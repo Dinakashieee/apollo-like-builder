@@ -2,95 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* EngageIQ Design System — Ocean Trust palette
+   All colors HSL. Semantic tokens only.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 215 50% 97%;          /* paper #f5f8fc */
+    --foreground: 217 60% 14%;          /* deep navy text */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 217 60% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 217 60% 14%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand */
+    --primary: 224 76% 48%;             /* royal blue #1d4ed8 */
+    --primary-foreground: 210 40% 99%;
+    --primary-glow: 220 90% 60%;
+    --primary-deep: 217 78% 18%;        /* navy #0c2340 */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 60% 94%;           /* soft sky #e0ecf7 */
+    --secondary-foreground: 217 60% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 215 40% 95%;
+    --muted-foreground: 217 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 70% 92%;
+    --accent-foreground: 224 76% 38%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Status */
+    --hot: 28 95% 55%;                  /* amber */
+    --hot-foreground: 28 80% 15%;
+    --warm: 224 76% 55%;
+    --warm-foreground: 0 0% 100%;
+    --cold: 215 20% 60%;
+    --cold-foreground: 0 0% 100%;
+    --success: 158 70% 38%;
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    /* Lines */
+    --border: 215 30% 88%;
+    --input: 215 30% 88%;
+    --ring: 224 76% 48%;
 
-    --sidebar-background: 0 0% 98%;
+    --radius: 0.875rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(224 76% 48%), hsl(220 90% 60%));
+    --gradient-deep: linear-gradient(160deg, hsl(217 78% 14%), hsl(224 76% 28%));
+    --gradient-soft: linear-gradient(180deg, hsl(215 50% 99%), hsl(215 50% 96%));
+    --gradient-hero: radial-gradient(ellipse 80% 60% at 50% -10%, hsl(224 76% 48% / 0.18), transparent 70%),
+                     linear-gradient(180deg, hsl(215 50% 98%), hsl(215 60% 95%));
+    --gradient-glow: radial-gradient(circle at 30% 20%, hsl(220 90% 60% / 0.25), transparent 60%);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(217 60% 14% / 0.04);
+    --shadow-card: 0 4px 16px -4px hsl(217 60% 20% / 0.08), 0 2px 4px hsl(217 60% 20% / 0.04);
+    --shadow-elevated: 0 10px 30px -10px hsl(217 60% 20% / 0.18), 0 4px 12px -2px hsl(217 60% 20% / 0.06);
+    --shadow-glow: 0 8px 32px -8px hsl(224 76% 48% / 0.45);
+    --shadow-inner-soft: inset 0 1px 0 hsl(0 0% 100% / 0.6);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Sidebar */
+    --sidebar-background: 217 78% 14%;
+    --sidebar-foreground: 215 30% 88%;
+    --sidebar-primary: 224 90% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 60% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 60% 22%;
+    --sidebar-ring: 224 90% 60%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 217 60% 7%;
+    --foreground: 215 30% 92%;
+    --card: 217 55% 11%;
+    --card-foreground: 215 30% 92%;
+    --popover: 217 55% 11%;
+    --popover-foreground: 215 30% 92%;
+    --primary: 224 90% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 50% 18%;
+    --secondary-foreground: 215 30% 92%;
+    --muted: 217 50% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 60% 22%;
+    --accent-foreground: 215 30% 92%;
+    --border: 217 50% 20%;
+    --input: 217 50% 20%;
+    --ring: 224 90% 62%;
   }
 }
 
@@ -99,7 +107,69 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
   }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Syne', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .card-glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/60;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-elevated {
+    @apply bg-card border border-border/60 rounded-2xl;
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .grid-pattern {
+    background-image: linear-gradient(hsl(217 30% 80% / 0.15) 1px, transparent 1px),
+                      linear-gradient(90deg, hsl(217 30% 80% / 0.15) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-fade-in {
+    animation: fadeIn 500ms ease-out both;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
