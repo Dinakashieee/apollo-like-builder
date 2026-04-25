@@ -7,11 +7,11 @@ export async function logActivity(
   description: string,
   metadata: Record<string, unknown> = {}
 ) {
-  await (supabase.from("activities") as any).insert({
+  await supabase.from("activities").insert({
     workspace_id: workspaceId,
     user_id: userId ?? null,
     type,
     description,
-    metadata,
+    metadata: metadata as any,
   });
 }
