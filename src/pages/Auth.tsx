@@ -99,7 +99,7 @@ export default function Auth() {
       <div className="hidden lg:flex flex-1 bg-gradient-deep text-primary-foreground p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 grid-pattern opacity-10" />
         <div className="relative">
-          <Logo variant="dark" />
+          <Logo variant="light" />
         </div>
         <div className="relative space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-semibold">
