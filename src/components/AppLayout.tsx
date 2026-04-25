@@ -1,11 +1,63 @@
-import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, Search } from "lucide-react";
+import { Search, LogOut, User as UserIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+import { NotificationBell } from "./NotificationBell";
 
 export function AppLayout() {
+  const { user, signOut } = useAuth();
+  const { current } = useWorkspace();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(
+    null
+  );
+  const [companyExists, setCompanyExists] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setProfile(data ?? { full_name: null, avatar_url: null }));
+  }, [user]);
+
+  useEffect(() => {
+    if (!current) return;
+    supabase
+      .from("company_profiles")
+      .select("id")
+      .eq("workspace_id", current.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setCompanyExists(!!data);
+        if (!data && window.location.pathname === "/app") navigate("/onboarding");
+      });
+  }, [current, navigate]);
+
+  const initials =
+    profile?.full_name
+      ?.split(" ")
+      .map((s) => s[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "U";
+
   return (
     <SidebarProvider defaultOpen>
       <div className="min-h-screen flex w-full bg-background">
@@ -16,21 +68,41 @@ export function AppLayout() {
             <div className="hidden md:flex relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search leads, companies, deals..."
+                placeholder="Search leads, companies..."
                 className="pl-9 h-9 bg-muted/40 border-border/60 focus-visible:ring-1"
               />
-              <kbd className="hidden lg:inline-flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-background border border-border/60 rounded">
-                ⌘K
-              </kbd>
             </div>
             <div className="ml-auto flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="relative h-9 w-9">
-                <Bell className="h-[18px] w-[18px] text-muted-foreground" />
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-hot ring-2 ring-card" />
-              </Button>
-              <div className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-sm font-semibold shadow-glow">
-                NE
-              </div>
+              <NotificationBell />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-sm font-semibold shadow-glow overflow-hidden">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      initials
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <p className="text-sm font-semibold">{profile?.full_name ?? user?.email}</p>
+                    <p className="text-xs text-muted-foreground font-normal truncate">{user?.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/app/settings")}>
+                    <UserIcon className="h-4 w-4 mr-2" /> Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await signOut();
+                      navigate("/auth");
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
           <main className="flex-1 overflow-auto">
