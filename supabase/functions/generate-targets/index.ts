@@ -1,0 +1,111 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const { workspace_id } = await req.json();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Unauthorized");
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    const { data: company } = await supabase
+      .from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle();
+    if (!company) throw new Error("Add a company profile first");
+
+    const { data: products } = await supabase
+      .from("products").select("name, description, category").eq("workspace_id", workspace_id);
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const userPrompt = `Company: ${company.company_name}
+Description: ${company.description ?? ""}
+Industries: ${(company.industries ?? []).join(", ")}
+Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}
+
+Generate competitor analysis and ideal target companies.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: "You are a B2B market analyst. Provide realistic competitive and ICP analysis." },
+          { role: "user", content: userPrompt },
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "save_targets",
+            parameters: {
+              type: "object",
+              properties: {
+                similar: {
+                  type: "array",
+                  description: "3-5 similar/competitive products",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      category: { type: "string" },
+                      strengths: { type: "array", items: { type: "string" } },
+                      weaknesses: { type: "array", items: { type: "string" } },
+                      audience: { type: "string" },
+                      your_advantage: { type: "string" },
+                    },
+                    required: ["name", "category", "strengths", "weaknesses", "audience", "your_advantage"],
+                  },
+                },
+                targets: {
+                  type: "array",
+                  description: "4-6 ideal customer profiles",
+                  items: {
+                    type: "object",
+                    properties: {
+                      type: { type: "string", description: "Company type/size" },
+                      industry: { type: "string" },
+                      problem: { type: "string" },
+                      why: { type: "string", description: "Why you can sell to them" },
+                      level: { type: "string", enum: ["high", "medium", "low"] },
+                    },
+                    required: ["type", "industry", "problem", "why", "level"],
+                  },
+                },
+              },
+              required: ["similar", "targets"],
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "save_targets" } },
+      }),
+    });
+
+    if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit. Try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!response.ok) throw new Error("AI gateway error");
+
+    const json = await response.json();
+    const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
+
+    await supabase.from("activities").insert({
+      workspace_id, user_id: user.id, type: "targets_generated",
+      description: `AI generated ${args.targets?.length ?? 0} targets and ${args.similar?.length ?? 0} competitor profiles`,
+    });
+
+    return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e?.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});

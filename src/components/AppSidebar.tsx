@@ -7,6 +7,9 @@ import {
   Workflow,
   Settings,
   HelpCircle,
+  Building2,
+  Target,
+  LifeBuoy,
 } from "lucide-react";
 import {
   Sidebar,
@@ -18,41 +21,52 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
+import { useWorkspace } from "@/hooks/useWorkspace";
 
 const mainItems = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
-  { title: "Leads", url: "/app/leads", icon: Users, badge: "258" },
-  { title: "AI Intelligence", url: "/app/intelligence", icon: Sparkles, badge: "AI" },
+  { title: "Leads", url: "/app/leads", icon: Users },
+  { title: "AI Insights", url: "/app/intelligence", icon: Sparkles, badge: "AI" },
+  { title: "Targets", url: "/app/targets", icon: Target },
   { title: "Email Composer", url: "/app/composer", icon: Mail },
   { title: "Automation", url: "/app/automation", icon: Workflow },
 ];
 
 const secondaryItems = [
+  { title: "Company", url: "/app/company", icon: Building2 },
   { title: "Settings", url: "/app/settings", icon: Settings },
-  { title: "Help & Docs", url: "/app/help", icon: HelpCircle },
+  { title: "Help", url: "/app/help", icon: HelpCircle },
+  { title: "Support", url: "/app/support", icon: LifeBuoy },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
+  const { current } = useWorkspace();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="px-4 py-5">
-        {collapsed ? (
-          <Logo showText={false} />
-        ) : (
-          <Logo variant="light" />
-        )}
+        {collapsed ? <Logo showText={false} /> : <Logo variant="light" />}
       </SidebarHeader>
 
       <SidebarContent className="px-2">
+        {!collapsed && current && (
+          <div className="px-3 pb-3 mb-1">
+            <p className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-semibold">
+              Workspace
+            </p>
+            <p className="text-sm font-semibold text-sidebar-accent-foreground truncate">
+              {current.name}
+            </p>
+          </div>
+        )}
+
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/50 uppercase text-[10px] tracking-widest font-semibold px-3">
@@ -67,7 +81,10 @@ export function AppSidebar() {
                   : pathname.startsWith(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="h-10 px-3 data-[active=true]:bg-sidebar-accent">
+                    <SidebarMenuButton
+                      asChild
+                      className="h-10 px-3 data-[active=true]:bg-sidebar-accent"
+                    >
                       <NavLink to={item.url} end={item.end}>
                         <item.icon
                           className={cn(
@@ -80,27 +97,19 @@ export function AppSidebar() {
                             <span
                               className={cn(
                                 "text-sm font-medium",
-                                active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/90"
+                                active
+                                  ? "text-sidebar-accent-foreground"
+                                  : "text-sidebar-foreground/90"
                               )}
                             >
                               {item.title}
                             </span>
                             {item.badge && (
-                              <span
-                                className={cn(
-                                  "ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md",
-                                  item.badge === "AI"
-                                    ? "bg-gradient-primary text-primary-foreground"
-                                    : "bg-sidebar-accent text-sidebar-foreground/70"
-                                )}
-                              >
+                              <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-gradient-primary text-primary-foreground">
                                 {item.badge}
                               </span>
                             )}
                           </>
-                        )}
-                        {active && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-sidebar-primary" />
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -137,25 +146,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      {!collapsed && (
-        <SidebarFooter className="p-3">
-          <div className="rounded-xl bg-gradient-to-br from-sidebar-accent to-sidebar-accent/40 p-4 border border-sidebar-border">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-4 w-4 text-sidebar-primary" />
-              <span className="text-xs font-semibold text-sidebar-accent-foreground">
-                Pro Plan
-              </span>
-            </div>
-            <p className="text-[11px] text-sidebar-foreground/70 mb-3 leading-snug">
-              You've used 71% of your AI credits this month.
-            </p>
-            <div className="h-1.5 rounded-full bg-sidebar-background overflow-hidden">
-              <div className="h-full w-[71%] bg-gradient-primary rounded-full" />
-            </div>
-          </div>
-        </SidebarFooter>
-      )}
     </Sidebar>
   );
 }

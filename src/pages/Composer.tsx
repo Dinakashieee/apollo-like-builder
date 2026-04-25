@@ -1,135 +1,215 @@
-import { Sparkles, Paperclip, Image as ImageIcon, Send, ChevronDown, Wand2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles, Send, RefreshCw, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AvatarBubble } from "@/components/AvatarBubble";
-import { leads } from "@/data/leads";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
+import { logActivity } from "@/lib/activities";
 
 export default function Composer() {
-  const lead = leads[0];
+  const { current } = useWorkspace();
+  const { user } = useAuth();
+  const [leads, setLeads] = useState<any[]>([]);
+  const [selectedLead, setSelectedLead] = useState<string>("");
+  const [tone, setTone] = useState("professional");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [hasCompany, setHasCompany] = useState(false);
+
+  useEffect(() => {
+    if (!current) return;
+    supabase
+      .from("leads")
+      .select("id, company_name, contact_name, role, email")
+      .eq("workspace_id", current.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setLeads(data ?? []);
+        if (data && data.length > 0 && !selectedLead) setSelectedLead(data[0].id);
+      });
+    supabase
+      .from("company_profiles")
+      .select("id")
+      .eq("workspace_id", current.id)
+      .maybeSingle()
+      .then(({ data }) => setHasCompany(!!data));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.id]);
+
+  const generate = async () => {
+    if (!current || !selectedLead) {
+      toast({ title: "Pick a lead first", variant: "destructive" });
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-email", {
+        body: { workspace_id: current.id, lead_id: selectedLead, tone },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSubject(data.subject ?? "");
+      setBody(data.body ?? "");
+      const lead = leads.find((l) => l.id === selectedLead);
+      await logActivity(
+        current.id,
+        user?.id,
+        "email_generated",
+        `Email drafted for ${lead?.company_name ?? "lead"}`
+      );
+    } catch (e: any) {
+      toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setGenerating(false);
+  };
+
+  const lead = leads.find((l) => l.id === selectedLead);
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
-            <Wand2 className="h-3.5 w-3.5" /> AI-assisted writing
+            <Sparkles className="h-3.5 w-3.5" /> AI-assisted
           </p>
           <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">
             Smart Email Composer
           </h1>
         </div>
-        <Button className="bg-gradient-primary shadow-glow">
-          <Sparkles className="h-4 w-4 mr-2" /> Generate with AI
+        <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
+          {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+          {generating ? "Writing..." : "Generate with AI"}
         </Button>
       </div>
 
+      {!hasCompany && (
+        <div className="card-elevated p-4 border-warm/40 bg-warm/5 text-sm">
+          ⚠️ Add your company profile to generate context-aware emails.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="card-elevated p-6 lg:col-span-2 animate-fade-up">
-          {/* Recipient */}
-          <div className="flex items-center justify-between pb-4 border-b border-border/60 mb-5">
-            <div className="flex items-center gap-3">
-              <AvatarBubble lead={lead} size="lg" />
-              <div>
-                <p className="font-semibold text-base text-primary-deep">{lead.name}</p>
-                <p className="text-xs text-muted-foreground">{lead.title} · {lead.company}</p>
-              </div>
+        <div className="card-elevated p-6 lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Lead</Label>
+              <Select value={selectedLead} onValueChange={setSelectedLead}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leads.length === 0 && (
+                    <div className="px-2 py-2 text-xs text-muted-foreground">No leads yet</div>
+                  )}
+                  {leads.map((l) => (
+                    <SelectItem key={l.id} value={l.id}>
+                      {l.contact_name || l.company_name} · {l.company_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <button className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border/60 hover:bg-muted/50 transition-colors">
-              <Sparkles className="h-3 w-3 text-primary" /> Sequence A1
-              <ChevronDown className="h-3 w-3" />
-            </button>
+            <div>
+              <Label>Tone</Label>
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="friendly">Friendly</SelectItem>
+                  <SelectItem value="direct">Direct</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Subject */}
-          <div className="mb-5">
-            <label className="text-[11px] uppercase font-semibold tracking-wider text-muted-foreground">
-              Subject
-            </label>
-            <input
-              defaultValue="Aligning Oracle ERP with JDGlobal's Growth"
-              className="w-full bg-transparent border-0 border-b border-border/40 focus:border-primary focus:ring-0 outline-none py-2 text-base font-semibold text-primary-deep"
+          <div>
+            <Label>Subject</Label>
+            <Input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Subject line will appear here..."
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Body</Label>
+            <Textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={14}
+              placeholder="Click 'Generate with AI' to draft a personalized email..."
+              className="mt-1"
             />
           </div>
 
-          {/* Body */}
-          <div className="space-y-4 text-sm leading-relaxed text-foreground/85">
-            <p className="font-medium text-primary-deep">Hi Natalie,</p>
-            <p>
-              I noticed JDGlobal's recent expansion into Germany and the operations
-              scaling alongside it. As your team manages Microsoft 365 and Oracle ERP
-              workflows, I wanted to share how teams in your space are{" "}
-              <span className="bg-primary/10 text-primary font-semibold px-1 rounded">
-                automating cross-system handoffs
-              </span>{" "}
-              to cut costs and improve efficiency.
+          <div className="flex justify-between pt-3 border-t border-border/60">
+            <p className="text-xs text-muted-foreground">
+              {body.length} characters
             </p>
-            <p>
-              Would 15 minutes next Tuesday work to walk you through what's possible
-              with a connected revenue stack?
-            </p>
-            <p className="text-muted-foreground">
-              — Sent via EngageIQ
-            </p>
-          </div>
-
-          {/* Toolbar */}
-          <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-9 w-9"><Paperclip className="h-4 w-4 text-muted-foreground" /></Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9"><ImageIcon className="h-4 w-4 text-muted-foreground" /></Button>
-              <Button variant="ghost" size="sm" className="h-9 text-xs gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Personalize
-              </Button>
-            </div>
-            <Button className="bg-gradient-primary shadow-glow gap-2">
-              Send Email <Send className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (lead?.email) {
+                  window.location.href = `mailto:${lead.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                } else {
+                  toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
+                }
+              }}
+              disabled={!subject && !body}
+            >
+              <Send className="h-4 w-4 mr-2" /> Open in mail client
             </Button>
           </div>
         </div>
 
-        {/* AI suggestions side */}
-        <div className="space-y-4">
-          <div className="card-elevated p-5 animate-fade-up" style={{ animationDelay: "120ms" }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center shadow-glow">
-                <Sparkles className="h-4 w-4 text-primary-foreground" />
+        <div className="card-elevated p-5 h-fit">
+          <h3 className="font-display font-bold text-base text-primary-deep mb-3 flex items-center gap-2">
+            <Mail className="h-4 w-4 text-primary" /> Selected lead
+          </h3>
+          {lead ? (
+            <div className="space-y-2 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground">Company</p>
+                <p className="font-semibold text-primary-deep">{lead.company_name}</p>
               </div>
-              <h3 className="font-display font-bold text-base text-primary-deep">AI Insights</h3>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: "Sentiment match", value: "Professional", color: "text-warm" },
-                { label: "Predicted reply rate", value: "68%", color: "text-success" },
-                { label: "Tone confidence", value: "High", color: "text-primary" },
-                { label: "Spam risk", value: "Low", color: "text-success" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{s.label}</span>
-                  <span className={`font-semibold ${s.color}`}>{s.value}</span>
+              {lead.contact_name && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Contact</p>
+                  <p className="font-medium">{lead.contact_name}</p>
                 </div>
-              ))}
+              )}
+              {lead.role && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Role</p>
+                  <p className="font-medium">{lead.role}</p>
+                </div>
+              )}
+              {lead.email && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium text-primary">{lead.email}</p>
+                </div>
+              )}
             </div>
-          </div>
-
-          <div className="card-elevated p-5 animate-fade-up" style={{ animationDelay: "180ms" }}>
-            <h3 className="font-display font-bold text-base text-primary-deep mb-3">
-              Suggested edits
-            </h3>
-            <div className="space-y-2 text-xs">
-              {[
-                "Mention recent Series B announcement",
-                "Reference shared connection: Sara Lee",
-                "Add case study link from Helio Labs",
-              ].map((s) => (
-                <button
-                  key={s}
-                  className="w-full text-left p-3 rounded-lg border border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all flex items-start gap-2"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground/85 font-medium">{s}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No lead selected.</p>
+          )}
         </div>
       </div>
     </div>

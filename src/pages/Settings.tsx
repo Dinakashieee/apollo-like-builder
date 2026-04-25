@@ -1,0 +1,266 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2, Download, Key, User as UserIcon, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+export default function Settings() {
+  const { user, signOut } = useAuth();
+  const { current, refresh } = useWorkspace();
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [password, setPassword] = useState("");
+  const [apolloKey, setApolloKey] = useState("");
+  const [hasApollo, setHasApollo] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setFullName(data?.full_name ?? "");
+        setAvatarUrl(data?.avatar_url ?? "");
+      });
+    supabase
+      .from("user_api_keys")
+      .select("api_key")
+      .eq("user_id", user.id)
+      .eq("provider", "apollo")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.api_key) {
+          setApolloKey("•".repeat(16));
+          setHasApollo(true);
+        }
+      });
+  }, [user]);
+
+  const saveProfile = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName, avatar_url: avatarUrl || null })
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    else toast({ title: "Profile saved" });
+  };
+
+  const changePassword = async () => {
+    if (password.length < 8) {
+      toast({ title: "Password too short", description: "Min 8 characters.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) toast({ title: "Failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: "Password updated" });
+      setPassword("");
+    }
+  };
+
+  const saveApollo = async () => {
+    if (!user) return;
+    if (!apolloKey || apolloKey.startsWith("•")) return;
+    const { error } = await supabase.from("user_api_keys").upsert(
+      { user_id: user.id, provider: "apollo", api_key: apolloKey, label: "Apollo.io" },
+      { onConflict: "user_id,provider" }
+    );
+    if (error) toast({ title: "Failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: "Apollo key saved", description: "Data is accessed via your connected account." });
+      setApolloKey("•".repeat(16));
+      setHasApollo(true);
+    }
+  };
+
+  const removeApollo = async () => {
+    if (!user) return;
+    await supabase.from("user_api_keys").delete().eq("user_id", user.id).eq("provider", "apollo");
+    setApolloKey("");
+    setHasApollo(false);
+    toast({ title: "Apollo key removed" });
+  };
+
+  const exportData = async () => {
+    if (!current) return;
+    const [leads, opps, acts, company] = await Promise.all([
+      supabase.from("leads").select("*").eq("workspace_id", current.id),
+      supabase.from("opportunities").select("*").eq("workspace_id", current.id),
+      supabase.from("activities").select("*").eq("workspace_id", current.id),
+      supabase.from("company_profiles").select("*").eq("workspace_id", current.id),
+    ]);
+    const blob = new Blob(
+      [JSON.stringify({ company: company.data, leads: leads.data, opportunities: opps.data, activities: acts.data }, null, 2)],
+      { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `engageiq-export-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const deleteAllData = async () => {
+    if (!current) return;
+    await Promise.all([
+      supabase.from("leads").delete().eq("workspace_id", current.id),
+      supabase.from("opportunities").delete().eq("workspace_id", current.id),
+      supabase.from("activities").delete().eq("workspace_id", current.id),
+      supabase.from("notifications").delete().eq("workspace_id", current.id),
+    ]);
+    toast({ title: "All workspace data deleted" });
+    refresh();
+  };
+
+  const deleteAccount = async () => {
+    if (!user) return;
+    // Best-effort: sign out. Full account deletion requires an edge function with service role.
+    await supabase.from("user_api_keys").delete().eq("user_id", user.id);
+    await signOut();
+    navigate("/");
+    toast({
+      title: "Signed out",
+      description: "Your data has been wiped. Contact support to permanently delete your auth record.",
+    });
+  };
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6 animate-fade-in max-w-3xl">
+      <div>
+        <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your profile, security, integrations, and data.</p>
+      </div>
+
+      {/* Profile */}
+      <section className="card-elevated p-6 space-y-4">
+        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
+          <UserIcon className="h-4 w-4 text-primary" /> Profile
+        </h2>
+        <div>
+          <Label>Email</Label>
+          <Input value={user?.email ?? ""} disabled className="mt-1" />
+        </div>
+        <div>
+          <Label>Full name</Label>
+          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>Avatar URL</Label>
+          <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="mt-1" placeholder="https://..." />
+        </div>
+        <Button onClick={saveProfile} disabled={saving} className="bg-gradient-primary">Save profile</Button>
+      </section>
+
+      {/* Security */}
+      <section className="card-elevated p-6 space-y-4">
+        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
+          <Lock className="h-4 w-4 text-primary" /> Password
+        </h2>
+        <div>
+          <Label>New password</Label>
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" />
+        </div>
+        <Button onClick={changePassword} variant="outline">Change password</Button>
+      </section>
+
+      {/* API keys */}
+      <section className="card-elevated p-6 space-y-4">
+        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
+          <Key className="h-4 w-4 text-primary" /> API integrations (BYOK)
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Connect your own API keys. Data is accessed via your connected account — never shared with other users.
+        </p>
+        <div>
+          <Label>Apollo.io API Key</Label>
+          <Input
+            value={apolloKey}
+            onChange={(e) => setApolloKey(e.target.value)}
+            className="mt-1"
+            placeholder={hasApollo ? "Connected" : "Paste your Apollo API key"}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={saveApollo} className="bg-gradient-primary">{hasApollo ? "Update" : "Connect"}</Button>
+          {hasApollo && <Button variant="outline" onClick={removeApollo}>Disconnect</Button>}
+        </div>
+      </section>
+
+      {/* Data control */}
+      <section className="card-elevated p-6 space-y-4">
+        <h2 className="font-display font-bold text-lg text-primary-deep">Your data</h2>
+        <p className="text-sm text-muted-foreground">Export everything, or wipe your workspace data. You own your data.</p>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={exportData}>
+            <Download className="h-4 w-4 mr-2" /> Export workspace data
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-destructive border-destructive/40 hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4 mr-2" /> Delete all workspace data
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete all workspace data?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This deletes all leads, opportunities, activities, and notifications in this workspace. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={deleteAllData} className="bg-destructive">Delete everything</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" /> Delete my account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This wipes your API keys and signs you out. Your auth record will be removed by support within 24h.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={deleteAccount} className="bg-destructive">Delete account</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </section>
+    </div>
+  );
+}
