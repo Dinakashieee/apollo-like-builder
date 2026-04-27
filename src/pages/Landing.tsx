@@ -10,6 +10,7 @@ import {
   Shield,
   CheckCircle2,
   Star,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
