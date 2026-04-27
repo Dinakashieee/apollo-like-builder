@@ -373,6 +373,45 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_signups: {
+        Row: {
+          business_name: string
+          created_at: string
+          designation: string
+          email: string
+          full_name: string
+          id: string
+          mobile: string
+          notes: string | null
+          status: Database["public"]["Enums"]["waitlist_status"]
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          designation: string
+          email: string
+          full_name: string
+          id?: string
+          mobile: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          designation?: string
+          email?: string
+          full_name?: string
+          id?: string
+          mobile?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       workspace_invites: {
         Row: {
           accepted_at: string | null
@@ -472,6 +511,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -486,6 +526,7 @@ export type Database = {
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost"
       opportunity_level: "high" | "medium" | "low"
       ticket_status: "open" | "in_progress" | "resolved"
+      waitlist_status: "waiting" | "invited" | "converted" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -617,6 +658,7 @@ export const Constants = {
       lead_status: ["new", "contacted", "qualified", "won", "lost"],
       opportunity_level: ["high", "medium", "low"],
       ticket_status: ["open", "in_progress", "resolved"],
+      waitlist_status: ["waiting", "invited", "converted", "rejected"],
     },
   },
 } as const
