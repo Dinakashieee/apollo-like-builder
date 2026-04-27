@@ -343,8 +343,117 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section id="pricing" className="py-24">
+      {/* Pricing */}
+      <section id="pricing" className="py-24 bg-gradient-soft">
+        <div className="container mx-auto px-6">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <p className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">Pricing</p>
+            <h2 className="text-4xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
+              Simple plans that scale with your team
+            </h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              Start free. Upgrade when you're ready. Cancel anytime.
+            </p>
+
+            {/* Billing toggle */}
+            <div className="inline-flex items-center gap-1 mt-8 p-1 rounded-full border border-border/60 bg-card">
+              <button
+                onClick={() => setAnnual(false)}
+                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                  !annual ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setAnnual(true)}
+                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors flex items-center gap-2 ${
+                  annual ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Annual
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  annual ? "bg-primary-foreground/20 text-primary-foreground" : "bg-success/10 text-success"
+                }`}>
+                  -20%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-7xl mx-auto">
+            {tiers.map((tier) => (
+              <div
+                key={tier.name}
+                className={`relative rounded-2xl p-7 flex flex-col bg-card transition-all duration-300 hover:-translate-y-1 ${
+                  tier.highlight
+                    ? "border-2 border-primary shadow-elevated"
+                    : "border border-border/60 shadow-sm hover:shadow-elevated"
+                }`}
+              >
+                {tier.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-gradient-primary text-primary-foreground px-3 py-1 rounded-full shadow-glow">
+                      Most popular
+                    </span>
+                  </div>
+                )}
+
+                <div className="mb-5">
+                  <h3 className="font-display font-bold text-xl text-primary-deep">{tier.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">{tier.tagline}</p>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-display font-bold text-primary-deep">
+                      {formatPrice(tier.monthly)}
+                    </span>
+                    {tier.monthly !== null && tier.monthly > 0 && (
+                      <span className="text-sm text-muted-foreground">/mo</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 h-4">
+                    {tier.monthly === null
+                      ? "Talk to sales for a custom quote"
+                      : tier.monthly === 0
+                        ? "Free forever"
+                        : annual
+                          ? `Billed annually ($${Math.round(tier.monthly * (1 - ANNUAL_DISCOUNT) * 12)}/yr)`
+                          : "Billed monthly"}
+                  </p>
+                </div>
+
+                <Button
+                  className={`w-full mb-6 ${
+                    tier.highlight ? "bg-gradient-primary shadow-glow" : ""
+                  }`}
+                  variant={tier.highlight ? "default" : "outline"}
+                  onClick={() => setWaitlistOpen(true)}
+                >
+                  {tier.cta}
+                </Button>
+
+                <ul className="space-y-2.5 text-sm">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span className="text-foreground/80">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-10">
+            All plans include a 14-day free trial · No credit card required · Cancel anytime
+          </p>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24">
         <div className="container mx-auto px-6">
           <div className="card-elevated p-12 lg:p-16 text-center bg-gradient-soft border-2 border-primary/10 max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 blur-3xl rounded-full" />
