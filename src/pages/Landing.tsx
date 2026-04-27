@@ -119,6 +119,14 @@ const tiers = [
 
 export default function Landing() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [annual, setAnnual] = useState(true);
+
+  const formatPrice = (monthly: number | null) => {
+    if (monthly === null) return "Custom";
+    if (monthly === 0) return "$0";
+    const value = annual ? Math.round(monthly * (1 - ANNUAL_DISCOUNT)) : monthly;
+    return `$${value}`;
+  };
   return (
     <div className="min-h-screen bg-background">
       <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
