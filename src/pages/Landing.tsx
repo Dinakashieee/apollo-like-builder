@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { WaitlistDialog } from "@/components/WaitlistDialog";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const features = [
@@ -50,8 +52,10 @@ const features = [
 const logos = ["Apollo", "Outreach", "Salesloft", "Gong", "Clay", "HubSpot"];
 
 export default function Landing() {
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
+      <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
       {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
         <div className="container mx-auto h-16 flex items-center justify-between">
@@ -63,14 +67,16 @@ export default function Landing() {
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/app" className="hidden sm:inline-flex">
+            <Link to="/auth" className="hidden sm:inline-flex">
               <Button variant="ghost" size="sm" className="text-sm">Sign in</Button>
             </Link>
-            <Link to="/app">
-              <Button size="sm" className="bg-gradient-primary shadow-glow">
-                Start free <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              className="bg-gradient-primary shadow-glow"
+              onClick={() => setWaitlistOpen(true)}
+            >
+              Join waitlist <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
         </div>
       </header>
@@ -118,11 +124,13 @@ export default function Landing() {
             className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up"
             style={{ animationDelay: "240ms" }}
           >
-            <Link to="/app">
-              <Button size="lg" className="bg-gradient-primary shadow-glow h-12 px-7 text-base">
-                Open the app <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="bg-gradient-primary shadow-glow h-12 px-7 text-base"
+              onClick={() => setWaitlistOpen(true)}
+            >
+              Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
             <Button size="lg" variant="outline" className="h-12 px-7 text-base border-border/60">
               Watch 2-min demo
             </Button>
@@ -273,11 +281,13 @@ export default function Landing() {
               Join thousands of teams who trust EngageIQ to power their revenue engine.
             </p>
             <div className="relative mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/app">
-                <Button size="lg" className="bg-gradient-primary shadow-glow h-12 px-8 text-base">
-                  Open the app <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                className="bg-gradient-primary shadow-glow h-12 px-8 text-base"
+                onClick={() => setWaitlistOpen(true)}
+              >
+                Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
               <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                 Talk to sales
               </Button>
