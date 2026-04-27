@@ -24,6 +24,7 @@ import Settings from "./pages/Settings";
 import Company from "./pages/Company";
 import Help from "./pages/Help";
 import Support from "./pages/Support";
+import Waitlist from "./pages/Waitlist";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/app" element={<AppLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="leads" element={<Leads />} />
+                  <Route path="waitlist" element={<Waitlist />} />
                   <Route path="intelligence" element={<Intelligence />} />
                   <Route path="targets" element={<Targets />} />
                   <Route path="composer" element={<Composer />} />
