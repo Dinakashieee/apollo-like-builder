@@ -52,6 +52,71 @@ const features = [
 
 const logos = ["Apollo", "Outreach", "Salesloft", "Gong", "Clay", "HubSpot"];
 
+const ANNUAL_DISCOUNT = 0.2; // 20% off annual
+
+const tiers = [
+  {
+    name: "Free",
+    tagline: "For solo sellers exploring EngageIQ",
+    monthly: 0,
+    cta: "Join the waitlist",
+    highlight: false,
+    features: [
+      "Up to 50 leads",
+      "Basic AI lead scoring",
+      "1 user",
+      "Email composer (10/mo)",
+      "Community support",
+    ],
+  },
+  {
+    name: "Starter",
+    tagline: "For small teams getting serious about outbound",
+    monthly: 49,
+    cta: "Join the waitlist",
+    highlight: false,
+    features: [
+      "Up to 2,500 leads",
+      "Full AI deal intelligence",
+      "3 users included",
+      "Unlimited email composer",
+      "1 automation sequence",
+      "Email support",
+    ],
+  },
+  {
+    name: "Pro",
+    tagline: "For growing revenue teams that need scale",
+    monthly: 149,
+    cta: "Join the waitlist",
+    highlight: true,
+    features: [
+      "Unlimited leads",
+      "Advanced intent + fit scoring",
+      "10 users included",
+      "Unlimited automations",
+      "Pipeline analytics",
+      "Bring your own AI keys (BYOK)",
+      "Priority support",
+    ],
+  },
+  {
+    name: "Enterprise",
+    tagline: "For organizations with custom needs",
+    monthly: null as number | null,
+    cta: "Join the waitlist",
+    highlight: false,
+    features: [
+      "Everything in Pro",
+      "SSO / SAML",
+      "Granular permissions & audit logs",
+      "Dedicated success manager",
+      "Custom data residency",
+      "99.9% SLA",
+    ],
+  },
+];
+
 export default function Landing() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   return (
