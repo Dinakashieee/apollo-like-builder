@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Download, Key, User as UserIcon, Lock, Mail } from "lucide-react";
+import { Trash2, Download, User as UserIcon, Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BillingSection } from "@/components/BillingSection";
 
