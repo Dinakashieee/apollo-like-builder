@@ -97,6 +97,35 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .eq('environment', env);
 }
 
+async function notifyTransaction(data: any, env: PaddleEnv, kind: 'success' | 'failed') {
+  try {
+    const userId = data?.customData?.userId;
+    if (!userId) return;
+
+    // Find any workspace the user belongs to so the notification is visible.
+    const { data: ws } = await getSupabase()
+      .from('workspace_members')
+      .select('workspace_id')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+    if (!ws?.workspace_id) return;
+
+    const isSuccess = kind === 'success';
+    await getSupabase().from('notifications').insert({
+      workspace_id: ws.workspace_id,
+      user_id: userId,
+      title: isSuccess ? 'Payment received' : 'Payment failed',
+      body: isSuccess
+        ? 'Your subscription payment was processed successfully.'
+        : 'We could not charge your card. Please update your payment method to avoid losing access.',
+      link: '/app/settings',
+    });
+  } catch (e) {
+    console.error('notifyTransaction failed:', e);
+  }
+}
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
 
@@ -109,6 +138,12 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       break;
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
+      break;
+    case EventName.TransactionCompleted:
+      await notifyTransaction(event.data, env, 'success');
+      break;
+    case EventName.TransactionPaymentFailed:
+      await notifyTransaction(event.data, env, 'failed');
       break;
     default:
       console.log('Unhandled event:', event.eventType);
