@@ -16,6 +16,9 @@ const companySchema = z.object({
   description: z.string().trim().max(1000).optional(),
   industries: z.string().trim().max(400).optional(),
   products_summary: z.string().trim().max(1000).optional(),
+  target_systems: z.string().trim().max(400).optional(),
+  solved_pain_points: z.string().trim().max(800).optional(),
+  positioning: z.string().trim().max(300).optional(),
 });
 
 export default function Company() {
@@ -25,6 +28,9 @@ export default function Company() {
   const [description, setDescription] = useState("");
   const [industries, setIndustries] = useState("");
   const [productsSummary, setProductsSummary] = useState("");
+  const [targetSystems, setTargetSystems] = useState("");
+  const [solvedPainPoints, setSolvedPainPoints] = useState("");
+  const [positioning, setPositioning] = useState("");
   const [members, setMembers] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -48,6 +54,9 @@ export default function Company() {
       setDescription(company.description ?? "");
       setIndustries((company.industries ?? []).join(", "));
       setProductsSummary(company.products_summary ?? "");
+      setTargetSystems((company.target_systems ?? []).join(", "));
+      setSolvedPainPoints((company.solved_pain_points ?? []).join("\n"));
+      setPositioning(company.positioning ?? "");
     }
     setMembers(mems ?? []);
     setInvites(invs ?? []);
@@ -65,12 +74,20 @@ export default function Company() {
       description,
       industries,
       products_summary: productsSummary,
+      target_systems: targetSystems,
+      solved_pain_points: solvedPainPoints,
+      positioning,
     });
     if (!parsed.success) {
       toast({ title: "Invalid", description: parsed.error.errors[0].message, variant: "destructive" });
       return;
     }
     const industriesArray = industries.split(",").map((s) => s.trim()).filter(Boolean);
+    const targetSystemsArray = targetSystems.split(",").map((s) => s.trim()).filter(Boolean);
+    const solvedPainArray = solvedPainPoints
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     const { data: existing } = await supabase
       .from("company_profiles")
       .select("id")
@@ -82,6 +99,9 @@ export default function Company() {
       description: parsed.data.description ?? null,
       industries: industriesArray,
       products_summary: parsed.data.products_summary ?? null,
+      target_systems: targetSystemsArray,
+      solved_pain_points: solvedPainArray,
+      positioning: parsed.data.positioning ?? null,
     };
     const { error } = existing
       ? await supabase.from("company_profiles").update(payload).eq("id", existing.id)
@@ -152,6 +172,46 @@ export default function Company() {
         <div>
           <Label>Products / services summary</Label>
           <Textarea rows={2} value={productsSummary} onChange={(e) => setProductsSummary(e.target.value)} className="mt-1" />
+        </div>
+        <div>
+          <Label>One-line positioning</Label>
+          <Input
+            value={positioning}
+            onChange={(e) => setPositioning(e.target.value)}
+            className="mt-1"
+            placeholder="e.g. IFS Premier Partner — world's #1 for IFS customer satisfaction (2023, 2024)"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Used as social proof inside AI-generated emails. Keep it factual.
+          </p>
+        </div>
+        <div>
+          <Label>Systems we replace or integrate with (comma-separated)</Label>
+          <Input
+            value={targetSystems}
+            onChange={(e) => setTargetSystems(e.target.value)}
+            className="mt-1"
+            placeholder="SAP, Oracle EBS, Microsoft Dynamics, legacy ERPs"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            The AI uses this to say things like "we know <em>Majis</em> is using <em>SAP</em>…"
+          </p>
+        </div>
+        <div>
+          <Label>Pain points we solve (one per line)</Label>
+          <Textarea
+            rows={4}
+            value={solvedPainPoints}
+            onChange={(e) => setSolvedPainPoints(e.target.value)}
+            className="mt-1"
+            placeholder={`Manual data reconciliation across systems
+Slow month-end close
+Lack of real-time KPI visibility
+Fragmented operational + financial data`}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            The AI matches these to the recipient's role so the email lands ("a CFO will see reconciliation; a COO will see throughput").
+          </p>
         </div>
         <Button onClick={saveCompany} className="bg-gradient-primary">Save</Button>
       </section>

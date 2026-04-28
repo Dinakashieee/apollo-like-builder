@@ -31,6 +31,7 @@ export default function Composer() {
   const [body, setBody] = useState("");
   const [generating, setGenerating] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
+  const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
@@ -50,6 +51,14 @@ export default function Composer() {
       .eq("workspace_id", current.id)
       .maybeSingle()
       .then(({ data }) => setHasCompany(!!data));
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("preferred_mail_client")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data }) => setMailClient(data?.preferred_mail_client ?? "default"));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id]);
 
@@ -207,11 +216,25 @@ export default function Composer() {
               variant="outline"
               size="sm"
               onClick={() => {
-                if (lead?.email) {
-                  window.location.href = `mailto:${lead.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                } else {
+                if (!lead?.email) {
                   toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
+                  return;
                 }
+                const to = encodeURIComponent(lead.email);
+                const su = encodeURIComponent(subject);
+                const bd = encodeURIComponent(body);
+                let url = `mailto:${lead.email}?subject=${su}&body=${bd}`;
+                if (mailClient === "gmail") {
+                  url = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`;
+                  window.open(url, "_blank");
+                  return;
+                }
+                if (mailClient === "outlook") {
+                  url = `https://outlook.live.com/mail/0/deeplink/compose?to=${to}&subject=${su}&body=${bd}`;
+                  window.open(url, "_blank");
+                  return;
+                }
+                window.location.href = url;
               }}
               disabled={!subject && !body}
             >
