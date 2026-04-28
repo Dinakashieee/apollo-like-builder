@@ -34,10 +34,11 @@ serve(async (req) => {
       );
     }
 
-    const [{ data: company }, { data: lead }, { data: products }] = await Promise.all([
+    const [{ data: company }, { data: lead }, { data: products }, { data: profile }] = await Promise.all([
       supabase.from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle(),
       supabase.from("leads").select("*").eq("id", lead_id).maybeSingle(),
       supabase.from("products").select("name, description").eq("workspace_id", workspace_id),
+      supabase.from("profiles").select("full_name, email_signature, sender_name").eq("id", user.id).maybeSingle(),
     ]);
     if (!lead) throw new Error("Lead not found");
 
@@ -47,15 +48,28 @@ serve(async (req) => {
     const senderDescription = company?.description ?? "";
     const senderProducts = products?.map((p: any) => `${p.name}${p.description ? ` — ${p.description}` : ""}`).join("; ") || company?.products_summary || "";
     const senderIndustries = (company?.industries ?? []).join(", ");
+    const senderTargetSystems = (company?.target_systems ?? []).join(", ");
+    const senderSolvedPains = (company?.solved_pain_points ?? []).join("; ");
+    const senderPositioning = company?.positioning ?? "";
 
-    const userPrompt = `Write a HYPER-PERSONALIZED B2B outreach email from ${senderName} to the recipient below. This must read like a thoughtful 1:1 message — not a template, not a generic pitch.
+    const leadSystems = (lead.systems_in_use ?? []).join(", ");
+    const leadPains = (lead.pain_points ?? []).join("; ");
+    const leadTools = (lead.tools ?? []).join(", ");
+
+    const repName = profile?.sender_name || profile?.full_name || "the team";
+
+    const userPrompt = `Write a HYPER-PERSONALIZED B2B outreach email from ${senderName} (sender) to the recipient below. This must read like a thoughtful 1:1 message — not a template, not a generic pitch. The reader must instantly feel "this person actually understands my world".
 
 ═══════════════════════════════
 SENDER (${senderName})
 ═══════════════════════════════
 - About: ${senderDescription}
+- Positioning / one-liner: ${senderPositioning}
 - Products / services: ${senderProducts}
 - Industries served: ${senderIndustries}
+- Systems we replace OR integrate with (this is what our prospects are usually running today): ${senderTargetSystems || "(not specified)"}
+- Pain points we typically solve: ${senderSolvedPains || "(not specified)"}
+- Sender rep (signing the email): ${repName}
 
 ═══════════════════════════════
 RECIPIENT
@@ -64,25 +78,41 @@ RECIPIENT
 - Role: ${lead.role ?? "(unknown)"}
 - Company: ${lead.company_name}
 - Industry: ${lead.industry ?? "(unknown)"}
-- Notes / signals: ${lead.notes ?? "(none provided)"}
+- Systems / stack the prospect is currently using: ${leadSystems || "(unknown — infer cautiously from industry & role, do not invent specific vendor names)"}
+- Tools mentioned: ${leadTools || "(none)"}
+- Known pain points / signals about this prospect: ${leadPains || "(none provided — infer common ones for this role/industry)"}
+- Free-text notes: ${lead.notes ?? "(none)"}
 
 ═══════════════════════════════
 TONE: ${tone ?? "warm, professional, consultative"}
 ═══════════════════════════════
 
 WRITING RULES (follow strictly):
-1. Greeting: address the recipient by first name only ("Dear <FirstName>,") followed by a warm one-line opener ("Good day to you and we hope you are doing well.").
-2. Reference: explicitly reference the recipient's situation in the second paragraph — name their company, their likely systems/stack, the kind of project environment they're in, and the specific challenges that role typically faces. Use the notes above to ground this — DO NOT invent named tools, named people, or facts that contradict the notes.
-3. Diagnose, then position: spend 1 paragraph empathetically describing the kinds of operational frictions someone in that role/industry typically faces (data reconciliation, manual effort, fragmented systems, visibility gaps, scaling complexity, etc.). Phrase as observations, not assumptions ("In environments like this, teams often find…", "This can sometimes lead to…").
-4. Then 1 paragraph on how ${senderName} specifically helps — tie the sender's products/services directly to the frictions you just named. Be concrete about the mechanism (integration, automation, middleware, enhancement, advisory, etc.).
-5. Soft, low-friction ask: offer something with no obligation (a no-cost assessment, a brief virtual or in-person discussion, a tailored walkthrough). Mention that a senior colleague / director would be glad to join. Frame as "an initial discussion with no obligation".
-6. If the sender has any credentials in their description (partner status, awards, certifications, customer count) — weave ONE in naturally as social proof. Do not invent credentials.
-7. Close with: "Thank you for your time, and I look forward to hearing from you." then "Wishing you a pleasant day ahead." on its own line.
-8. Length: 220–320 words. Long enough to feel considered, short enough to be respectful. Multiple short paragraphs, NOT a wall of text.
-9. Voice: warm, respectful, slightly formal, never salesy, never use words like "leverage", "synergy", "solutions provider", "game-changer", "revolutionary".
-10. Subject line: specific, curiosity-driven, references either the recipient's company or a specific outcome. 6–10 words. No emojis. No "Quick question" / "Following up".
 
-OUTPUT: Return ONLY the structured email via the tool call.`;
+1. **Greeting**: "Dear <FirstName>," then one warm opener line ("Good day to you and we hope you are doing well.").
+
+2. **Role-aware opening paragraph**: Acknowledge the recipient's role at their company in one sentence — describe the *vantage point* that role gives them ("As the <Role> at <Company>, you are in a unique position to see…"). Make it feel observed, not flattering.
+
+3. **System-aware diagnostic paragraph (CRITICAL)**: This is what makes the email land. Reference the systems the prospect is running today (from "Systems / stack" above), and describe the *specific operational frictions* a person in their role experiences with that stack. Example pattern:
+   "We know that <Company> is using <System(s)> for <areas>, and in environments like that, <role>s often struggle with <specific friction 1>, <specific friction 2>, and <specific friction 3>."
+   - The frictions you list MUST be drawn from the recipient's known pain points OR from the sender's "Pain points we typically solve" list, filtered to the ones that are *actually relevant to this role*. A CFO cares about reconciliation, forecasting accuracy, closing cycles, real-time visibility into KPIs. A COO cares about throughput, downtime, fragmented operations. A CIO cares about integration debt, security, scaling, vendor sprawl. **Match pain points to the recipient's job — they should read it and think "yes, exactly".**
+   - If the prospect's systems are unknown, say so gently ("In environments running multiple disconnected ERPs / legacy stacks…") — never fabricate a specific vendor name.
+
+4. **Then-position paragraph**: Connect the sender's offering DIRECTLY to the frictions you just named. Use the sender's products and the "Systems we replace/integrate with" list. Be concrete about the mechanism (replacement, integration, middleware, automation, advisory).
+
+5. **Soft, no-obligation ask**: Offer something with no commitment — a brief virtual or in-person discussion, a tailored walkthrough. Mention that a Director / senior colleague would be glad to join. Frame as "an initial discussion with no obligation".
+
+6. **Social proof (optional, max 1 line)**: If the sender description contains credentials (partner status, awards, customer count, certifications) — weave ONE in naturally. Do not invent.
+
+7. **Sign-off**: Close with "Thank you for your time, and I look forward to hearing from you." then on its own line "Wishing you a pleasant day ahead." Do NOT add a name, title, or signature block — those are appended automatically by the platform.
+
+8. **Length**: 220–340 words. Multiple short paragraphs. Never a wall of text.
+
+9. **Voice**: warm, respectful, slightly formal, never salesy. Banned words: "leverage", "synergy", "solutions provider", "game-changer", "revolutionary", "circle back", "touch base".
+
+10. **Subject line**: 6–10 words. Specific. Reference either the recipient's company OR the specific friction the email diagnoses (e.g. "A thought on financial and operational data at <Company>"). No emojis. No "Quick question" / "Following up".
+
+OUTPUT: Return ONLY the structured email via the tool call. Do not include any signature, name, or contact block — only greeting through the two closing lines.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -90,7 +120,7 @@ OUTPUT: Return ONLY the structured email via the tool call.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You are an elite B2B sales copywriter who writes hyper-personalized 1:1 outreach. Your emails feel hand-written by a thoughtful senior account executive — never templated, never generic, never salesy. You ground every claim in the provided context and never fabricate names, tools, metrics, or credentials." },
+          { role: "system", content: "You are an elite B2B sales copywriter who writes hyper-personalized 1:1 outreach. Your emails feel hand-written by a thoughtful senior account executive — never templated, never generic, never salesy. You ground every claim in the provided context. You map the sender's solutions onto the recipient's *actual systems and role-specific pain points*, and you NEVER fabricate vendor names, customer logos, metrics, or credentials." },
           { role: "user", content: userPrompt },
         ],
         tools: [{
@@ -101,7 +131,7 @@ OUTPUT: Return ONLY the structured email via the tool call.`;
               type: "object",
               properties: {
                 subject: { type: "string", description: "Specific, curiosity-driven subject line, 6-10 words." },
-                body: { type: "string", description: "The full email body, 220-320 words, multiple short paragraphs, starting with 'Dear <FirstName>,' and ending with 'Wishing you a pleasant day ahead.'" },
+                body: { type: "string", description: "Email body, 220-340 words, multiple short paragraphs, starting with 'Dear <FirstName>,' and ending with 'Wishing you a pleasant day ahead.' No signature block." },
               },
               required: ["subject", "body"],
             },
@@ -118,10 +148,17 @@ OUTPUT: Return ONLY the structured email via the tool call.`;
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
+    // Append the user's saved signature, if any.
+    let body = args.body ?? "";
+    const signature = (profile?.email_signature ?? "").trim();
+    if (signature) {
+      body = `${body.trimEnd()}\n\n${signature}`;
+    }
+
     // Count successful generation toward Free quota.
     await incrementAiEmails(admin, workspace_id);
 
-    return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ subject: args.subject, body }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
