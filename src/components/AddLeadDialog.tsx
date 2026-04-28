@@ -93,12 +93,9 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       setPainPoints((prev) => mergeUnique(prev, pains));
       setEnrichSignals((data as any)?.signals ?? []);
       setEnrichConfidence((data as any)?.confidence ?? null);
-      const apolloUsed = !!(data as any)?.apollo_used;
       toast({
-        title: apolloUsed ? "Enriched with Apollo.io ✓" : "Enriched from AI signals",
-        description: apolloUsed
-          ? `Real firmographics + ${systems.length} systems · ${pains.length} pain points`
-          : `${systems.length} systems · ${pains.length} pain points (add Apollo key in Settings for verified data)`,
+        title: "Enriched from AI signals",
+        description: `${systems.length} systems · ${pains.length} pain points`,
       });
     } catch (e: any) {
       toast({ title: "Auto-find failed", description: e?.message ?? "Try again later", variant: "destructive" });
