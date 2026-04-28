@@ -592,9 +592,9 @@ export default function Landing() {
             © 2026 EngageIQ. Built for revenue teams who refuse to settle.
           </p>
           <div className="flex items-center gap-5 text-xs text-muted-foreground">
-            <a href="#" className="hover:text-foreground">Privacy</a>
-            <a href="#" className="hover:text-foreground">Terms</a>
-            <a href="#" className="hover:text-foreground">Security</a>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/refund" className="hover:text-foreground">Refund</Link>
           </div>
         </div>
       </footer>

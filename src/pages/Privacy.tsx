@@ -7,37 +7,81 @@ export default function Privacy() {
       <header className="container mx-auto px-6 py-6 border-b">
         <Link to="/"><Logo /></Link>
       </header>
-      <main className="container mx-auto px-6 py-12 max-w-3xl prose prose-slate">
-        <h1 className="text-3xl font-display font-bold text-primary-deep">Privacy Policy</h1>
+      <main className="container mx-auto px-6 py-12 max-w-3xl">
+        <h1 className="text-3xl font-display font-bold text-primary-deep">Privacy Notice</h1>
         <p className="text-muted-foreground">Last updated: April 2026</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-8">1. Your data is yours</h2>
-        <p>You own all data you upload to EngageIQ — leads, company profiles, AI-generated insights. You can export it or delete it at any time from Settings.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-8">1. Who we are</h2>
+        <p>This service ("EngageIQ", "we", "us") is operated by <strong>EngageIQ</strong>, the legal entity providing the EngageIQ platform. EngageIQ acts as the <strong>data controller</strong> for personal data processed through the service. For privacy questions, contact us through in-app support.</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">2. We do not sell personal data</h2>
-        <p>We never sell, rent, or share your data with third parties for advertising or marketing purposes.</p>
-
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">3. What we collect</h2>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">2. Personal data we collect</h2>
         <ul className="list-disc pl-6 space-y-1">
-          <li>Account info: email, full name, optional avatar.</li>
-          <li>Workspace data: company profile, leads, opportunities, activities you create.</li>
-          <li>Auth metadata required to sign you in (managed by our backend provider).</li>
+          <li><strong>Account data:</strong> email address, full name, optional avatar, hashed password or OAuth identifiers.</li>
+          <li><strong>Workspace data:</strong> company profile, leads, opportunities, activities, AI-generated content you create.</li>
+          <li><strong>Support messages:</strong> content of messages you send to support or our in-app assistant.</li>
+          <li><strong>Usage and telemetry:</strong> pages visited, features used, errors encountered.</li>
+          <li><strong>Device and connection data:</strong> IP address, browser type, device identifiers, approximate location.</li>
+          <li><strong>Cookies and similar technologies:</strong> session cookies for authentication and essential site functionality.</li>
         </ul>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">4. How AI works</h2>
-        <p>When you click "Generate with AI", we send your company profile and products to an AI model to produce insights. We do not store your data with the AI provider beyond the request itself.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">3. Purposes and legal bases</h2>
+        <ul className="list-disc pl-6 space-y-1">
+          <li><strong>Provide the service</strong> (account creation, authentication, delivering features) — legal basis: performance of a contract.</li>
+          <li><strong>Process payments and manage subscriptions</strong> — legal basis: performance of a contract; carried out by our Merchant of Record (see Section 4).</li>
+          <li><strong>Security and fraud prevention</strong> (abuse detection, rate limiting, audit logs) — legal basis: legitimate interests.</li>
+          <li><strong>Product improvement</strong> (aggregated usage analytics, debugging) — legal basis: legitimate interests.</li>
+          <li><strong>Customer support</strong> (responding to requests) — legal basis: legitimate interests / contract performance.</li>
+          <li><strong>Legal compliance</strong> (tax, accounting, lawful requests) — legal basis: legal obligation.</li>
+        </ul>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. BYOK integrations</h2>
-        <p>If you connect your own API keys (e.g. Apollo), data is fetched via your account only. We do not redistribute it.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">4. Who we share data with</h2>
+        <ul className="list-disc pl-6 space-y-1">
+          <li><strong>Paddle.com Market Limited ("Paddle")</strong> — our Merchant of Record. Paddle processes all orders, payments, subscription billing, tax compliance, invoicing, and refund handling. When you make a purchase, Paddle collects and processes your billing data under its own privacy policy: <a className="underline" href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer">paddle.com/legal/privacy</a>.</li>
+          <li><strong>Hosting and infrastructure providers</strong> — for application hosting, database storage, file storage, and edge compute.</li>
+          <li><strong>AI model providers</strong> — when you use AI features, the relevant prompt content (e.g. company profile, lead notes) is sent to the model provider to generate a response. We do not allow providers to train on your data.</li>
+          <li><strong>Email delivery providers</strong> — to deliver transactional and authentication emails.</li>
+          <li><strong>Professional advisers</strong> — accountants and lawyers, where strictly necessary.</li>
+          <li><strong>Authorities</strong> — where required to comply with applicable law or a valid legal request.</li>
+        </ul>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">6. Data isolation</h2>
-        <p>Your workspace is private. Other users cannot read your data. We enforce this with row-level security in the database.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. Data retention</h2>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Account and workspace data: retained while your account is active and deleted within 30 days of account closure (unless we must retain it longer for legal, tax, or fraud-prevention reasons).</li>
+          <li>Billing records held by Paddle: retained according to Paddle's policy, typically 7 years for tax purposes.</li>
+          <li>Logs and telemetry: typically retained for up to 12 months.</li>
+          <li>Backups: rotated within 35 days of deletion from production.</li>
+        </ul>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">7. Deletion</h2>
-        <p>Settings → Your data: delete all workspace data, or delete your account. Auth records are removed within 24h on request.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">6. Your rights</h2>
+        <p>Depending on where you live, you have the right to:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Access the personal data we hold about you.</li>
+          <li>Request correction of inaccurate data.</li>
+          <li>Request erasure ("right to be forgotten").</li>
+          <li>Restrict or object to certain processing.</li>
+          <li>Data portability — receive your data in a machine-readable format.</li>
+          <li>Withdraw consent at any time, where processing is based on consent.</li>
+          <li>Lodge a complaint with your local data protection authority.</li>
+        </ul>
+        <p>To exercise any of these rights, contact us through in-app support. We respond within one month.</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">8. Contact</h2>
-        <p>Questions? Open a support ticket inside the app.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">7. International transfers</h2>
+        <p>Your data may be processed outside your country of residence, including in the United States and the European Economic Area, by our service providers. Where required, we rely on appropriate safeguards such as the European Commission's Standard Contractual Clauses or adequacy decisions.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">8. Security</h2>
+        <p>We apply appropriate technical and organisational measures to protect personal data, including encryption in transit (TLS), encryption at rest, role-based access controls, row-level security in our database, audit logging, and least-privilege access for staff. No method of transmission or storage is 100% secure, but we work to follow industry best practice.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">9. Cookies</h2>
+        <p>We use strictly necessary cookies for authentication and session management. We do not use advertising or third-party tracking cookies. Limited first-party analytics may be used to understand aggregate usage. You can manage cookies through your browser settings.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">10. AI features</h2>
+        <p>When you use AI-powered features, your prompt content is sent to a third-party model provider to generate a response. We do not store your data with the AI provider beyond the request itself, and providers are contractually prohibited from training on your data.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">11. Changes to this notice</h2>
+        <p>We may update this notice from time to time. Material changes will be communicated through the app or by email.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">12. Contact</h2>
+        <p>For privacy questions or to exercise your rights, contact EngageIQ through in-app support.</p>
       </main>
     </div>
   );
