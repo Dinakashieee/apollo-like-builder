@@ -173,6 +173,46 @@ export default function Company() {
           <Label>Products / services summary</Label>
           <Textarea rows={2} value={productsSummary} onChange={(e) => setProductsSummary(e.target.value)} className="mt-1" />
         </div>
+        <div>
+          <Label>One-line positioning</Label>
+          <Input
+            value={positioning}
+            onChange={(e) => setPositioning(e.target.value)}
+            className="mt-1"
+            placeholder="e.g. IFS Premier Partner — world's #1 for IFS customer satisfaction (2023, 2024)"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Used as social proof inside AI-generated emails. Keep it factual.
+          </p>
+        </div>
+        <div>
+          <Label>Systems we replace or integrate with (comma-separated)</Label>
+          <Input
+            value={targetSystems}
+            onChange={(e) => setTargetSystems(e.target.value)}
+            className="mt-1"
+            placeholder="SAP, Oracle EBS, Microsoft Dynamics, legacy ERPs"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            The AI uses this to say things like "we know <em>Majis</em> is using <em>SAP</em>…"
+          </p>
+        </div>
+        <div>
+          <Label>Pain points we solve (one per line)</Label>
+          <Textarea
+            rows={4}
+            value={solvedPainPoints}
+            onChange={(e) => setSolvedPainPoints(e.target.value)}
+            className="mt-1"
+            placeholder={`Manual data reconciliation across systems
+Slow month-end close
+Lack of real-time KPI visibility
+Fragmented operational + financial data`}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            The AI matches these to the recipient's role so the email lands ("a CFO will see reconciliation; a COO will see throughput").
+          </p>
+        </div>
         <Button onClick={saveCompany} className="bg-gradient-primary">Save</Button>
       </section>
 
