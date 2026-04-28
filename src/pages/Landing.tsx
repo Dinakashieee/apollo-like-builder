@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import { WaitlistDialog } from "@/components/WaitlistDialog";
+
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
@@ -145,7 +145,6 @@ const tiers: Tier[] = [
 ];
 
 export default function Landing() {
-  const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [annual, setAnnual] = useState(true);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { user } = useAuth();
@@ -153,7 +152,7 @@ export default function Landing() {
 
   const handleTierCta = (tier: Tier) => {
     if (tier.contact) {
-      setWaitlistOpen(true);
+      window.location.href = "mailto:sales@engageiq.app?subject=Enterprise%20inquiry";
       return;
     }
     if (tier.monthly === 0) {
@@ -183,7 +182,6 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <PaymentTestModeBanner />
-      <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 
       {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
