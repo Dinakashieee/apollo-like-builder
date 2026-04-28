@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "./NotificationBell";
+import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -60,7 +61,9 @@ export function AppLayout() {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-background flex-col">
+        <PaymentTestModeBanner />
+        <div className="flex-1 flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-16 flex items-center gap-3 border-b border-border/60 bg-card/50 backdrop-blur-xl px-4 sticky top-0 z-30">
@@ -108,6 +111,7 @@ export function AppLayout() {
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
+        </div>
         </div>
       </div>
     </SidebarProvider>
