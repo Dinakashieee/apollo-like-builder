@@ -16,6 +16,9 @@ const companySchema = z.object({
   description: z.string().trim().max(1000).optional(),
   industries: z.string().trim().max(400).optional(),
   products_summary: z.string().trim().max(1000).optional(),
+  target_systems: z.string().trim().max(400).optional(),
+  solved_pain_points: z.string().trim().max(800).optional(),
+  positioning: z.string().trim().max(300).optional(),
 });
 
 export default function Company() {
@@ -25,6 +28,9 @@ export default function Company() {
   const [description, setDescription] = useState("");
   const [industries, setIndustries] = useState("");
   const [productsSummary, setProductsSummary] = useState("");
+  const [targetSystems, setTargetSystems] = useState("");
+  const [solvedPainPoints, setSolvedPainPoints] = useState("");
+  const [positioning, setPositioning] = useState("");
   const [members, setMembers] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -48,6 +54,9 @@ export default function Company() {
       setDescription(company.description ?? "");
       setIndustries((company.industries ?? []).join(", "));
       setProductsSummary(company.products_summary ?? "");
+      setTargetSystems((company.target_systems ?? []).join(", "));
+      setSolvedPainPoints((company.solved_pain_points ?? []).join("\n"));
+      setPositioning(company.positioning ?? "");
     }
     setMembers(mems ?? []);
     setInvites(invs ?? []);
@@ -65,12 +74,20 @@ export default function Company() {
       description,
       industries,
       products_summary: productsSummary,
+      target_systems: targetSystems,
+      solved_pain_points: solvedPainPoints,
+      positioning,
     });
     if (!parsed.success) {
       toast({ title: "Invalid", description: parsed.error.errors[0].message, variant: "destructive" });
       return;
     }
     const industriesArray = industries.split(",").map((s) => s.trim()).filter(Boolean);
+    const targetSystemsArray = targetSystems.split(",").map((s) => s.trim()).filter(Boolean);
+    const solvedPainArray = solvedPainPoints
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     const { data: existing } = await supabase
       .from("company_profiles")
       .select("id")
@@ -82,6 +99,9 @@ export default function Company() {
       description: parsed.data.description ?? null,
       industries: industriesArray,
       products_summary: parsed.data.products_summary ?? null,
+      target_systems: targetSystemsArray,
+      solved_pain_points: solvedPainArray,
+      positioning: parsed.data.positioning ?? null,
     };
     const { error } = existing
       ? await supabase.from("company_profiles").update(payload).eq("id", existing.id)
