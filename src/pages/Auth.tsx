@@ -38,7 +38,7 @@ const signInSchema = z.object({
 });
 
 export default function Auth() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,7 +57,22 @@ export default function Auth() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const emailParsed = z.string().trim().email("Invalid email").safeParse(email);
+        if (!emailParsed.success) {
+          toast({ title: "Invalid email", description: emailParsed.error.errors[0].message, variant: "destructive" });
+          return;
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(emailParsed.data, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast({
+          title: "Check your inbox",
+          description: "We sent you a link to reset your password.",
+        });
+        setMode("signin");
+      } else if (mode === "signup") {
         const parsed = signUpSchema.safeParse({ fullName, email, password });
         if (!parsed.success) {
           toast({ title: "Invalid input", description: parsed.error.errors[0].message, variant: "destructive" });
