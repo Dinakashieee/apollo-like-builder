@@ -92,7 +92,9 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     const toArray = (s?: string) =>
       (s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
     setSubmitting(true);
+    const leadId = crypto.randomUUID();
     const { error } = await supabase.from("leads").insert({
+      id: leadId,
       workspace_id: current.id,
       company_name: parsed.data.company_name,
       contact_name: parsed.data.contact_name || null,
@@ -111,6 +113,22 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       return;
     }
     await logActivity(current.id, user?.id, "lead_added", `Lead added: ${parsed.data.company_name}`);
+    // Notify the workspace user that a lead was added
+    if (user?.email) {
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "lead-added",
+          recipientEmail: user.email,
+          idempotencyKey: `lead-added-${leadId}`,
+          templateData: {
+            recipientName: user.user_metadata?.full_name ?? null,
+            leadName: parsed.data.contact_name || parsed.data.company_name,
+            leadCompany: parsed.data.company_name,
+            leadRole: parsed.data.role || null,
+          },
+        },
+      }).catch(() => {});
+    }
     toast({ title: "Lead added", description: parsed.data.company_name });
     setCompanyName("");
     setContactName("");
