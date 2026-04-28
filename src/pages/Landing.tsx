@@ -242,9 +242,9 @@ export default function Landing() {
             className="mt-6 text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-up"
             style={{ animationDelay: "120ms" }}
           >
-            EngageIQ unifies prospecting, AI-powered outreach, and pipeline intelligence
-            into one workflow. Find your best-fit accounts, write better emails, and close
-            faster — all in one place.
+            Stop sending bulk emails without context. EngageIQ tells you exactly which
+            accounts match your company — and only prompts you to reach out when there's
+            a real opportunity worth your time.
           </p>
 
           <div
