@@ -16,10 +16,14 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 export default function Composer() {
   const { current } = useWorkspace();
   const { user } = useAuth();
+  const { aiEmailsUsed, aiEmailsLimit, aiEmailsAtLimit, aiEmailsNearLimit, tier, refetch: refetchUsage } =
+    useEntitlements();
   const [leads, setLeads] = useState<any[]>([]);
   const [selectedLead, setSelectedLead] = useState<string>("");
   const [tone, setTone] = useState("professional");
@@ -27,6 +31,7 @@ export default function Composer() {
   const [body, setBody] = useState("");
   const [generating, setGenerating] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     if (!current) return;
