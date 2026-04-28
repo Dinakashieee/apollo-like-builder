@@ -1,0 +1,151 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { toast } from "sonner";
+import { CreditCard, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
+
+const TIER_LABELS: Record<string, string> = {
+  starter_plan: "Starter",
+  pro_plan: "Pro",
+};
+
+export function BillingSection() {
+  const { user } = useAuth();
+  const { subscription, isActive, tier, refetch } = useSubscription(user?.id);
+  const { openCheckout } = usePaddleCheckout();
+  const [busy, setBusy] = useState(false);
+  const [billing, setBilling] = useState<"month" | "year">("month");
+
+  const subscribe = (priceId: string) => {
+    if (!user) return;
+    openCheckout({
+      priceId,
+      customerEmail: user.email ?? undefined,
+      userId: user.id,
+      successUrl: `${window.location.origin}/app/settings?checkout=success`,
+    });
+  };
+
+  const changePlan = async (newPriceId: string) => {
+    setBusy(true);
+    try {
+      const { error } = await supabase.functions.invoke("change-plan", {
+        body: { action: "change", newPriceId, environment: getPaddleEnvironment() },
+      });
+      if (error) throw error;
+      toast.success("Plan updated. Charges are prorated.");
+      setTimeout(refetch, 800);
+    } catch (e) {
+      toast.error("Could not change plan. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancelPlan = async () => {
+    if (!confirm("Cancel your subscription at the end of the current billing period?")) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.functions.invoke("change-plan", {
+        body: { action: "cancel", environment: getPaddleEnvironment() },
+      });
+      if (error) throw error;
+      toast.success("Subscription will end at the end of your billing period.");
+      setTimeout(refetch, 800);
+    } catch {
+      toast.error("Could not cancel. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const planLabel = subscription ? TIER_LABELS[subscription.product_id] ?? subscription.product_id : "Free";
+  const periodEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString()
+    : null;
+
+  return (
+    <section className="bg-card border border-border/60 rounded-xl p-6 space-y-5">
+      <div className="flex items-center gap-3">
+        <CreditCard className="h-5 w-5 text-primary" />
+        <h2 className="font-display font-bold text-lg">Billing & subscription</h2>
+      </div>
+
+      <div className="flex flex-wrap items-baseline gap-3 pb-4 border-b border-border/60">
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Current plan</p>
+          <p className="text-2xl font-display font-bold text-primary-deep">{planLabel}</p>
+        </div>
+        <div className="ml-auto text-right">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
+          <p className="text-sm font-medium capitalize">
+            {isActive ? subscription?.status ?? "free" : "free"}
+            {subscription?.cancel_at_period_end && " (ends soon)"}
+          </p>
+          {periodEnd && isActive && (
+            <p className="text-xs text-muted-foreground">
+              {subscription?.cancel_at_period_end ? "Ends" : "Renews"} on {periodEnd}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {!isActive && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm text-muted-foreground">Billed</span>
+            <button
+              onClick={() => setBilling("month")}
+              className={`text-xs px-2.5 py-1 rounded-md ${billing === "month" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling("year")}
+              className={`text-xs px-2.5 py-1 rounded-md ${billing === "year" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              Annual <span className="ml-1 opacity-70">save 20%</span>
+            </button>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Button variant="outline" onClick={() => subscribe(billing === "year" ? "starter_yearly" : "starter_monthly")}>
+              Subscribe to Starter — {billing === "year" ? "$470/yr" : "$49/mo"}
+            </Button>
+            <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
+              Subscribe to Pro — {billing === "year" ? "$1,430/yr" : "$149/mo"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isActive && (
+        <div className="flex flex-wrap gap-2">
+          {tier === "starter" && (
+            <Button onClick={() => changePlan("pro_monthly")} disabled={busy}>
+              {busy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowUpRight className="h-4 w-4 mr-2" />}
+              Upgrade to Pro
+            </Button>
+          )}
+          {tier === "pro" && (
+            <Button variant="outline" onClick={() => changePlan("starter_monthly")} disabled={busy}>
+              <ArrowDownRight className="h-4 w-4 mr-2" /> Downgrade to Starter
+            </Button>
+          )}
+          {!subscription?.cancel_at_period_end && (
+            <Button variant="ghost" onClick={cancelPlan} disabled={busy} className="text-destructive">
+              Cancel subscription
+            </Button>
+          )}
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Plan prices exclude payment processing fees (5% + 50¢ per transaction). Plan changes are prorated immediately.
+      </p>
+    </section>
+  );
+}

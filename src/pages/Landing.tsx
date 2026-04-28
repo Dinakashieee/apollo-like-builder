@@ -15,6 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { WaitlistDialog } from "@/components/WaitlistDialog";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const features = [
@@ -60,18 +64,30 @@ const trustedAvatars = [
 
 const ANNUAL_DISCOUNT = 0.2; // 20% off annual
 
-const tiers = [
+type Tier = {
+  name: string;
+  tagline: string;
+  monthly: number | null;
+  cta: string;
+  highlight: boolean;
+  features: string[];
+  priceMonthly?: string;
+  priceYearly?: string;
+  contact?: boolean;
+};
+
+const tiers: Tier[] = [
   {
     name: "Free",
     tagline: "For solo sellers exploring EngageIQ",
     monthly: 0,
-    cta: "Join the waitlist",
+    cta: "Get started free",
     highlight: false,
     features: [
       "Up to 50 leads",
+      "20 AI emails / month",
       "Basic AI lead scoring",
       "1 user",
-      "Email composer (10/mo)",
       "Community support",
     ],
   },
@@ -79,8 +95,10 @@ const tiers = [
     name: "Starter",
     tagline: "For small teams getting serious about outbound",
     monthly: 49,
-    cta: "Join the waitlist",
+    cta: "Subscribe to Starter",
     highlight: false,
+    priceMonthly: "starter_monthly",
+    priceYearly: "starter_yearly",
     features: [
       "Up to 2,500 leads",
       "Full AI deal intelligence",
@@ -94,8 +112,10 @@ const tiers = [
     name: "Pro",
     tagline: "For growing revenue teams that need scale",
     monthly: 149,
-    cta: "Join the waitlist",
+    cta: "Subscribe to Pro",
     highlight: true,
+    priceMonthly: "pro_monthly",
+    priceYearly: "pro_yearly",
     features: [
       "Unlimited leads",
       "Advanced intent + fit scoring",
@@ -109,9 +129,10 @@ const tiers = [
   {
     name: "Enterprise",
     tagline: "For organizations with custom needs",
-    monthly: null as number | null,
-    cta: "Join the waitlist",
+    monthly: null,
+    cta: "Contact sales",
     highlight: false,
+    contact: true,
     features: [
       "Everything in Pro",
       "SSO / SAML",
@@ -127,6 +148,32 @@ export default function Landing() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [annual, setAnnual] = useState(true);
   const [demoOpen, setDemoOpen] = useState(false);
+  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleTierCta = (tier: Tier) => {
+    if (tier.contact) {
+      setWaitlistOpen(true);
+      return;
+    }
+    if (tier.monthly === 0) {
+      navigate(user ? "/app" : "/auth");
+      return;
+    }
+    if (!user) {
+      navigate("/auth?next=/#pricing");
+      return;
+    }
+    const priceId = annual ? tier.priceYearly : tier.priceMonthly;
+    if (!priceId) return;
+    openCheckout({
+      priceId,
+      customerEmail: user.email ?? undefined,
+      userId: user.id,
+      successUrl: `${window.location.origin}/app?checkout=success`,
+    });
+  };
 
   const formatPrice = (monthly: number | null) => {
     if (monthly === null) return "Custom";
@@ -136,6 +183,7 @@ export default function Landing() {
   };
   return (
     <div className="min-h-screen bg-background">
+      <PaymentTestModeBanner />
       <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 
       {/* Demo video modal */}
@@ -483,9 +531,10 @@ export default function Landing() {
                     tier.highlight ? "bg-gradient-primary shadow-glow" : ""
                   }`}
                   variant={tier.highlight ? "default" : "outline"}
-                  onClick={() => setWaitlistOpen(true)}
+                  onClick={() => handleTierCta(tier)}
+                  disabled={checkoutLoading}
                 >
-                  {tier.cta}
+                  {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
                 </Button>
 
                 <ul className="space-y-2.5 text-sm">
@@ -500,8 +549,9 @@ export default function Landing() {
             ))}
           </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-10">
-            All plans include a 14-day free trial · No credit card required · Cancel anytime
+          <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
+            All plans include a 14-day free trial · Cancel anytime · Prices exclude payment processing fees
+            (5% + 50¢ per transaction, passed through from our payment gateway)
           </p>
         </div>
       </section>
