@@ -12,7 +12,7 @@ export default function Refund() {
         <p className="text-muted-foreground">Last updated: April 2026</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-8">14 working day refund window</h2>
-        <p>EngageIQ offers a refund window of <strong>14 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>14 working days</strong> of placing your order.</p>
+        <p><strong>EngageIQ</strong> offers a refund window of <strong>14 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>14 working days</strong> of placing your order.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">How to request a refund</h2>
         <p>Refunds for EngageIQ are processed by our payment provider and Merchant of Record, <strong>Paddle</strong>. To request a refund:</p>
