@@ -87,6 +87,30 @@ export default function Settings() {
     else toast({ title: "Profile saved" });
   };
 
+  const saveEmailSettings = async () => {
+    if (!user) return;
+    if (senderEmail) {
+      const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(senderEmail);
+      if (!ok) {
+        toast({ title: "Invalid email", description: "Enter a valid sending email.", variant: "destructive" });
+        return;
+      }
+    }
+    setSavingEmail(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        sender_email: senderEmail || null,
+        sender_name: senderName || null,
+        email_signature: emailSignature || null,
+        preferred_mail_client: mailClient || "default",
+      })
+      .eq("id", user.id);
+    setSavingEmail(false);
+    if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    else toast({ title: "Email settings saved" });
+  };
+
   const changePassword = async () => {
     if (password.length < 8) {
       toast({ title: "Password too short", description: "Min 8 characters.", variant: "destructive" });
