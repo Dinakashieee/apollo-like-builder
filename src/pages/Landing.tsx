@@ -138,7 +138,7 @@ const tiers: Tier[] = [
       "Everything in Pro",
       "Granular permissions & audit logs",
       "Dedicated success manager",
-      "Custom data residency",
+      "Custom data residency (EU, US, IN, AU)",
       "99.9% SLA",
     ],
   },
