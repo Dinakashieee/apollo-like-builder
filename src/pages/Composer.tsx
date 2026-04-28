@@ -58,13 +58,29 @@ export default function Composer() {
       toast({ title: "Pick a lead first", variant: "destructive" });
       return;
     }
+    if (aiEmailsAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
+    if (aiEmailsNearLimit && tier !== "pro") {
+      toast({
+        title: "Nearing AI email limit",
+        description: `${aiEmailsUsed} of ${aiEmailsLimit} used this month.`,
+      });
+    }
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-email", {
         body: { workspace_id: current.id, lead_id: selectedLead, tone },
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data.code === "quota_exceeded") {
+          setUpgradeOpen(true);
+          throw new Error(data.error);
+        }
+        throw new Error(data.error);
+      }
       setSubject(data.subject ?? "");
       setBody(data.body ?? "");
       const lead = leads.find((l) => l.id === selectedLead);
@@ -74,6 +90,7 @@ export default function Composer() {
         "email_generated",
         `Email drafted for ${lead?.company_name ?? "lead"}`
       );
+      refetchUsage();
     } catch (e: any) {
       toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
     }
