@@ -14,7 +14,7 @@ About EngageIQ:
   - Free: up to 50 leads, 20 AI emails/month, basic scoring, 1 user, community support.
   - Starter ($49/mo or $470/yr): up to 2,500 leads, full AI intelligence, 3 users, unlimited composer, 2,000 AI emails/mo.
   - Pro ($149/mo or $1,430/yr): unlimited leads & AI emails, advanced intent+fit scoring, 10 users, unlimited automations.
-  - Enterprise: custom pricing, SSO/SAML, audit logs, dedicated success manager.
+  - Enterprise: custom pricing, audit logs, dedicated success manager.
 - Plan prices exclude payment processing (5% + 50¢ per transaction).
 - Plan changes are prorated immediately. Cancellations take effect at the end of the billing period.
 
