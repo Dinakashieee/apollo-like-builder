@@ -10,6 +10,7 @@ import {
   Sparkles,
   Calendar,
   Plus,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const [profileName, setProfileName] = useState<string>("");
   const [stats, setStats] = useState({ leads: 0, hot: 0, opps: 0, emails: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [topLeads, setTopLeads] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +39,7 @@ export default function Dashboard() {
       { count: hotCount },
       { count: oppsCount },
       { data: recent },
+      { data: top },
       { data: acts },
     ] = await Promise.all([
       supabase
@@ -59,6 +62,14 @@ export default function Dashboard() {
         .order("created_at", { ascending: false })
         .limit(5),
       supabase
+        .from("leads")
+        .select("id, company_name, contact_name, role, status, score, industry, notes")
+        .eq("workspace_id", current.id)
+        .not("status", "in", "(won,lost)")
+        .order("score", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
         .from("activities")
         .select("id, type, description, created_at")
         .eq("workspace_id", current.id)
@@ -72,6 +83,7 @@ export default function Dashboard() {
       emails: 0,
     });
     setRecentLeads(recent ?? []);
+    setTopLeads(top ?? []);
     setActivities(acts ?? []);
     setLoading(false);
   };
