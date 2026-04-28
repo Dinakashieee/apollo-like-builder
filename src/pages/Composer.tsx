@@ -94,9 +94,16 @@ export default function Composer() {
         </Button>
       </div>
 
-      {!hasCompany && (
+      {!hasCompany ? (
         <div className="card-elevated p-4 border-warm/40 bg-warm/5 text-sm">
-          ⚠️ Add your company profile to generate context-aware emails.
+          ⚠️ Add your company profile and products in <strong>Company</strong> — the AI uses them to write context-aware emails tailored to what you actually sell.
+        </div>
+      ) : (
+        <div className="card-elevated p-4 border-primary/30 bg-primary/5 text-sm flex items-start gap-2">
+          <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <span>
+            Emails are personalized using <strong>your company profile</strong> and the <strong>products & services</strong> you listed in Company. Update them anytime to change the AI's voice and offer.
+          </span>
         </div>
       )}
 
