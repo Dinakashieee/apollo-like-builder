@@ -111,28 +111,7 @@ export default function Settings() {
     }
   };
 
-  const saveApollo = async () => {
-    if (!user) return;
-    if (!apolloKey || apolloKey.startsWith("•")) return;
-    const { error } = await supabase.from("user_api_keys").upsert(
-      { user_id: user.id, provider: "apollo", api_key: apolloKey, label: "Apollo.io" },
-      { onConflict: "user_id,provider" }
-    );
-    if (error) toast({ title: "Failed", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: "Apollo key saved", description: "Data is accessed via your connected account." });
-      setApolloKey("•".repeat(16));
-      setHasApollo(true);
-    }
-  };
 
-  const removeApollo = async () => {
-    if (!user) return;
-    await supabase.from("user_api_keys").delete().eq("user_id", user.id).eq("provider", "apollo");
-    setApolloKey("");
-    setHasApollo(false);
-    toast({ title: "Apollo key removed" });
-  };
 
   const exportData = async () => {
     if (!current) return;
