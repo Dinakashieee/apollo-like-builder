@@ -193,9 +193,9 @@ export default function Landing() {
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
           </nav>
-          <div className="flex items-center gap-2">
-            <Link to="/auth" className="hidden sm:inline-flex">
-              <Button variant="ghost" size="sm" className="text-sm">Sign in</Button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Link to="/auth">
+              <Button variant="ghost" size="sm" className="text-sm px-2 sm:px-3">Sign in</Button>
             </Link>
             <Button
               size="sm"
