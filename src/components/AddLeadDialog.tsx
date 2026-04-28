@@ -26,6 +26,9 @@ const schema = z.object({
   contact_name: z.string().trim().max(80).optional(),
   role: z.string().trim().max(80).optional(),
   email: z.string().trim().email().max(120).optional().or(z.literal("")),
+  industry: z.string().trim().max(80).optional(),
+  systems_in_use: z.string().trim().max(300).optional(),
+  pain_points: z.string().trim().max(500).optional(),
   notes: z.string().trim().max(1000).optional(),
 });
 
@@ -41,6 +44,9 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const [contactName, setContactName] = useState("");
   const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [systemsInUse, setSystemsInUse] = useState("");
+  const [painPoints, setPainPoints] = useState("");
   const [notes, setNotes] = useState("");
   const warnedRef = useRef(false);
 
@@ -74,12 +80,17 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       contact_name: contactName,
       role,
       email,
+      industry,
+      systems_in_use: systemsInUse,
+      pain_points: painPoints,
       notes,
     });
     if (!parsed.success) {
       toast({ title: "Invalid input", description: parsed.error.errors[0].message, variant: "destructive" });
       return;
     }
+    const toArray = (s?: string) =>
+      (s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
     setSubmitting(true);
     const { error } = await supabase.from("leads").insert({
       workspace_id: current.id,
@@ -87,6 +98,9 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       contact_name: parsed.data.contact_name || null,
       role: parsed.data.role || null,
       email: parsed.data.email || null,
+      industry: parsed.data.industry || null,
+      systems_in_use: toArray(parsed.data.systems_in_use),
+      pain_points: toArray(parsed.data.pain_points),
       notes: parsed.data.notes || null,
       status: "new",
       created_by: user?.id,
@@ -102,6 +116,9 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     setContactName("");
     setRole("");
     setEmail("");
+    setIndustry("");
+    setSystemsInUse("");
+    setPainPoints("");
     setNotes("");
     setOpen(false);
     refetchUsage();
@@ -138,6 +155,28 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
             <div>
               <Label>Email</Label>
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Industry</Label>
+                <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Manufacturing" />
+              </div>
+              <div>
+                <Label>Systems in use</Label>
+                <Input
+                  value={systemsInUse}
+                  onChange={(e) => setSystemsInUse(e.target.value)}
+                  placeholder="SAP, Oracle, Salesforce"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Known pain points (comma-separated)</Label>
+              <Input
+                value={painPoints}
+                onChange={(e) => setPainPoints(e.target.value)}
+                placeholder="manual reconciliation, slow month-end close"
+              />
             </div>
             <div>
               <Label>Notes</Label>
