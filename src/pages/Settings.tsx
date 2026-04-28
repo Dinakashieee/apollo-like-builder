@@ -36,8 +36,7 @@ export default function Settings() {
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [password, setPassword] = useState("");
-  const [apolloKey, setApolloKey] = useState("");
-  const [hasApollo, setHasApollo] = useState(false);
+  const [saving2, _unused] = useState(false);
   const [saving, setSaving] = useState(false);
   // Email connect & signature
   const [senderEmail, setSenderEmail] = useState("");
