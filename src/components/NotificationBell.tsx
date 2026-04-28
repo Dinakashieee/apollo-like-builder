@@ -40,8 +40,9 @@ export function NotificationBell() {
   useEffect(() => {
     load();
     if (!current) return;
-    const channel = supabase
-      .channel(`notif-${current.id}`)
+    const topic = `notif-${current.id}-${Math.random().toString(36).slice(2, 10)}`;
+    const channel = supabase.channel(topic);
+    channel
       .on(
         "postgres_changes",
         {
