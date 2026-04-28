@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -6,7 +6,9 @@ import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { toast } from "sonner";
-import { CreditCard, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
+import {
+  CreditCard, ArrowUpRight, ArrowDownRight, Loader2, RotateCcw, Wallet, RefreshCw, AlertTriangle,
+} from "lucide-react";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
@@ -17,8 +19,27 @@ export function BillingSection() {
   const { user } = useAuth();
   const { subscription, isActive, tier, refetch } = useSubscription(user?.id);
   const { openCheckout } = usePaddleCheckout();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
   const [billing, setBilling] = useState<"month" | "year">("month");
+
+  // After checkout success, poll for the subscription to appear (webhook
+  // typically lands within a few seconds).
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("checkout") !== "success") return;
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.toString());
+
+    toast.success("Payment received — activating your plan…");
+    let tries = 0;
+    const interval = setInterval(async () => {
+      tries++;
+      await refetch();
+      if (subscription || tries >= 10) clearInterval(interval);
+    }, 1500);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const subscribe = (priceId: string) => {
     if (!user) return;
@@ -30,25 +51,29 @@ export function BillingSection() {
     });
   };
 
-  const changePlan = async (newPriceId: string) => {
-    setBusy(true);
+  const callChange = async (newPriceId: string, label: string) => {
+    setBusy(label);
     try {
-      const { error } = await supabase.functions.invoke("change-plan", {
+      const { data, error } = await supabase.functions.invoke("change-plan", {
         body: { action: "change", newPriceId, environment: getPaddleEnvironment() },
       });
       if (error) throw error;
-      toast.success("Plan updated. Charges are prorated.");
+      toast.success(
+        data?.scheduled
+          ? "Change scheduled — takes effect at your next renewal."
+          : "Plan updated. Charges are prorated."
+      );
       setTimeout(refetch, 800);
-    } catch (e) {
+    } catch {
       toast.error("Could not change plan. Please try again.");
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
   const cancelPlan = async () => {
     if (!confirm("Cancel your subscription at the end of the current billing period?")) return;
-    setBusy(true);
+    setBusy("cancel");
     try {
       const { error } = await supabase.functions.invoke("change-plan", {
         body: { action: "cancel", environment: getPaddleEnvironment() },
@@ -59,7 +84,40 @@ export function BillingSection() {
     } catch {
       toast.error("Could not cancel. Please try again.");
     } finally {
-      setBusy(false);
+      setBusy(null);
+    }
+  };
+
+  const resumePlan = async () => {
+    setBusy("resume");
+    try {
+      const { error } = await supabase.functions.invoke("manage-subscription", {
+        body: { action: "resume", environment: getPaddleEnvironment() },
+      });
+      if (error) throw error;
+      toast.success("Subscription resumed.");
+      setTimeout(refetch, 800);
+    } catch {
+      toast.error("Could not resume. Please try again.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const openPortal = async (target: "updatePayment" | "general") => {
+    setBusy("portal");
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-subscription", {
+        body: { action: "portal", environment: getPaddleEnvironment() },
+      });
+      if (error) throw error;
+      const url = data?.[target] ?? data?.general;
+      if (!url) throw new Error("No portal URL");
+      window.open(url, "_blank", "noopener");
+    } catch {
+      toast.error("Could not open billing portal. Please try again.");
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -67,6 +125,9 @@ export function BillingSection() {
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString()
     : null;
+  const currentInterval = subscription?.price_id?.endsWith("_yearly") ? "year" : "month";
+  const altInterval = currentInterval === "year" ? "month" : "year";
+  const isPastDue = subscription?.status === "past_due";
 
   return (
     <section className="bg-card border border-border/60 rounded-xl p-6 space-y-5">
@@ -74,6 +135,19 @@ export function BillingSection() {
         <CreditCard className="h-5 w-5 text-primary" />
         <h2 className="font-display font-bold text-lg">Billing & subscription</h2>
       </div>
+
+      {isPastDue && (
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-sm">
+          <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-destructive">Your last payment failed.</p>
+            <p className="text-muted-foreground">Update your payment method to avoid losing access.</p>
+          </div>
+          <Button size="sm" onClick={() => openPortal("updatePayment")} disabled={busy === "portal"}>
+            Update card
+          </Button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-baseline gap-3 pb-4 border-b border-border/60">
         <div>
@@ -125,18 +199,40 @@ export function BillingSection() {
       {isActive && (
         <div className="flex flex-wrap gap-2">
           {tier === "starter" && (
-            <Button onClick={() => changePlan("pro_monthly")} disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowUpRight className="h-4 w-4 mr-2" />}
+            <Button onClick={() => callChange(currentInterval === "year" ? "pro_yearly" : "pro_monthly", "upgrade")} disabled={!!busy}>
+              {busy === "upgrade" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowUpRight className="h-4 w-4 mr-2" />}
               Upgrade to Pro
             </Button>
           )}
-          {tier === "pro" && (
-            <Button variant="outline" onClick={() => changePlan("starter_monthly")} disabled={busy}>
+          {tier === "pro" && !subscription?.cancel_at_period_end && (
+            <Button variant="outline" onClick={() => callChange(currentInterval === "year" ? "starter_yearly" : "starter_monthly", "downgrade")} disabled={!!busy}>
               <ArrowDownRight className="h-4 w-4 mr-2" /> Downgrade to Starter
             </Button>
           )}
+
+          {/* Switch billing interval */}
           {!subscription?.cancel_at_period_end && (
-            <Button variant="ghost" onClick={cancelPlan} disabled={busy} className="text-destructive">
+            <Button
+              variant="outline"
+              onClick={() => callChange(`${tier}_${altInterval === "year" ? "yearly" : "monthly"}`, "interval")}
+              disabled={!!busy}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Switch to {altInterval === "year" ? "annual" : "monthly"}
+            </Button>
+          )}
+
+          <Button variant="outline" onClick={() => openPortal("updatePayment")} disabled={!!busy}>
+            <Wallet className="h-4 w-4 mr-2" /> Update payment method
+          </Button>
+
+          {subscription?.cancel_at_period_end ? (
+            <Button onClick={resumePlan} disabled={!!busy} className="bg-gradient-primary">
+              {busy === "resume" ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RotateCcw className="h-4 w-4 mr-2" />}
+              Resume subscription
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={cancelPlan} disabled={!!busy} className="text-destructive">
               Cancel subscription
             </Button>
           )}
@@ -144,7 +240,7 @@ export function BillingSection() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Plan prices exclude payment processing fees (5% + 50¢ per transaction). Plan changes are prorated immediately.
+        Plan prices exclude payment processing fees. Upgrades are prorated immediately; downgrades take effect at your next renewal.
       </p>
     </section>
   );

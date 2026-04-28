@@ -181,14 +181,14 @@ export default function Settings() {
 
   const deleteAccount = async () => {
     if (!user) return;
-    // Best-effort: sign out. Full account deletion requires an edge function with service role.
-    await supabase.from("user_api_keys").delete().eq("user_id", user.id);
+    const { error } = await supabase.functions.invoke("delete-account");
+    if (error) {
+      toast({ title: "Could not delete account", description: error.message, variant: "destructive" });
+      return;
+    }
     await signOut();
     navigate("/");
-    toast({
-      title: "Signed out",
-      description: "Your data has been wiped. Contact support to permanently delete your auth record.",
-    });
+    toast({ title: "Account deleted", description: "Your account and all associated data have been removed." });
   };
 
   return (
@@ -361,7 +361,7 @@ john@engageiq.com  ·  +1 555 123 4567`}
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This wipes your API keys and signs you out. Your auth record will be removed by support within 24h.
+                  This permanently deletes your account, all workspaces you own, and all associated data. This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
