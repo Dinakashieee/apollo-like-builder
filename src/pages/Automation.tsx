@@ -380,6 +380,8 @@ export default function Automation() {
         </div>
       </div>
 
+      <SenderSettingsCard />
+
       <Tabs defaultValue="inbox" className="space-y-4">
         <TabsList>
           <TabsTrigger value="inbox">
