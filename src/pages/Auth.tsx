@@ -88,6 +88,15 @@ export default function Auth() {
           },
         });
         if (error) throw error;
+        // Fire-and-forget welcome email (idempotent per email)
+        supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "welcome",
+            recipientEmail: parsed.data.email,
+            idempotencyKey: `welcome-${parsed.data.email.toLowerCase()}`,
+            templateData: { name: parsed.data.fullName },
+          },
+        }).catch(() => {});
         toast({ title: "Welcome to EngageIQ!", description: "Account created." });
       } else {
         const parsed = signInSchema.safeParse({ email, password });
