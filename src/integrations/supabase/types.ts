@@ -394,6 +394,33 @@ export type Database = {
           },
         ]
       }
+      usage_counters: {
+        Row: {
+          ai_emails_used: number
+          created_at: string
+          id: string
+          period_start: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          ai_emails_used?: number
+          created_at?: string
+          id?: string
+          period_start: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          ai_emails_used?: number
+          created_at?: string
+          id?: string
+          period_start?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       user_api_keys: {
         Row: {
           api_key: string
@@ -559,10 +586,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_lead_count: { Args: { _workspace_id: string }; Returns: number }
+      get_current_ai_emails: {
+        Args: { _workspace_id: string }
+        Returns: number
+      }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
+      get_workspace_owner_tier: {
+        Args: { _workspace_id: string }
+        Returns: string
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      increment_ai_emails: { Args: { _workspace_id: string }; Returns: number }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
