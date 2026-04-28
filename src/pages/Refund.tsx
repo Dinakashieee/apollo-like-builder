@@ -11,8 +11,8 @@ export default function Refund() {
         <h1 className="text-3xl font-display font-bold text-primary-deep">Refund Policy</h1>
         <p className="text-muted-foreground">Last updated: April 2026</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-8">30-day money-back guarantee</h2>
-        <p>EngageIQ offers a <strong>30-day money-back guarantee</strong> on all paid subscriptions. If you are not satisfied with your purchase, you may request a full refund within <strong>30 days</strong> of your initial order date.</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-8">3 working day refund window</h2>
+        <p>EngageIQ offers a refund window of <strong>3 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>3 working days</strong> of placing your order.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">How to request a refund</h2>
         <p>Refunds for EngageIQ are processed by our payment provider and Merchant of Record, <strong>Paddle</strong>. To request a refund:</p>
@@ -26,7 +26,7 @@ export default function Refund() {
         <p>You can cancel your subscription at any time from <strong>Settings → Billing</strong>. Cancellation takes effect at the end of your current billing period — you will keep access until then and will not be charged again.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">Renewals after the refund window</h2>
-        <p>After the 30-day money-back window has passed, subscription renewals (the next monthly or annual charge) are not automatically refundable. If a renewal was charged and you intended to cancel, contact us through in-app support — we review these requests on a case-by-case basis and aim to be fair.</p>
+        <p>After the 3 working day refund window has passed, charges (including subscription renewals) are not automatically refundable. If a renewal was charged and you intended to cancel, contact us through in-app support — we review these requests on a case-by-case basis and aim to be fair.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">Questions</h2>
         <p>If you have questions about this policy or a specific charge, contact EngageIQ through in-app support, or refer to <a className="underline" href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer">Paddle's Refund Policy</a>.</p>
