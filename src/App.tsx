@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Refund from "./pages/Refund";
 import NotFound from "./pages/NotFound.tsx";
 import { AppLayout } from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
