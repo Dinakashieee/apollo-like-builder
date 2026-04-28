@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2, Download, Key, User as UserIcon, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BillingSection } from "@/components/BillingSection";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -155,6 +156,9 @@ export default function Settings() {
         <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your profile, security, integrations, and data.</p>
       </div>
+
+      {/* Billing */}
+      <BillingSection />
 
       {/* Profile */}
       <section className="card-elevated p-6 space-y-4">
