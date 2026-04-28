@@ -91,9 +91,9 @@ const DEFAULT_CADENCE: Omit<Step, "id" | "sequence_id">[] = [
 
 function fillTemplate(t: string, lead: Lead) {
   return t
-    .replaceAll("{{company}}", lead.company_name || "")
-    .replaceAll("{{contact}}", lead.contact_name || "there")
-    .replaceAll("{{role}}", lead.role || "");
+    .replace(/\{\{company\}\}/g, lead.company_name || "")
+    .replace(/\{\{contact\}\}/g, lead.contact_name || "there")
+    .replace(/\{\{role\}\}/g, lead.role || "");
 }
 
 export default function Automation() {
