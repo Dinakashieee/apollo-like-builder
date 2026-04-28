@@ -59,7 +59,10 @@ export type Database = {
           description: string | null
           id: string
           industries: string[] | null
+          positioning: string | null
           products_summary: string | null
+          solved_pain_points: string[] | null
+          target_systems: string[] | null
           updated_at: string
           workspace_id: string
         }
@@ -69,7 +72,10 @@ export type Database = {
           description?: string | null
           id?: string
           industries?: string[] | null
+          positioning?: string | null
           products_summary?: string | null
+          solved_pain_points?: string[] | null
+          target_systems?: string[] | null
           updated_at?: string
           workspace_id: string
         }
@@ -79,7 +85,10 @@ export type Database = {
           description?: string | null
           id?: string
           industries?: string[] | null
+          positioning?: string | null
           products_summary?: string | null
+          solved_pain_points?: string[] | null
+          target_systems?: string[] | null
           updated_at?: string
           workspace_id?: string
         }
@@ -103,10 +112,12 @@ export type Database = {
           id: string
           industry: string | null
           notes: string | null
+          pain_points: string[] | null
           role: string | null
           score: number | null
           source: string | null
           status: Database["public"]["Enums"]["lead_status"]
+          systems_in_use: string[] | null
           tools: string[] | null
           updated_at: string
           workspace_id: string
@@ -120,10 +131,12 @@ export type Database = {
           id?: string
           industry?: string | null
           notes?: string | null
+          pain_points?: string[] | null
           role?: string | null
           score?: number | null
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
+          systems_in_use?: string[] | null
           tools?: string[] | null
           updated_at?: string
           workspace_id: string
@@ -137,10 +150,12 @@ export type Database = {
           id?: string
           industry?: string | null
           notes?: string | null
+          pain_points?: string[] | null
           role?: string | null
           score?: number | null
           source?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
+          systems_in_use?: string[] | null
           tools?: string[] | null
           updated_at?: string
           workspace_id?: string
@@ -283,24 +298,36 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string
+          email_signature: string | null
           full_name: string | null
           id: string
+          preferred_mail_client: string | null
+          sender_email: string | null
+          sender_name: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           email: string
+          email_signature?: string | null
           full_name?: string | null
           id: string
+          preferred_mail_client?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           email?: string
+          email_signature?: string | null
           full_name?: string | null
           id?: string
+          preferred_mail_client?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           updated_at?: string
         }
         Relationships: []
