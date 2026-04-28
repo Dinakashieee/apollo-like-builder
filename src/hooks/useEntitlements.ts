@@ -41,7 +41,7 @@ export function useEntitlements() {
     refetch();
   }, [refetch]);
 
-  const limits = PLAN_LIMITS[tier];
+  const limits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
   const leadsLimit = limits.leads;
   const aiEmailsLimit = limits.ai_emails;
 
