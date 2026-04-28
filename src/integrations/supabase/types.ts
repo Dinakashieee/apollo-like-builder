@@ -175,6 +175,7 @@ export type Database = {
           mode: string
           reply_to: string | null
           updated_at: string
+          verification_code: string | null
           verified: boolean
           workspace_id: string
         }
@@ -187,6 +188,7 @@ export type Database = {
           mode?: string
           reply_to?: string | null
           updated_at?: string
+          verification_code?: string | null
           verified?: boolean
           workspace_id: string
         }
@@ -199,6 +201,7 @@ export type Database = {
           mode?: string
           reply_to?: string | null
           updated_at?: string
+          verification_code?: string | null
           verified?: boolean
           workspace_id?: string
         }
