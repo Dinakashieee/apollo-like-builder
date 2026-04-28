@@ -18,6 +18,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "./NotificationBell";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
+import { ChatWidget } from "./ChatWidget";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
