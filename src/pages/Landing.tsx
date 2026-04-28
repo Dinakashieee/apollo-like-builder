@@ -50,7 +50,13 @@ const features = [
   },
 ];
 
-const logos = ["Apollo", "Outreach", "Salesloft", "Gong", "Clay", "HubSpot"];
+const trustedAvatars = [
+  { initials: "AR", from: "from-rose-400", to: "to-pink-500" },
+  { initials: "JM", from: "from-amber-400", to: "to-orange-500" },
+  { initials: "PT", from: "from-emerald-400", to: "to-teal-500" },
+  { initials: "SK", from: "from-sky-400", to: "to-indigo-500" },
+  { initials: "LV", from: "from-violet-400", to: "to-purple-500" },
+];
 
 const ANNUAL_DISCOUNT = 0.2; // 20% off annual
 
@@ -120,6 +126,7 @@ const tiers = [
 export default function Landing() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [annual, setAnnual] = useState(true);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   const formatPrice = (monthly: number | null) => {
     if (monthly === null) return "Custom";
@@ -130,6 +137,35 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+
+      {/* Demo video modal */}
+      {demoOpen && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setDemoOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl aspect-video bg-card rounded-2xl overflow-hidden shadow-elevated"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setDemoOpen(false)}
+              className="absolute top-3 right-3 z-10 h-9 w-9 rounded-full bg-background/90 hover:bg-background flex items-center justify-center text-foreground font-bold"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0"
+              title="EngageIQ 2-minute demo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
+
       {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
         <div className="container mx-auto h-16 flex items-center justify-between">
@@ -205,8 +241,13 @@ export default function Landing() {
             >
               Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-7 text-base border-border/60">
-              Watch 2-min demo
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 px-7 text-base border-border/60"
+              onClick={() => setDemoOpen(true)}
+            >
+              ▶ Watch 2-min demo
             </Button>
           </div>
 
@@ -270,18 +311,32 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Logo strip */}
+      {/* Trusted strip */}
       <section className="py-12 border-y border-border/60 bg-card/30">
         <div className="container mx-auto px-6">
-          <p className="text-center text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-6">
-            Trusted by 4,000+ revenue teams worldwide
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
-            {logos.map((l) => (
-              <span key={l} className="text-2xl font-display font-bold text-foreground/30 hover:text-foreground/60 transition-colors">
-                {l}
-              </span>
-            ))}
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex -space-x-2">
+              {trustedAvatars.map((a) => (
+                <div
+                  key={a.initials}
+                  className={`h-10 w-10 rounded-full bg-gradient-to-br ${a.from} ${a.to} border-2 border-background flex items-center justify-center text-xs font-bold text-white shadow-sm`}
+                >
+                  {a.initials}
+                </div>
+              ))}
+              <div className="h-10 w-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[11px] font-bold text-muted-foreground shadow-sm">
+                +95
+              </div>
+            </div>
+            <p className="text-center text-sm text-muted-foreground font-medium">
+              Trusted by <span className="font-bold text-primary-deep">100+ individuals</span> across the world
+            </p>
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-hot text-hot" />
+              ))}
+              <span className="ml-2 text-xs text-muted-foreground">Loved by early adopters</span>
+            </div>
           </div>
         </div>
       </section>
@@ -327,17 +382,16 @@ export default function Landing() {
             ))}
           </div>
           <blockquote className="text-2xl lg:text-3xl font-display font-medium leading-relaxed">
-            "EngageIQ replaced Apollo, Outreach, and our analytics stack.
-            Our SDRs book <span className="text-primary-glow">3× more meetings</span>, and
-            our pipeline visibility is finally real-time."
+            "EngageIQ tells me <span className="text-primary-glow">exactly which 5 leads</span> to
+            focus on each week. I stopped guessing — and started closing."
           </blockquote>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-semibold">
-              SK
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-semibold">
+              AR
             </div>
             <div className="text-left">
-              <p className="font-semibold">Sarah Kim</p>
-              <p className="text-sm text-primary-foreground/70">VP Sales · Helio Labs</p>
+              <p className="font-semibold">Ananya R.</p>
+              <p className="text-sm text-primary-foreground/70">Founder · Early adopter</p>
             </div>
           </div>
         </div>

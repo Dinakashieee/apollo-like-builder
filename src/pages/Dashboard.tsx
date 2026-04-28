@@ -10,6 +10,7 @@ import {
   Sparkles,
   Calendar,
   Plus,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const [profileName, setProfileName] = useState<string>("");
   const [stats, setStats] = useState({ leads: 0, hot: 0, opps: 0, emails: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [topLeads, setTopLeads] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +39,7 @@ export default function Dashboard() {
       { count: hotCount },
       { count: oppsCount },
       { data: recent },
+      { data: top },
       { data: acts },
     ] = await Promise.all([
       supabase
@@ -59,6 +62,14 @@ export default function Dashboard() {
         .order("created_at", { ascending: false })
         .limit(5),
       supabase
+        .from("leads")
+        .select("id, company_name, contact_name, role, status, score, industry, notes")
+        .eq("workspace_id", current.id)
+        .not("status", "in", "(won,lost)")
+        .order("score", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
         .from("activities")
         .select("id, type, description, created_at")
         .eq("workspace_id", current.id)
@@ -72,6 +83,7 @@ export default function Dashboard() {
       emails: 0,
     });
     setRecentLeads(recent ?? []);
+    setTopLeads(top ?? []);
     setActivities(acts ?? []);
     setLoading(false);
   };
@@ -135,6 +147,70 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* Top 5 leads to focus on this week */}
+      {topLeads.length > 0 && (
+        <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-card to-warm/5 p-6 shadow-elevated relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+          <div className="relative flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                <Zap className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                  AI recommendation · This week
+                </p>
+                <h3 className="font-display font-bold text-lg text-primary-deep leading-tight">
+                  Top 5 leads to work on right now
+                </h3>
+              </div>
+            </div>
+            <Link to="/app/leads">
+              <Button variant="ghost" size="sm" className="text-primary text-xs h-8">
+                See all leads <ArrowUpRight className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            {topLeads.map((lead, idx) => (
+              <Link
+                key={lead.id}
+                to="/app/composer"
+                className="group rounded-xl bg-card border border-border/60 p-4 hover:border-primary/50 hover:shadow-glow transition-all relative"
+              >
+                <div className="absolute -top-2 -left-2 h-7 w-7 rounded-full bg-gradient-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow-soft">
+                  {idx + 1}
+                </div>
+                <div className="flex items-center justify-between mb-2 mt-1">
+                  <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">
+                    {lead.company_name?.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-xs font-bold text-primary">{lead.score ?? 0}</span>
+                </div>
+                <p className="font-semibold text-sm text-primary-deep truncate">
+                  {lead.contact_name || lead.company_name}
+                </p>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {lead.role ? `${lead.role} · ` : ""}{lead.company_name}
+                </p>
+                {lead.industry && (
+                  <p className="text-[10px] text-muted-foreground/80 mt-1 truncate">{lead.industry}</p>
+                )}
+                <div className="mt-3 flex items-center gap-1 text-[10px] font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Sparkles className="h-3 w-3" /> Draft email
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <p className="relative text-[11px] text-muted-foreground mt-4 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-primary" />
+            Ranked by AI score, fit & recency. Updated as you add leads and intelligence.
+          </p>
+        </div>
+      )}
 
       {stats.leads === 0 && !loading && (
         <div className="card-elevated p-8 text-center">
