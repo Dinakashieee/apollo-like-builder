@@ -51,7 +51,7 @@ const features = [
   {
     icon: Shield,
     title: "Enterprise Ready",
-    desc: "SOC 2 compliant, SAML SSO, granular permissions, and full audit logs.",
+    desc: "SOC 2 compliant, granular permissions, and full audit logs.",
   },
 ];
 
@@ -136,7 +136,6 @@ const tiers: Tier[] = [
     contact: true,
     features: [
       "Everything in Pro",
-      "SSO / SAML",
       "Granular permissions & audit logs",
       "Dedicated success manager",
       "Custom data residency",
