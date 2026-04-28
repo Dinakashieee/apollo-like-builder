@@ -37,7 +37,6 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
-  const [saving, setSaving] = useState(false);
   // Email connect & signature
   const [senderEmail, setSenderEmail] = useState("");
   const [senderName, setSenderName] = useState("");
