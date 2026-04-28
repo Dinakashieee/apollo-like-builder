@@ -253,6 +253,41 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
                 placeholder="manual reconciliation, slow month-end close"
               />
             </div>
+            <div className="rounded-lg border border-dashed p-3 space-y-2 bg-muted/30">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  Don't know the systems or pain points? Let AI infer them from public signals
+                  (job posts, news, leadership changes).
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAutoFind}
+                  disabled={enriching || !companyName.trim()}
+                >
+                  {enriching ? (
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Finding…</>
+                  ) : (
+                    <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-find from web</>
+                  )}
+                </Button>
+              </div>
+              {(enrichSignals.length > 0 || enrichConfidence) && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {enrichConfidence && (
+                    <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                      {enrichConfidence} confidence
+                    </span>
+                  )}
+                  {enrichSignals.map((s, i) => (
+                    <span key={i} className="text-[11px] px-1.5 py-0.5 rounded bg-background border text-muted-foreground">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             <div>
               <Label>Notes</Label>
               <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
