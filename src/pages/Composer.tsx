@@ -16,10 +16,14 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 export default function Composer() {
   const { current } = useWorkspace();
   const { user } = useAuth();
+  const { aiEmailsUsed, aiEmailsLimit, aiEmailsAtLimit, aiEmailsNearLimit, tier, refetch: refetchUsage } =
+    useEntitlements();
   const [leads, setLeads] = useState<any[]>([]);
   const [selectedLead, setSelectedLead] = useState<string>("");
   const [tone, setTone] = useState("professional");
@@ -27,6 +31,7 @@ export default function Composer() {
   const [body, setBody] = useState("");
   const [generating, setGenerating] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     if (!current) return;
@@ -53,13 +58,29 @@ export default function Composer() {
       toast({ title: "Pick a lead first", variant: "destructive" });
       return;
     }
+    if (aiEmailsAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
+    if (aiEmailsNearLimit && tier !== "pro") {
+      toast({
+        title: "Nearing AI email limit",
+        description: `${aiEmailsUsed} of ${aiEmailsLimit} used this month.`,
+      });
+    }
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-email", {
         body: { workspace_id: current.id, lead_id: selectedLead, tone },
       });
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data.code === "quota_exceeded") {
+          setUpgradeOpen(true);
+          throw new Error(data.error);
+        }
+        throw new Error(data.error);
+      }
       setSubject(data.subject ?? "");
       setBody(data.body ?? "");
       const lead = leads.find((l) => l.id === selectedLead);
@@ -69,6 +90,7 @@ export default function Composer() {
         "email_generated",
         `Email drafted for ${lead?.company_name ?? "lead"}`
       );
+      refetchUsage();
     } catch (e: any) {
       toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
     }
@@ -88,11 +110,24 @@ export default function Composer() {
             Smart Email Composer
           </h1>
         </div>
-        <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
-          {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-          {generating ? "Writing..." : "Generate with AI"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {tier !== "pro" && isFinite(aiEmailsLimit) && (
+            <span className="text-xs text-muted-foreground">
+              {aiEmailsUsed}/{aiEmailsLimit} AI emails this month
+            </span>
+          )}
+          <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
+            {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            {generating ? "Writing..." : "Generate with AI"}
+          </Button>
+        </div>
       </div>
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="AI email limit reached"
+        description={`You've used ${aiEmailsUsed} of ${aiEmailsLimit} AI emails this month on the ${tier} plan. Upgrade for more.`}
+      />
 
       {!hasCompany ? (
         <div className="card-elevated p-4 border-warm/40 bg-warm/5 text-sm">

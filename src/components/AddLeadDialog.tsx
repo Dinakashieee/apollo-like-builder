@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activities";
 import { Button } from "@/components/ui/button";
@@ -30,17 +32,43 @@ const schema = z.object({
 export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const { user } = useAuth();
   const { current } = useWorkspace();
+  const { leadsUsed, leadsLimit, leadsAtLimit, leadsNearLimit, tier, refetch: refetchUsage } =
+    useEntitlements();
   const [open, setOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
   const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
+  const warnedRef = useRef(false);
+
+  useEffect(() => {
+    if (leadsNearLimit && !warnedRef.current && tier !== "pro") {
+      warnedRef.current = true;
+      toast({
+        title: "You're nearing your plan limit",
+        description: `${leadsUsed} of ${leadsLimit} leads used. Consider upgrading.`,
+      });
+    }
+  }, [leadsNearLimit, leadsUsed, leadsLimit, tier]);
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    if (leadsAtLimit) {
+      e.preventDefault();
+      setUpgradeOpen(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!current) return;
+    if (leadsAtLimit) {
+      setOpen(false);
+      setUpgradeOpen(true);
+      return;
+    }
     const parsed = schema.safeParse({
       company_name: companyName,
       contact_name: contactName,
@@ -76,50 +104,59 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     setEmail("");
     setNotes("");
     setOpen(false);
+    refetchUsage();
     onCreated?.();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="bg-gradient-primary shadow-glow">
-          <Plus className="h-4 w-4 mr-2" /> Add Lead
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add a new lead</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Company *</Label>
-            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button size="sm" className="bg-gradient-primary shadow-glow" onClick={handleTriggerClick}>
+            <Plus className="h-4 w-4 mr-2" /> Add Lead
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a new lead</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Contact name</Label>
-              <Input value={contactName} onChange={(e) => setContactName(e.target.value)} />
+              <Label>Company *</Label>
+              <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Contact name</Label>
+                <Input value={contactName} onChange={(e) => setContactName(e.target.value)} />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Input value={role} onChange={(e) => setRole(e.target.value)} />
+              </div>
             </div>
             <div>
-              <Label>Role</Label>
-              <Input value={role} onChange={(e) => setRole(e.target.value)} />
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div>
-            <Label>Notes</Label>
-            <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={submitting} className="bg-gradient-primary">
-              {submitting ? "Adding..." : "Add lead"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <div>
+              <Label>Notes</Label>
+              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={submitting} className="bg-gradient-primary">
+                {submitting ? "Adding..." : "Add lead"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="Lead limit reached"
+        description={`You've used ${leadsUsed} of ${leadsLimit} leads on the ${tier} plan. Upgrade to add more.`}
+      />
+    </>
   );
 }
