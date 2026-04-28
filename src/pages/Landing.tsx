@@ -598,6 +598,7 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      <ChatWidget mode="support" />
     </div>
   );
 }
