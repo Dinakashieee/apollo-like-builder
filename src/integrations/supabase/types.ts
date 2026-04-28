@@ -419,6 +419,179 @@ export type Database = {
         }
         Relationships: []
       }
+      sequence_enrollments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          lead_id: string
+          sequence_id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          lead_id: string
+          sequence_id: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          lead_id?: string
+          sequence_id?: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sequence_enrollments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sequence_enrollments_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequence_step_status: {
+        Row: {
+          created_at: string
+          due_at: string
+          enrollment_id: string
+          id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["step_status"]
+          step_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_at: string
+          enrollment_id: string
+          id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["step_status"]
+          step_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          enrollment_id?: string
+          id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["step_status"]
+          step_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sequence_step_status_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "sequence_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sequence_step_status_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "sequence_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequence_steps: {
+        Row: {
+          body_template: string
+          created_at: string
+          day_offset: number
+          id: string
+          sequence_id: string
+          step_order: number
+          subject_template: string
+          workspace_id: string
+        }
+        Insert: {
+          body_template?: string
+          created_at?: string
+          day_offset?: number
+          id?: string
+          sequence_id: string
+          step_order: number
+          subject_template?: string
+          workspace_id: string
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          day_offset?: number
+          id?: string
+          sequence_id?: string
+          step_order?: number
+          subject_template?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sequence_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequences: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -776,8 +949,10 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "member"
+      enrollment_status: "active" | "paused" | "completed" | "stopped"
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost"
       opportunity_level: "high" | "medium" | "low"
+      step_status: "pending" | "sent" | "skipped"
       ticket_status: "open" | "in_progress" | "resolved"
       waitlist_status: "waiting" | "invited" | "converted" | "rejected"
     }
@@ -908,8 +1083,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "member"],
+      enrollment_status: ["active", "paused", "completed", "stopped"],
       lead_status: ["new", "contacted", "qualified", "won", "lost"],
       opportunity_level: ["high", "medium", "low"],
+      step_status: ["pending", "sent", "skipped"],
       ticket_status: ["open", "in_progress", "resolved"],
       waitlist_status: ["waiting", "invited", "converted", "rejected"],
     },
