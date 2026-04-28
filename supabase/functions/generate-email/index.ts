@@ -93,6 +93,9 @@ Constraints: Under 110 words. Specific. Not salesy. End with one clear ask.`;
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
+    // Count successful generation toward Free quota.
+    await incrementAiEmails(admin, workspace_id);
+
     return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e?.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
