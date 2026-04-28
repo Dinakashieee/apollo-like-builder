@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "./NotificationBell";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 import { ChatWidget } from "./ChatWidget";
+import { CreditsPill } from "./CreditsPill";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -77,6 +78,7 @@ export function AppLayout() {
               />
             </div>
             <div className="ml-auto flex items-center gap-2">
+              <CreditsPill />
               <NotificationBell />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
