@@ -536,7 +536,12 @@ export default function Landing() {
               >
                 Get started free <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-base"
+                onClick={() => (window.location.href = "mailto:sales@engageiq.app?subject=EngageIQ%20-%20Talk%20to%20sales")}
+              >
                 Talk to sales
               </Button>
             </div>
