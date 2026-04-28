@@ -20,17 +20,36 @@ export default function Terms() {
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">3. The Service</h2>
         <p>EngageIQ provides a B2B revenue-intelligence platform, including lead and opportunity management, AI-generated insights, AI-assisted outbound email composition, and related tools. Specific features depend on the plan you subscribe to.</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">4. Acceptable use</h2>
-        <p>You agree not to:</p>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">4. Acceptable Use Policy</h2>
+        <p>EngageIQ is a B2B revenue-intelligence and sales-enablement tool intended for legitimate, permission-based business outreach. It is <strong>not</strong> a bulk email, marketing-automation, or cold-mailing platform, and it must not be used to send spam.</p>
+        <p><strong>Permitted use.</strong> You may use EngageIQ to:</p>
         <ul className="list-disc pl-6 space-y-1">
-          <li>Use the Service for any unlawful purpose or in violation of any applicable law (including data protection, anti-spam, and consumer protection laws such as GDPR and CAN-SPAM).</li>
-          <li>Send spam, phishing, or unsolicited bulk communications.</li>
-          <li>Infringe the intellectual property rights of others.</li>
+          <li>Manage and qualify business leads you have lawfully obtained.</li>
+          <li>Draft and personalise <em>individual, one-to-one</em> business emails to recipients with whom you have a legitimate business relationship, prior consent, or a clear lawful basis under applicable law.</li>
+          <li>Generate insights and analysis on your own pipeline and account data.</li>
+        </ul>
+        <p className="mt-3"><strong>You must:</strong></p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Comply with all applicable anti-spam and data protection laws, including the EU/UK GDPR, the US CAN-SPAM Act, Canada's CASL, and any equivalent local laws.</li>
+          <li>Send only to recipients with a valid lawful basis (consent, legitimate interest with proper balancing, or an existing business relationship).</li>
+          <li>Identify yourself accurately, never use deceptive subject lines or sender identities, and honour opt-out / unsubscribe requests promptly.</li>
+          <li>Use accurate, up-to-date contact data that you have the right to process.</li>
+          <li>Use EngageIQ's email features for one-to-one human review and sending — not for automated mass blasts.</li>
+        </ul>
+        <p className="mt-3"><strong>You must NOT use EngageIQ to:</strong></p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Send spam, unsolicited bulk email, chain mail, or unsolicited commercial messages of any kind.</li>
+          <li>Send phishing, malware, fraudulent, deceptive, or impersonation messages.</li>
+          <li>Harass, threaten, defame, harm, or discriminate against any individual or group.</li>
+          <li>Send messages to consumers (B2C) without the legal basis required in their jurisdiction; EngageIQ is intended for B2B outreach only.</li>
+          <li>Scrape, crawl, harvest, or otherwise collect personal data without a lawful basis or in violation of any third party's terms.</li>
+          <li>Promote illegal goods or services, sexually explicit content involving minors, weapons, controlled substances, gambling where prohibited, hate speech, or content that infringes intellectual property rights.</li>
+          <li>Use the Service for any unlawful purpose or in violation of any applicable law.</li>
           <li>Probe, scan, or test the vulnerability of the Service; introduce malware; or attempt to gain unauthorised access.</li>
-          <li>Scrape, crawl, or otherwise harvest data from the Service except as expressly permitted.</li>
           <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service, except as permitted by law.</li>
           <li>Resell or redistribute the Service or circumvent any technical limits or quotas.</li>
         </ul>
+        <p className="mt-3"><strong>Enforcement.</strong> You are solely responsible for the content and recipients of any communications you create or send using EngageIQ. We may investigate suspected violations, remove content, throttle or disable AI-generation features, suspend or terminate accounts without notice, and report unlawful activity to the relevant authorities. Repeated or serious violations will result in permanent termination.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. Account responsibility</h2>
         <p>You must provide accurate registration information and keep it up to date. You are responsible for maintaining the confidentiality of your credentials and API keys, and for all activity that occurs under your account.</p>
