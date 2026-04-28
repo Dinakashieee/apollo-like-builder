@@ -20,6 +20,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
+import { SenderSettingsCard } from "@/components/SenderSettingsCard";
 
 type Sequence = {
   id: string;
