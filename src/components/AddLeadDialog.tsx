@@ -48,7 +48,62 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const [systemsInUse, setSystemsInUse] = useState("");
   const [painPoints, setPainPoints] = useState("");
   const [notes, setNotes] = useState("");
+  const [enriching, setEnriching] = useState(false);
+  const [enrichSignals, setEnrichSignals] = useState<string[]>([]);
+  const [enrichConfidence, setEnrichConfidence] = useState<string | null>(null);
   const warnedRef = useRef(false);
+
+  const mergeUnique = (existing: string, additions: string[]) => {
+    const set = new Set(
+      existing.split(",").map((s) => s.trim()).filter(Boolean).map((s) => s.toLowerCase()),
+    );
+    const out = existing.split(",").map((s) => s.trim()).filter(Boolean);
+    for (const a of additions) {
+      const k = a.trim();
+      if (k && !set.has(k.toLowerCase())) {
+        set.add(k.toLowerCase());
+        out.push(k);
+      }
+    }
+    return out.join(", ");
+  };
+
+  const handleAutoFind = async () => {
+    if (!companyName.trim()) {
+      toast({ title: "Company required", description: "Enter a company name first.", variant: "destructive" });
+      return;
+    }
+    setEnriching(true);
+    setEnrichSignals([]);
+    setEnrichConfidence(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("enrich-lead", {
+        body: {
+          company_name: companyName.trim(),
+          industry: industry.trim() || undefined,
+          contact_name: contactName.trim() || undefined,
+          role: role.trim() || undefined,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const systems: string[] = (data as any)?.systems_in_use ?? [];
+      const pains: string[] = (data as any)?.pain_points ?? [];
+      setSystemsInUse((prev) => mergeUnique(prev, systems));
+      setPainPoints((prev) => mergeUnique(prev, pains));
+      setEnrichSignals((data as any)?.signals ?? []);
+      setEnrichConfidence((data as any)?.confidence ?? null);
+      toast({
+        title: "Enriched from web signals",
+        description: `${systems.length} systems · ${pains.length} pain points`,
+      });
+    } catch (e: any) {
+      toast({ title: "Auto-find failed", description: e?.message ?? "Try again later", variant: "destructive" });
+    } finally {
+      setEnriching(false);
+    }
+  };
+
 
   useEffect(() => {
     if (leadsNearLimit && !warnedRef.current && tier !== "pro") {
