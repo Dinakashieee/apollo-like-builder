@@ -157,37 +157,43 @@ export default function Auth() {
             <Logo />
           </div>
           <h1 className="text-3xl font-display font-bold text-primary-deep mb-2">
-            {mode === "signin" ? "Welcome back" : "Create your account"}
+            {mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your account" : "Reset your password"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
               ? "Sign in to your EngageIQ workspace."
-              : "Start finding and engaging your best-fit accounts."}
+              : mode === "signup"
+              ? "Use your business email to create an account."
+              : "Enter your business email and we'll send you a reset link."}
           </p>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-11 mb-4 border-border/60"
-            onClick={handleGoogle}
-          >
-            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.5 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.22-4.74 3.22-8.32z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.99 10.99 0 0 0 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18A10.99 10.99 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.83z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A10.99 10.99 0 0 0 2.18 7.07l3.66 2.83C6.71 7.31 9.14 5.38 12 5.38z"/>
-            </svg>
-            Continue with Google
-          </Button>
+          {mode !== "forgot" && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 mb-4 border-border/60"
+                onClick={handleGoogle}
+              >
+                <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.5 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.22-4.74 3.22-8.32z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.99 10.99 0 0 0 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18A10.99 10.99 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.83z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A10.99 10.99 0 0 0 2.18 7.07l3.66 2.83C6.71 7.31 9.14 5.38 12 5.38z"/>
+                </svg>
+                Continue with Google
+              </Button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/60" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or continue with email</span>
-            </div>
-          </div>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/60" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or continue with email</span>
+                </div>
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
@@ -207,7 +213,7 @@ export default function Auth() {
               </div>
             )}
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Business email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -220,39 +226,77 @@ export default function Auth() {
                   required
                 />
               </div>
+              {mode === "signup" && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Free email providers (Gmail, Yahoo, Outlook, etc.) are not allowed.
+                </p>
+              )}
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-9 h-11"
-                  required
-                />
+            {mode !== "forgot" && (
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="text-xs text-primary font-semibold hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative mt-1">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="pl-9 h-11"
+                    required
+                  />
+                </div>
               </div>
-            </div>
+            )}
             <Button
               type="submit"
               disabled={submitting}
               className="w-full h-11 bg-gradient-primary shadow-glow"
             >
-              {submitting ? "Please wait..." : mode === "signin" ? "Sign in" : "Create account"}
+              {submitting
+                ? "Please wait..."
+                : mode === "signin"
+                ? "Sign in"
+                : mode === "signup"
+                ? "Create account"
+                : "Send reset link"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              className="text-primary font-semibold hover:underline"
-            >
-              {mode === "signin" ? "Sign up" : "Sign in"}
-            </button>
+            {mode === "forgot" ? (
+              <>
+                Remembered it?{" "}
+                <button
+                  onClick={() => setMode("signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Back to sign in
+                </button>
+              </>
+            ) : (
+              <>
+                {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
+                <button
+                  onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  {mode === "signin" ? "Sign up" : "Sign in"}
+                </button>
+              </>
+            )}
           </p>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             <Link to="/" className="hover:text-foreground">← Back to homepage</Link>
