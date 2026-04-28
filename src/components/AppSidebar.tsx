@@ -10,7 +10,7 @@ import {
   Building2,
   Target,
   LifeBuoy,
-  
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +27,7 @@ import {
 import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
 
 const mainItems = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
@@ -50,6 +51,10 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const { current } = useWorkspace();
+  const { isAdmin } = usePlatformAdmin();
+  const accountItems = isAdmin
+    ? [...secondaryItems, { title: "Admin", url: "/app/admin", icon: ShieldCheck }]
+    : secondaryItems;
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -130,7 +135,7 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
-              {secondaryItems.map((item) => (
+              {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-10 px-3">
                     <NavLink to={item.url}>
