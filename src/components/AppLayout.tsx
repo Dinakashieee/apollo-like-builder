@@ -114,6 +114,7 @@ export function AppLayout() {
           </main>
         </div>
         </div>
+        <ChatWidget mode="assistant" />
       </div>
     </SidebarProvider>
   );
