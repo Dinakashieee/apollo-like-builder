@@ -123,7 +123,7 @@ const tiers: Tier[] = [
       "10 users included",
       "Unlimited automations",
       "Pipeline analytics",
-      "Bring your own API keys (Apollo, OpenAI, etc.)",
+      "Bring your own AI keys (OpenAI, Anthropic, etc.)",
       "Priority support",
     ],
   },

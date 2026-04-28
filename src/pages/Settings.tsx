@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Download, Key, User as UserIcon, Lock, Mail } from "lucide-react";
+import { Trash2, Download, User as UserIcon, Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BillingSection } from "@/components/BillingSection";
 
@@ -36,8 +36,6 @@ export default function Settings() {
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [password, setPassword] = useState("");
-  const [apolloKey, setApolloKey] = useState("");
-  const [hasApollo, setHasApollo] = useState(false);
   const [saving, setSaving] = useState(false);
   // Email connect & signature
   const [senderEmail, setSenderEmail] = useState("");
@@ -60,18 +58,6 @@ export default function Settings() {
         setSenderName(data?.sender_name ?? data?.full_name ?? "");
         setEmailSignature(data?.email_signature ?? "");
         setMailClient(data?.preferred_mail_client ?? "default");
-      });
-    supabase
-      .from("user_api_keys")
-      .select("api_key")
-      .eq("user_id", user.id)
-      .eq("provider", "apollo")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.api_key) {
-          setApolloKey("•".repeat(16));
-          setHasApollo(true);
-        }
       });
   }, [user]);
 
@@ -124,28 +110,7 @@ export default function Settings() {
     }
   };
 
-  const saveApollo = async () => {
-    if (!user) return;
-    if (!apolloKey || apolloKey.startsWith("•")) return;
-    const { error } = await supabase.from("user_api_keys").upsert(
-      { user_id: user.id, provider: "apollo", api_key: apolloKey, label: "Apollo.io" },
-      { onConflict: "user_id,provider" }
-    );
-    if (error) toast({ title: "Failed", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: "Apollo key saved", description: "Data is accessed via your connected account." });
-      setApolloKey("•".repeat(16));
-      setHasApollo(true);
-    }
-  };
 
-  const removeApollo = async () => {
-    if (!user) return;
-    await supabase.from("user_api_keys").delete().eq("user_id", user.id).eq("provider", "apollo");
-    setApolloKey("");
-    setHasApollo(false);
-    toast({ title: "Apollo key removed" });
-  };
 
   const exportData = async () => {
     if (!current) return;
@@ -299,28 +264,6 @@ john@engageiq.com  ·  +1 555 123 4567`}
         <Button onClick={changePassword} variant="outline">Change password</Button>
       </section>
 
-      {/* API keys */}
-      <section className="card-elevated p-6 space-y-4">
-        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
-          <Key className="h-4 w-4 text-primary" /> API integrations (BYOK)
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Connect your own API keys. Data is accessed via your connected account — never shared with other users.
-        </p>
-        <div>
-          <Label>Apollo.io API Key</Label>
-          <Input
-            value={apolloKey}
-            onChange={(e) => setApolloKey(e.target.value)}
-            className="mt-1"
-            placeholder={hasApollo ? "Connected" : "Paste your Apollo API key"}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={saveApollo} className="bg-gradient-primary">{hasApollo ? "Update" : "Connect"}</Button>
-          {hasApollo && <Button variant="outline" onClick={removeApollo}>Disconnect</Button>}
-        </div>
-      </section>
 
       {/* Data control */}
       <section className="card-elevated p-6 space-y-4">
