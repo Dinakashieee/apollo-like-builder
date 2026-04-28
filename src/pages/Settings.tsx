@@ -60,18 +60,6 @@ export default function Settings() {
         setEmailSignature(data?.email_signature ?? "");
         setMailClient(data?.preferred_mail_client ?? "default");
       });
-    supabase
-      .from("user_api_keys")
-      .select("api_key")
-      .eq("user_id", user.id)
-      .eq("provider", "apollo")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.api_key) {
-          setApolloKey("•".repeat(16));
-          setHasApollo(true);
-        }
-      });
   }, [user]);
 
   const saveProfile = async () => {
