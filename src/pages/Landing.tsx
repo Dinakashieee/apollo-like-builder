@@ -148,7 +148,6 @@ const tiers: Tier[] = [
 export default function Landing() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [annual, setAnnual] = useState(true);
-  const [demoOpen, setDemoOpen] = useState(false);
   const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -186,34 +185,6 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <PaymentTestModeBanner />
       <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
-
-      {/* Demo video modal */}
-      {demoOpen && (
-        <div
-          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setDemoOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-4xl aspect-video bg-card rounded-2xl overflow-hidden shadow-elevated"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setDemoOpen(false)}
-              className="absolute top-3 right-3 z-10 h-9 w-9 rounded-full bg-background/90 hover:bg-background flex items-center justify-center text-foreground font-bold"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0"
-              title="EngageIQ 2-minute demo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      )}
 
       {/* Nav */}
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
@@ -289,14 +260,6 @@ export default function Landing() {
               onClick={() => setWaitlistOpen(true)}
             >
               Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-12 px-7 text-base border-border/60"
-              onClick={() => setDemoOpen(true)}
-            >
-              ▶ Watch 2-min demo
             </Button>
           </div>
 
