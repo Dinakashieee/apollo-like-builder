@@ -221,6 +221,72 @@ export default function Settings() {
         <Button onClick={saveProfile} disabled={saving} className="bg-gradient-primary">Save profile</Button>
       </section>
 
+      {/* Email connect & signature */}
+      <section className="card-elevated p-6 space-y-4">
+        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
+          <Mail className="h-4 w-4 text-primary" /> Connect your email
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Set the email address generated drafts will be sent from, and a signature that's appended to every AI-written email automatically.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label>Sending name</Label>
+            <Input
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="John Farrell"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label>Sending email</Label>
+            <Input
+              type="email"
+              value={senderEmail}
+              onChange={(e) => setSenderEmail(e.target.value)}
+              placeholder="you@yourcompany.com"
+              className="mt-1"
+            />
+          </div>
+        </div>
+        <div>
+          <Label>Preferred mail client</Label>
+          <Select value={mailClient} onValueChange={setMailClient}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">System default (mailto:)</SelectItem>
+              <SelectItem value="gmail">Gmail (open in browser)</SelectItem>
+              <SelectItem value="outlook">Outlook Web</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1">
+            When you click "Open in mail client" in the composer, your draft opens in this app.
+          </p>
+        </div>
+        <div>
+          <Label>Email signature</Label>
+          <Textarea
+            rows={6}
+            value={emailSignature}
+            onChange={(e) => setEmailSignature(e.target.value)}
+            placeholder={`Best regards,
+John Farrell
+Director, EngageIQ
+john@engageiq.com  ·  +1 555 123 4567`}
+            className="mt-1 font-mono text-sm"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Appended to every AI-generated email automatically.
+          </p>
+        </div>
+        <Button onClick={saveEmailSettings} disabled={savingEmail} className="bg-gradient-primary">
+          {savingEmail ? "Saving..." : "Save email settings"}
+        </Button>
+      </section>
+
       {/* Security */}
       <section className="card-elevated p-6 space-y-4">
         <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
