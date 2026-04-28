@@ -265,28 +265,6 @@ john@engageiq.com  ·  +1 555 123 4567`}
         <Button onClick={changePassword} variant="outline">Change password</Button>
       </section>
 
-      {/* API keys */}
-      <section className="card-elevated p-6 space-y-4">
-        <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
-          <Key className="h-4 w-4 text-primary" /> API integrations (BYOK)
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Connect your own API keys. Data is accessed via your connected account — never shared with other users.
-        </p>
-        <div>
-          <Label>Apollo.io API Key</Label>
-          <Input
-            value={apolloKey}
-            onChange={(e) => setApolloKey(e.target.value)}
-            className="mt-1"
-            placeholder={hasApollo ? "Connected" : "Paste your Apollo API key"}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={saveApollo} className="bg-gradient-primary">{hasApollo ? "Update" : "Connect"}</Button>
-          {hasApollo && <Button variant="outline" onClick={removeApollo}>Disconnect</Button>}
-        </div>
-      </section>
 
       {/* Data control */}
       <section className="card-elevated p-6 space-y-4">
