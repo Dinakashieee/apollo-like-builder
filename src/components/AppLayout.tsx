@@ -20,6 +20,7 @@ import { NotificationBell } from "./NotificationBell";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 import { ChatWidget } from "./ChatWidget";
 import { CreditsPill } from "./CreditsPill";
+import { EmailConfirmBanner } from "./EmailConfirmBanner";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -65,6 +66,7 @@ export function AppLayout() {
     <SidebarProvider defaultOpen>
       <div className="min-h-screen flex w-full bg-background flex-col">
         <PaymentTestModeBanner />
+        <EmailConfirmBanner />
         <div className="flex-1 flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">

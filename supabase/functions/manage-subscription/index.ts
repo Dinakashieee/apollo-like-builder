@@ -6,13 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-async function resolvePaddlePriceId(externalId: string, env: PaddleEnv): Promise<string> {
-  const r = await gatewayFetch(env, `/prices?external_id=${encodeURIComponent(externalId)}`);
-  const json = await r.json();
-  if (!json.data?.length) throw new Error(`Price not found: ${externalId}`);
-  return json.data[0].id;
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
@@ -29,14 +22,16 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: userData, error: userErr } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    const { data: userData, error: userErr } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
     if (userErr || !userData.user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { newPriceId, environment, action } = await req.json();
+    const { action, environment } = await req.json();
     const env = (environment || 'sandbox') as PaddleEnv;
 
     const { data: sub } = await supabase
@@ -56,37 +51,38 @@ Deno.serve(async (req) => {
 
     const paddle = getPaddleClient(env);
 
-    if (action === 'cancel') {
-      // Cancel at end of period (effective_from defaults to next_billing_period)
-      await paddle.subscriptions.cancel(sub.paddle_subscription_id, { effectiveFrom: 'next_billing_period' });
+    if (action === 'resume') {
+      // Reverse a scheduled cancellation by clearing scheduled_change.
+      // Paddle SDK exposes this via update with scheduledChange: null.
+      const r = await gatewayFetch(env, `/subscriptions/${sub.paddle_subscription_id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ scheduled_change: null }),
+      });
+      if (!r.ok) {
+        const err = await r.text();
+        return new Response(JSON.stringify({ error: 'Could not resume', detail: err }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (action === 'change' && newPriceId) {
-      const paddlePriceId = await resolvePaddlePriceId(newPriceId, env);
-
-      // Determine if this is an upgrade or a downgrade so we can pick the
-      // right proration behavior:
-      //   upgrade   -> charge prorated difference now, switch immediately
-      //   downgrade -> keep current plan until period end, then switch
-      const TIER_RANK: Record<string, number> = {
-        starter_plan: 1,
-        pro_plan: 2,
-      };
-      const currentRank = TIER_RANK[sub.product_id] ?? 0;
-      // Resolve the new product id from the price's external_id pattern
-      // (e.g. "pro_monthly" -> "pro_plan").
-      const newProductId = newPriceId.replace(/_(monthly|yearly)$/, '_plan');
-      const newRank = TIER_RANK[newProductId] ?? 0;
-      const isDowngrade = newRank < currentRank;
-
-      await paddle.subscriptions.update(sub.paddle_subscription_id, {
-        items: [{ priceId: paddlePriceId, quantity: 1 }],
-        prorationBillingMode: isDowngrade ? 'do_not_bill' : 'prorated_immediately',
-      });
-      return new Response(JSON.stringify({ ok: true, scheduled: isDowngrade }), {
+    if (action === 'portal') {
+      // Create a customer portal session for managing payment methods.
+      const portal = await paddle.customerPortalSessions.create(
+        sub.paddle_customer_id,
+        [sub.paddle_subscription_id]
+      );
+      const subEntry = portal.urls.subscriptions?.find(
+        (s: any) => s.id === sub.paddle_subscription_id
+      );
+      return new Response(JSON.stringify({
+        general: portal.urls.general.overview,
+        updatePayment: subEntry?.updatePaymentMethod ?? portal.urls.general.overview,
+        cancel: subEntry?.cancelSubscription ?? portal.urls.general.overview,
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -95,7 +91,7 @@ Deno.serve(async (req) => {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    console.error('change-plan error:', e);
+    console.error('manage-subscription error:', e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
