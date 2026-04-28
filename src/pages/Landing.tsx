@@ -202,9 +202,9 @@ export default function Landing() {
             <Button
               size="sm"
               className="bg-gradient-primary shadow-glow"
-              onClick={() => setWaitlistOpen(true)}
+              onClick={() => navigate(user ? "/app" : "/auth")}
             >
-              Join waitlist <ArrowRight className="h-4 w-4 ml-1" />
+              Get started <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         </div>
@@ -256,9 +256,9 @@ export default function Landing() {
             <Button
               size="lg"
               className="bg-gradient-primary shadow-glow h-12 px-7 text-base"
-              onClick={() => setWaitlistOpen(true)}
+              onClick={() => navigate(user ? "/app" : "/auth")}
             >
-              Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
+              Get started free <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
 
@@ -534,9 +534,9 @@ export default function Landing() {
               <Button
                 size="lg"
                 className="bg-gradient-primary shadow-glow h-12 px-8 text-base"
-                onClick={() => setWaitlistOpen(true)}
+                onClick={() => navigate(user ? "/app" : "/auth")}
               >
-                Join the waitlist <ArrowRight className="h-4 w-4 ml-2" />
+                Get started free <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Button size="lg" variant="outline" className="h-12 px-8 text-base">
                 Talk to sales

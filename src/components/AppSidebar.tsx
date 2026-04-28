@@ -31,7 +31,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 const mainItems = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Leads", url: "/app/leads", icon: Users },
-  { title: "Waitlist", url: "/app/waitlist", icon: ListChecks },
+  
   { title: "AI Insights", url: "/app/intelligence", icon: Sparkles, badge: "AI" },
   { title: "Targets", url: "/app/targets", icon: Target },
   { title: "Email Composer", url: "/app/composer", icon: Mail },
