@@ -110,11 +110,24 @@ export default function Composer() {
             Smart Email Composer
           </h1>
         </div>
-        <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
-          {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-          {generating ? "Writing..." : "Generate with AI"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {tier !== "pro" && isFinite(aiEmailsLimit) && (
+            <span className="text-xs text-muted-foreground">
+              {aiEmailsUsed}/{aiEmailsLimit} AI emails this month
+            </span>
+          )}
+          <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
+            {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            {generating ? "Writing..." : "Generate with AI"}
+          </Button>
+        </div>
       </div>
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="AI email limit reached"
+        description={`You've used ${aiEmailsUsed} of ${aiEmailsLimit} AI emails this month on the ${tier} plan. Upgrade for more.`}
+      />
 
       {!hasCompany ? (
         <div className="card-elevated p-4 border-warm/40 bg-warm/5 text-sm">
