@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, ChevronDown, BookOpen, LifeBuoy, PlayCircle, FileText, Mail, ExternalLink } from "lucide-react";
+import { Search, ChevronDown, BookOpen, LifeBuoy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -67,28 +67,8 @@ export default function Help() {
         <p className="text-sm text-muted-foreground mt-1">Documentation, demo and support — all in one place.</p>
       </div>
 
-      {/* 2-min demo video */}
-      <div className="card-elevated overflow-hidden">
-        <div className="aspect-video bg-black relative">
-          <iframe
-            className="absolute inset-0 w-full h-full"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0"
-            title="EngageIQ 2-minute demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-        <div className="p-4 flex items-center gap-3">
-          <PlayCircle className="h-5 w-5 text-primary shrink-0" />
-          <div>
-            <p className="font-semibold text-sm text-primary-deep">2-minute product demo</p>
-            <p className="text-xs text-muted-foreground">See how to add leads, generate AI emails, and find your top 5 prospects.</p>
-          </div>
-        </div>
-      </div>
-
       {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <a href="#docs" className="card-elevated p-4 hover:border-primary/40 transition-colors group">
           <BookOpen className="h-5 w-5 text-primary mb-2" />
           <p className="font-semibold text-sm text-primary-deep">Documentation</p>
@@ -99,11 +79,6 @@ export default function Help() {
           <p className="font-semibold text-sm text-primary-deep">Contact Support</p>
           <p className="text-xs text-muted-foreground">Open a ticket — we reply fast.</p>
         </Link>
-        <a href="mailto:support@engageiq.app" className="card-elevated p-4 hover:border-primary/40 transition-colors group">
-          <Mail className="h-5 w-5 text-primary mb-2" />
-          <p className="font-semibold text-sm text-primary-deep">Email us</p>
-          <p className="text-xs text-muted-foreground">support@engageiq.app</p>
-        </a>
       </div>
 
       <div id="docs" className="relative">
