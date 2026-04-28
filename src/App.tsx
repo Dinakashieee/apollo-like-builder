@@ -28,6 +28,7 @@ import Settings from "./pages/Settings";
 import Company from "./pages/Company";
 import Help from "./pages/Help";
 import Support from "./pages/Support";
+import Admin from "./pages/Admin";
 
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="company" element={<Company />} />
                   <Route path="help" element={<Help />} />
                   <Route path="support" element={<Support />} />
+                  <Route path="admin" element={<Admin />} />
                 </Route>
               </Route>
 
