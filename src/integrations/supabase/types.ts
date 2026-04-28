@@ -165,6 +165,53 @@ export type Database = {
         }
         Relationships: []
       }
+      email_sender_settings: {
+        Row: {
+          created_at: string
+          from_email: string | null
+          from_name: string | null
+          id: string
+          last_verification_sent_at: string | null
+          mode: string
+          reply_to: string | null
+          updated_at: string
+          verified: boolean
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_email?: string | null
+          from_name?: string | null
+          id?: string
+          last_verification_sent_at?: string | null
+          mode?: string
+          reply_to?: string | null
+          updated_at?: string
+          verified?: boolean
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string | null
+          from_name?: string | null
+          id?: string
+          last_verification_sent_at?: string | null
+          mode?: string
+          reply_to?: string | null
+          updated_at?: string
+          verified?: boolean
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sender_settings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_unsubscribe_tokens: {
         Row: {
           created_at: string
