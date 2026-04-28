@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { WaitlistDialog } from "@/components/WaitlistDialog";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { ChatWidget } from "@/components/ChatWidget";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
