@@ -20,6 +20,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
+import { SenderSettingsCard } from "@/components/SenderSettingsCard";
 
 type Sequence = {
   id: string;
@@ -355,7 +356,7 @@ export default function Automation() {
   const recentlyDone = due.filter(d => d.status !== "pending").slice(0, 20);
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 animate-fade-in">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
@@ -378,6 +379,8 @@ export default function Automation() {
           <Button onClick={createBlank}><Plus className="h-4 w-4 mr-1" />New sequence</Button>
         </div>
       </div>
+
+      <SenderSettingsCard />
 
       <Tabs defaultValue="inbox" className="space-y-4">
         <TabsList>
