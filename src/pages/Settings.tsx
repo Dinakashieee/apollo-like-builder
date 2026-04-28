@@ -32,17 +32,27 @@ export default function Settings() {
   const [apolloKey, setApolloKey] = useState("");
   const [hasApollo, setHasApollo] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Email connect & signature
+  const [senderEmail, setSenderEmail] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [emailSignature, setEmailSignature] = useState("");
+  const [mailClient, setMailClient] = useState<string>("default");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("full_name, avatar_url")
+      .select("full_name, avatar_url, sender_email, sender_name, email_signature, preferred_mail_client")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         setFullName(data?.full_name ?? "");
         setAvatarUrl(data?.avatar_url ?? "");
+        setSenderEmail(data?.sender_email ?? user.email ?? "");
+        setSenderName(data?.sender_name ?? data?.full_name ?? "");
+        setEmailSignature(data?.email_signature ?? "");
+        setMailClient(data?.preferred_mail_client ?? "default");
       });
     supabase
       .from("user_api_keys")
