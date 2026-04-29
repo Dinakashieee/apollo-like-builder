@@ -4,17 +4,17 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0
 
 export const FREE_LIMITS = {
   leads: 10,
-  ai_emails: 10,
+  ai_emails: 25,
 } as const;
 
 export const STARTER_LIMITS = {
   leads: 2500,
-  ai_emails: 2000,
+  ai_emails: 5000,
 } as const;
 
 export const GROWTH_LIMITS = {
   leads: 4000,
-  ai_emails: 4000,
+  ai_emails: 10000,
 } as const;
 
 export type Tier = "free" | "starter" | "growth" | "pro";

@@ -89,7 +89,7 @@ const tiers: Tier[] = [
     highlight: false,
     features: [
       "10 leads",
-      "10 AI emails / month",
+      "25 AI emails / month",
       "Basic AI lead scoring",
       "1 user",
       "Bring Your Own Database (BYOD) supported",
@@ -106,7 +106,7 @@ const tiers: Tier[] = [
     priceYearly: "starter_yearly",
     features: [
       "2,500 leads",
-      "2,000 AI emails / month",
+      "5,000 AI emails / month",
       "Full AI deal intelligence",
       "3 users included",
       "1 automation sequence",
@@ -124,7 +124,7 @@ const tiers: Tier[] = [
     priceYearly: "growth_yearly",
     features: [
       "4,000 leads",
-      "4,000 AI emails / month",
+      "10,000 AI emails / month",
       "Advanced intent + fit scoring",
       "5 users included",
       "Unlimited automations",
