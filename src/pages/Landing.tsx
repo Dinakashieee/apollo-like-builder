@@ -282,7 +282,7 @@ export default function Landing() {
             className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground animate-fade-up"
             style={{ animationDelay: "360ms" }}
           >
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> 7-day Starter trial</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free plan available</span>
             <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Paddle</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Cancel anytime</span>
           </div>
