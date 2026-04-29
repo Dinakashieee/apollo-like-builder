@@ -263,9 +263,42 @@ export default function Auth() {
                 </div>
               </div>
             )}
+            {mode === "signup" && (
+              <div className="rounded-md border border-border/60 bg-muted/30 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  Email compliance acknowledgement
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  EngageIQ is a B2B sales-enablement tool — not a bulk-mail platform. By creating an account you confirm that, when sending outreach, you will:
+                </p>
+                <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
+                  <li>Have a lawful basis (consent, legitimate interest, or existing relationship) for every contact</li>
+                  <li>Include a clear <strong>unsubscribe link</strong> and your <strong>postal address</strong> in every email</li>
+                  <li>Identify yourself accurately — no deceptive sender names or subject lines</li>
+                  <li>Honour opt-out, access, and erasure requests promptly at your own cost</li>
+                  <li>Comply with <strong>GDPR, UK GDPR, CAN-SPAM, CASL, PECR, CCPA, PIPEDA, LGPD</strong> and equivalent laws</li>
+                  <li>Not send unsolicited bulk email, phishing, or messages to consumers (B2C)</li>
+                </ul>
+                <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                  <Checkbox
+                    checked={complianceAck}
+                    onCheckedChange={(v) => setComplianceAck(v === true)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs leading-relaxed">
+                    I agree to follow these rules and accept the{" "}
+                    <Link to="/terms" target="_blank" className="underline text-primary">Terms (§5 — user is the data controller)</Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" target="_blank" className="underline text-primary">Privacy Notice</Link>.
+                    I understand my account may be suspended for violations.
+                  </span>
+                </label>
+              </div>
+            )}
             <Button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (mode === "signup" && !complianceAck)}
               className="w-full h-11 bg-gradient-primary shadow-glow"
             >
               {submitting
