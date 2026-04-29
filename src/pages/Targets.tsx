@@ -259,7 +259,20 @@ export default function Targets() {
 
       {/* Best companies */}
       <section>
-        <h2 className="text-xl font-display font-bold text-primary-deep mb-3">Best companies to target</h2>
+        <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
+          <div>
+            <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Hit <span className="font-semibold text-primary">Claim</span> on the ones you'll focus on — we'll instantly swap in a fresh prospect.
+            </p>
+          </div>
+          {claimed.length > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {claimed.length} claimed
+            </span>
+          )}
+        </div>
         {!loading && targets.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
             Generate to see ideal customer profiles.
