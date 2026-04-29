@@ -51,7 +51,23 @@ export default function Terms() {
         </ul>
         <p className="mt-3"><strong>Enforcement.</strong> You are solely responsible for the content and recipients of any communications you create or send using EngageIQ. We may investigate suspected violations, remove content, throttle or disable AI-generation features, suspend or terminate accounts without notice, and report unlawful activity to the relevant authorities. Repeated or serious violations will result in permanent termination.</p>
 
-        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. Account responsibility</h2>
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. Your legal responsibility & compliance with law</h2>
+        <p><strong>You are the data controller.</strong> When you upload, import, enrich, or process information about leads, prospects, or contacts in EngageIQ, <strong>you</strong> determine the purposes and means of that processing. You are therefore the "data controller" (under GDPR / UK GDPR) or the equivalent legally responsible party (under CCPA, PIPEDA, LGPD, and other applicable laws). EngageIQ acts only as a data <em>processor</em> on your behalf and processes data solely on your documented instructions, as set out in our <Link className="underline" to="/privacy">Privacy Notice</Link>.</p>
+        <p className="mt-3"><strong>You represent and warrant that you will, at all times:</strong></p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Comply with all laws applicable to your use of the Service, including but not limited to the <strong>EU GDPR, UK GDPR, US CAN-SPAM Act, Canada's CASL, Australia's Spam Act, the ePrivacy Directive (PECR), CCPA/CPRA, PIPEDA, LGPD,</strong> and any other applicable data-protection, anti-spam, marketing, consumer-protection, export-control, and sanctions laws.</li>
+          <li>Have a valid <strong>lawful basis</strong> (consent, legitimate interest with a documented balancing test, or an existing business relationship) for every contact you process or message through the Service.</li>
+          <li>Provide your own <strong>privacy notice</strong> to the individuals you contact, telling them how you process their data and how to exercise their rights.</li>
+          <li>Honour <strong>opt-out, unsubscribe, erasure, access, and objection</strong> requests from your contacts promptly and at your own cost — these requests are your responsibility, not EngageIQ's.</li>
+          <li>Identify yourself accurately in every message, never use deceptive sender names or subject lines, and include a valid postal address and unsubscribe mechanism where required by law.</li>
+          <li>Maintain any <strong>licences, registrations, or regulatory permissions</strong> required in your jurisdiction to conduct outreach or process the categories of data you handle.</li>
+          <li>Keep records sufficient to <strong>demonstrate your compliance</strong> (e.g. source of consent, lawful-basis assessments) if challenged by a regulator or recipient.</li>
+          <li>Not transfer EngageIQ's compliance obligations onto EngageIQ — we provide a tool; <strong>responsibility for how you use it rests with you</strong>.</li>
+        </ul>
+        <p className="mt-3"><strong>Indemnity for compliance failures.</strong> You agree to indemnify, defend, and hold EngageIQ harmless from any claim, fine, penalty, regulatory action, complaint, chargeback, or loss arising from (a) your breach of any law listed above, (b) the content or recipients of messages you send, (c) the data you upload or process, or (d) your failure to honour data-subject or unsubscribe requests.</p>
+        <p className="mt-3"><strong>Cooperation with authorities.</strong> If we receive a credible complaint, regulator inquiry, or legal request relating to your activity, we may suspend the affected account, preserve relevant data, and disclose information to the extent required by law.</p>
+
+        <h2 className="text-xl font-display font-bold text-primary-deep mt-6">6. Account responsibility</h2>
         <p>You must provide accurate registration information and keep it up to date. You are responsible for maintaining the confidentiality of your credentials and API keys, and for all activity that occurs under your account.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">6. Intellectual property</h2>
