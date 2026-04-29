@@ -18,3 +18,9 @@ verify_jwt = false
 
 [functions.handle-email-suppression]
 verify_jwt = false
+
+[functions.oauth-google-callback]
+verify_jwt = false
+
+[functions.oauth-microsoft-callback]
+verify_jwt = false
