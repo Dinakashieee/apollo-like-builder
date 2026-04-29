@@ -33,6 +33,8 @@ import { ImportDialog } from "@/components/ImportDialog";
 import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { useDashboardPrefs, type TileKey } from "@/hooks/useDashboardPrefs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Globe } from "lucide-react";
+import { findCountry, regionOf } from "@/lib/countries";
 
 type Range = "1D" | "7D" | "30D" | "QTD";
 const RANGE_DAYS: Record<Range, number> = { "1D": 1, "7D": 7, "30D": 30, "QTD": 90 };
@@ -97,6 +99,7 @@ export default function Dashboard() {
   const [velocity, setVelocity] = useState<VelocityPoint[]>([]);
   const [liveActivity, setLiveActivity] = useState<ActivityRow[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [leadsGeo, setLeadsGeo] = useState<{ country: string | null; count: number }[]>([]);
 
   const days = RANGE_DAYS[range];
   const showTile = (k: TileKey) => visible.includes(k);
@@ -272,6 +275,47 @@ export default function Dashboard() {
       supabase.removeChannel(channel);
     };
   }, [current?.id, days]);
+
+  // Leads-by-country aggregate (independent of date range)
+  useEffect(() => {
+    if (!current?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("country")
+        .eq("workspace_id", current.id)
+        .limit(5000);
+      if (cancelled || !data) return;
+      const counts = new Map<string | null, number>();
+      for (const row of data) {
+        const k = (row as any).country ?? null;
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+      const arr = Array.from(counts.entries())
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count);
+      setLeadsGeo(arr);
+    })();
+    return () => { cancelled = true; };
+  }, [current?.id]);
+
+  // Aggregate by region for the geo tile
+  const geoByRegion = useMemo(() => {
+    const map = new Map<string, number>();
+    let total = 0;
+    for (const row of leadsGeo) {
+      const region = row.country ? regionOf(row.country) : "Unknown";
+      map.set(region, (map.get(region) ?? 0) + row.count);
+      total += row.count;
+    }
+    return {
+      total,
+      regions: Array.from(map.entries())
+        .map(([region, count]) => ({ region, count }))
+        .sort((a, b) => b.count - a.count),
+    };
+  }, [leadsGeo]);
 
   const openRate = stats.delivered > 0 ? (stats.opens / stats.delivered) * 100 : 0;
   const openRatePrev =
@@ -539,6 +583,86 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Leads by country / region */}
+      {showTile("leads_geo") && (
+        <div className="card-elevated p-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 className="font-display font-bold text-base text-primary-deep flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              Leads by country & region
+            </h3>
+            <span className="text-xs text-muted-foreground">
+              {geoByRegion.total} total · {leadsGeo.filter(r => r.country).length} countries
+            </span>
+          </div>
+          {leadsGeo.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-8">
+              No leads yet. Add leads with a country to see geographic insights.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Region breakdown */}
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3 font-semibold">
+                  By region
+                </p>
+                <div className="space-y-2">
+                  {geoByRegion.regions.map((r) => {
+                    const pctRegion = geoByRegion.total > 0 ? (r.count / geoByRegion.total) * 100 : 0;
+                    return (
+                      <div key={r.region}>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="font-medium text-primary-deep">{r.region}</span>
+                          <span className="text-muted-foreground">
+                            {r.count} <span className="text-xs">({pctRegion.toFixed(0)}%)</span>
+                          </span>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-primary"
+                            style={{ width: `${pctRegion}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Top countries */}
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3 font-semibold">
+                  Top countries
+                </p>
+                <div className="space-y-2">
+                  {leadsGeo.slice(0, 8).map((row) => {
+                    const c = findCountry(row.country);
+                    const label = c?.name ?? (row.country ?? "Unspecified");
+                    const pctCountry = geoByRegion.total > 0 ? (row.count / geoByRegion.total) * 100 : 0;
+                    return (
+                      <div
+                        key={row.country ?? "none"}
+                        className="flex items-center justify-between text-sm py-1.5 px-2 rounded-md hover:bg-muted/50"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-primary-deep truncate">{label}</p>
+                          {c && (
+                            <p className="text-[11px] text-muted-foreground truncate">{c.law}</p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <p className="font-semibold text-primary">{row.count}</p>
+                          <p className="text-[11px] text-muted-foreground">{pctCountry.toFixed(0)}%</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Top opportunities + AI insight */}
       {(showTile("top_opportunities") || showTile("ai_insight")) && (

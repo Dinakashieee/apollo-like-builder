@@ -18,8 +18,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Sparkles, Loader2, Globe } from "lucide-react";
 import { z } from "zod";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { COUNTRIES, findCountry, guessCountryFromEmail } from "@/lib/countries";
 
 const schema = z.object({
   company_name: z.string().trim().min(1, "Company required").max(120),
@@ -27,6 +31,7 @@ const schema = z.object({
   role: z.string().trim().max(80).optional(),
   email: z.string().trim().email().max(120).optional().or(z.literal("")),
   industry: z.string().trim().max(80).optional(),
+  country: z.string().trim().max(2).optional(),
   systems_in_use: z.string().trim().max(300).optional(),
   pain_points: z.string().trim().max(500).optional(),
   notes: z.string().trim().max(1000).optional(),
@@ -48,10 +53,19 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const [systemsInUse, setSystemsInUse] = useState("");
   const [painPoints, setPainPoints] = useState("");
   const [notes, setNotes] = useState("");
+  const [country, setCountry] = useState<string>("");
+  const [countryTouched, setCountryTouched] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichSignals, setEnrichSignals] = useState<string[]>([]);
   const [enrichConfidence, setEnrichConfidence] = useState<string | null>(null);
   const warnedRef = useRef(false);
+
+  // Auto-suggest country from email TLD when user hasn't manually picked one
+  useEffect(() => {
+    if (countryTouched) return;
+    const guess = guessCountryFromEmail(email);
+    if (guess && guess !== country) setCountry(guess);
+  }, [email, countryTouched, country]);
 
   const mergeUnique = (existing: string, additions: string[]) => {
     const set = new Set(
@@ -136,6 +150,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       role,
       email,
       industry,
+      country,
       systems_in_use: systemsInUse,
       pain_points: painPoints,
       notes,
@@ -156,6 +171,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       role: parsed.data.role || null,
       email: parsed.data.email || null,
       industry: parsed.data.industry || null,
+      country: parsed.data.country || null,
       systems_in_use: toArray(parsed.data.systems_in_use),
       pain_points: toArray(parsed.data.pain_points),
       notes: parsed.data.notes || null,
@@ -193,6 +209,8 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     setSystemsInUse("");
     setPainPoints("");
     setNotes("");
+    setCountry("");
+    setCountryTouched(false);
     setEnrichSignals([]);
     setEnrichConfidence(null);
     setOpen(false);
@@ -244,6 +262,32 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
                   placeholder="SAP, Oracle, Salesforce"
                 />
               </div>
+            </div>
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-primary" /> Country you're contacting them in
+              </Label>
+              <Select
+                value={country}
+                onValueChange={(v) => { setCountry(v); setCountryTouched(true); }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select country (drives compliance rules)" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name} <span className="text-muted-foreground">· {c.region}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {country && findCountry(country) && (
+                <p className="mt-2 text-xs text-muted-foreground rounded-md border border-border/60 bg-muted/40 p-2">
+                  <strong className="text-primary-deep">{findCountry(country)!.law}:</strong>{" "}
+                  {findCountry(country)!.lawSummary}
+                </p>
+              )}
             </div>
             <div>
               <Label>Known pain points (comma-separated)</Label>
