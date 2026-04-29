@@ -8,7 +8,8 @@ export type TileKey =
   | "funnel"
   | "live_activity"
   | "top_opportunities"
-  | "ai_insight";
+  | "ai_insight"
+  | "leads_geo";
 
 export const ALL_TILES: { key: TileKey; label: string; description: string }[] = [
   { key: "kpis", label: "KPI cards", description: "Emails sent, open rate, reply rate, pipeline added" },
@@ -17,6 +18,7 @@ export const ALL_TILES: { key: TileKey; label: string; description: string }[] =
   { key: "live_activity", label: "Live email activity", description: "Real-time email events as they happen" },
   { key: "top_opportunities", label: "Top opportunities", description: "Highest-intent accounts to work today" },
   { key: "ai_insight", label: "AI insight", description: "Recommended next action with predicted impact" },
+  { key: "leads_geo", label: "Leads by country & region", description: "Geographic breakdown of leads in your pipeline" },
 ];
 
 const DEFAULT_TILES: TileKey[] = ALL_TILES.map((t) => t.key);
