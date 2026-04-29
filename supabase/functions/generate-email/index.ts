@@ -21,7 +21,7 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
 
-    // Quota check (Free tier = 20 AI emails / month). Uses service role.
+    // Quota check (Free tier = 25 AI emails / month). Uses service role.
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
