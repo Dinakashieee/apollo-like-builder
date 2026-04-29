@@ -3,6 +3,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Button, Container, Head, Heading, Html, Preview, Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandHeader } from '../email-templates/brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'EngageIQ'
@@ -18,6 +19,7 @@ const WelcomeEmail = ({ name }: WelcomeProps) => (
     <Preview>Welcome to {SITE_NAME} — let's turn intent into pipeline</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>{name ? `Welcome, ${name}!` : `Welcome to ${SITE_NAME}!`}</Heading>
         <Text style={text}>
           Thanks for joining {SITE_NAME}. You now have access to AI-powered, hyper-personalized
