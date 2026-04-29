@@ -47,7 +47,9 @@ export default function Targets() {
   const { current } = useWorkspace();
   const [similar, setSimilar] = useState<SimilarProduct[]>([]);
   const [targets, setTargets] = useState<TargetCompany[]>([]);
+  const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [hasCompany, setHasCompany] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,25 @@ export default function Targets() {
         setTargets(j.targets ?? []);
       } catch {}
     }
+    const claimedRaw = localStorage.getItem(`targets-claimed-${current.id}`);
+    if (claimedRaw) {
+      try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch {}
+    }
   }, [current]);
+
+  const persist = (nextSimilar: SimilarProduct[], nextTargets: TargetCompany[]) => {
+    if (!current) return;
+    localStorage.setItem(
+      `targets-${current.id}`,
+      JSON.stringify({ similar: nextSimilar, targets: nextTargets })
+    );
+  };
+
+  const persistClaimed = (next: string[]) => {
+    if (!current) return;
+    setClaimed(next);
+    localStorage.setItem(`targets-claimed-${current.id}`, JSON.stringify(next));
+  };
 
   const generate = async () => {
     if (!current) return;
@@ -87,15 +107,51 @@ export default function Targets() {
       if (data?.error) throw new Error(data.error);
       setSimilar(data.similar ?? []);
       setTargets(data.targets ?? []);
-      localStorage.setItem(
-        `targets-${current.id}`,
-        JSON.stringify({ similar: data.similar, targets: data.targets })
-      );
+      persist(data.similar ?? [], data.targets ?? []);
       toast({ title: "Insights generated" });
     } catch (e: any) {
       toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
     }
     setLoading(false);
+  };
+
+  const claimAndReplace = async (idx: number) => {
+    if (!current) return;
+    const original = targets[idx];
+    const name = original?.company ?? original?.type ?? "Target";
+    setReplacingIdx(idx);
+    try {
+      const exclude = Array.from(
+        new Set([
+          ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
+          ...claimed,
+        ])
+      );
+      const { data, error } = await supabase.functions.invoke("generate-targets", {
+        body: { workspace_id: current.id, mode: "replace", exclude },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const replacement: TargetCompany | undefined = data.targets?.[0];
+      const nextClaimed = Array.from(new Set([...claimed, name]));
+      persistClaimed(nextClaimed);
+
+      let nextTargets = [...targets];
+      if (replacement) {
+        nextTargets[idx] = replacement;
+      } else {
+        nextTargets.splice(idx, 1);
+      }
+      setTargets(nextTargets);
+      persist(similar, nextTargets);
+      toast({
+        title: `Claimed ${name}`,
+        description: replacement ? "A fresh target has been added in its place." : "Removed from your focus list.",
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't refresh", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setReplacingIdx(null);
   };
 
   return (
