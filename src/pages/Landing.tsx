@@ -152,7 +152,7 @@ export default function Landing() {
 
   const handleTierCta = (tier: Tier) => {
     if (tier.contact) {
-      window.location.href = "mailto:sales@engageiq.app?subject=Enterprise%20inquiry";
+      window.location.href = "mailto:sales@engageiqlk.com?subject=Enterprise%20inquiry";
       return;
     }
     if (tier.monthly === 0) {
@@ -594,7 +594,7 @@ export default function Landing() {
                 size="lg"
                 variant="outline"
                 className="h-12 px-8 text-base"
-                onClick={() => (window.location.href = "mailto:sales@engageiq.app?subject=EngageIQ%20-%20Talk%20to%20sales")}
+                onClick={() => (window.location.href = "mailto:sales@engageiqlk.com?subject=EngageIQ%20-%20Talk%20to%20sales")}
               >
                 Talk to sales
               </Button>
