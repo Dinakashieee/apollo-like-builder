@@ -150,6 +150,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       role,
       email,
       industry,
+      country,
       systems_in_use: systemsInUse,
       pain_points: painPoints,
       notes,
