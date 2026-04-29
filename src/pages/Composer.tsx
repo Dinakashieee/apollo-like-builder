@@ -41,7 +41,7 @@ export default function Composer() {
     if (!current) return;
     supabase
       .from("leads")
-      .select("id, company_name, contact_name, role, email")
+      .select("id, company_name, contact_name, role, email, country")
       .eq("workspace_id", current.id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
