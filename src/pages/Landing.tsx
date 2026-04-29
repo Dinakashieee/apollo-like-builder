@@ -492,8 +492,8 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
-            All plans include a 14-day free trial · Cancel anytime · Prices exclude payment processing fees
-            (5% + 50¢ per transaction, passed through from our payment gateway)
+            Free plan is fully free — no card needed. Starter includes a 7-day free trial (card on file, cancel anytime).
+            All plans support Bring Your Own Database. Prices exclude payment processing fees.
           </p>
         </div>
       </section>
@@ -507,7 +507,7 @@ export default function Landing() {
               Start closing more deals today
             </h2>
             <p className="relative mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Join thousands of teams who trust EngageIQ to power their revenue engine.
+              Join early adopters using EngageIQ to power their revenue engine — with full control of their data.
             </p>
             <div className="relative mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -521,9 +521,9 @@ export default function Landing() {
                 size="lg"
                 variant="outline"
                 className="h-12 px-8 text-base"
-                onClick={() => (window.location.href = "mailto:sales@engageiqlk.com?subject=EngageIQ%20-%20Talk%20to%20sales")}
+                onClick={() => navigate(user ? "/app" : "/auth?next=/#pricing")}
               >
-                Talk to sales
+                See plans
               </Button>
             </div>
           </div>
