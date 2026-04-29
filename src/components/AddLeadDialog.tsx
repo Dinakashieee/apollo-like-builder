@@ -209,6 +209,8 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     setSystemsInUse("");
     setPainPoints("");
     setNotes("");
+    setCountry("");
+    setCountryTouched(false);
     setEnrichSignals([]);
     setEnrichConfidence(null);
     setOpen(false);
