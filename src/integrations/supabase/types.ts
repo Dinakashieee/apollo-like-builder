@@ -102,6 +102,156 @@ export type Database = {
           },
         ]
       }
+      email_accounts: {
+        Row: {
+          access_token: string | null
+          access_token_expires_at: string | null
+          created_at: string
+          display_name: string | null
+          email_address: string
+          gmail_history_id: string | null
+          gmail_watch_expires_at: string | null
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          ms_subscription_expires_at: string | null
+          ms_subscription_id: string | null
+          ms_tenant_id: string | null
+          provider: Database["public"]["Enums"]["email_account_provider"]
+          refresh_token: string
+          status: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_address: string
+          gmail_history_id?: string | null
+          gmail_watch_expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          ms_subscription_expires_at?: string | null
+          ms_subscription_id?: string | null
+          ms_tenant_id?: string | null
+          provider: Database["public"]["Enums"]["email_account_provider"]
+          refresh_token: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_address?: string
+          gmail_history_id?: string | null
+          gmail_watch_expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          ms_subscription_expires_at?: string | null
+          ms_subscription_id?: string | null
+          ms_tenant_id?: string | null
+          provider?: Database["public"]["Enums"]["email_account_provider"]
+          refresh_token?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      email_messages: {
+        Row: {
+          account_id: string
+          body_html: string | null
+          body_text: string | null
+          cc_emails: string[]
+          created_at: string
+          direction: Database["public"]["Enums"]["email_message_direction"]
+          from_email: string
+          from_name: string | null
+          id: string
+          in_reply_to: string | null
+          is_read: boolean
+          provider_message_id: string
+          received_at: string | null
+          rfc822_message_id: string | null
+          sent_at: string
+          snippet: string | null
+          subject: string | null
+          thread_id: string
+          to_emails: string[]
+          workspace_id: string
+        }
+        Insert: {
+          account_id: string
+          body_html?: string | null
+          body_text?: string | null
+          cc_emails?: string[]
+          created_at?: string
+          direction: Database["public"]["Enums"]["email_message_direction"]
+          from_email: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          is_read?: boolean
+          provider_message_id: string
+          received_at?: string | null
+          rfc822_message_id?: string | null
+          sent_at?: string
+          snippet?: string | null
+          subject?: string | null
+          thread_id: string
+          to_emails?: string[]
+          workspace_id: string
+        }
+        Update: {
+          account_id?: string
+          body_html?: string | null
+          body_text?: string | null
+          cc_emails?: string[]
+          created_at?: string
+          direction?: Database["public"]["Enums"]["email_message_direction"]
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          in_reply_to?: string | null
+          is_read?: boolean
+          provider_message_id?: string
+          received_at?: string | null
+          rfc822_message_id?: string | null
+          sent_at?: string
+          snippet?: string | null
+          subject?: string | null
+          thread_id?: string
+          to_emails?: string[]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_messages_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "email_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "email_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -211,6 +361,56 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: true
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_threads: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          last_message_at: string
+          lead_id: string | null
+          participants: string[]
+          provider_thread_id: string
+          subject: string | null
+          unread_count: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          participants?: string[]
+          provider_thread_id: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          participants?: string[]
+          provider_thread_id?: string
+          subject?: string | null
+          unread_count?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_threads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "email_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1098,6 +1298,8 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "member"
+      email_account_provider: "gmail" | "outlook"
+      email_message_direction: "outbound" | "inbound"
       enrollment_status: "active" | "paused" | "completed" | "stopped"
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost"
       opportunity_level: "high" | "medium" | "low"
@@ -1232,6 +1434,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "member"],
+      email_account_provider: ["gmail", "outlook"],
+      email_message_direction: ["outbound", "inbound"],
       enrollment_status: ["active", "paused", "completed", "stopped"],
       lead_status: ["new", "contacted", "qualified", "won", "lost"],
       opportunity_level: ["high", "medium", "low"],
