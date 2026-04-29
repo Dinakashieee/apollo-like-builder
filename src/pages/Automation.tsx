@@ -109,6 +109,7 @@ export default function Automation() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [due, setDue] = useState<DueRow[]>([]);
   const [seeding, setSeeding] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
 
   // editor state
   const [editingSeq, setEditingSeq] = useState<Sequence | null>(null);
