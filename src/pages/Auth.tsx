@@ -206,7 +206,7 @@ export default function Auth() {
               </div>
             )}
             <div>
-              <Label htmlFor="email">Business email</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -214,14 +214,14 @@ export default function Auth() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
+                  placeholder="you@example.com"
                   className="pl-9 h-11"
                   required
                 />
               </div>
               {mode === "signup" && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Free email providers (Gmail, Yahoo, Outlook, etc.) are not allowed.
+                  Business or personal email — both are welcome.
                 </p>
               )}
             </div>
