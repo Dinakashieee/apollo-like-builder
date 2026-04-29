@@ -97,6 +97,7 @@ export default function Dashboard() {
   const [velocity, setVelocity] = useState<VelocityPoint[]>([]);
   const [liveActivity, setLiveActivity] = useState<ActivityRow[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [leadsGeo, setLeadsGeo] = useState<{ country: string | null; count: number }[]>([]);
 
   const days = RANGE_DAYS[range];
   const showTile = (k: TileKey) => visible.includes(k);
