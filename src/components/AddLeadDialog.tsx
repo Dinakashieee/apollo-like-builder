@@ -53,10 +53,19 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const [systemsInUse, setSystemsInUse] = useState("");
   const [painPoints, setPainPoints] = useState("");
   const [notes, setNotes] = useState("");
+  const [country, setCountry] = useState<string>("");
+  const [countryTouched, setCountryTouched] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichSignals, setEnrichSignals] = useState<string[]>([]);
   const [enrichConfidence, setEnrichConfidence] = useState<string | null>(null);
   const warnedRef = useRef(false);
+
+  // Auto-suggest country from email TLD when user hasn't manually picked one
+  useEffect(() => {
+    if (countryTouched) return;
+    const guess = guessCountryFromEmail(email);
+    if (guess && guess !== country) setCountry(guess);
+  }, [email, countryTouched, country]);
 
   const mergeUnique = (existing: string, additions: string[]) => {
     const set = new Set(
