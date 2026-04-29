@@ -11,25 +11,9 @@ import { toast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
 import { Sparkles, Mail, Lock, User as UserIcon } from "lucide-react";
 
-const FREE_EMAIL_DOMAINS = new Set([
-  "gmail.com","googlemail.com","yahoo.com","yahoo.co.uk","yahoo.co.in","ymail.com","rocketmail.com",
-  "hotmail.com","hotmail.co.uk","outlook.com","outlook.in","live.com","msn.com",
-  "icloud.com","me.com","mac.com",
-  "aol.com","protonmail.com","proton.me","pm.me","gmx.com","gmx.net","mail.com","zoho.com",
-  "yandex.com","yandex.ru","tutanota.com","fastmail.com","hey.com","qq.com","163.com","126.com",
-]);
-
-const isBusinessEmail = (email: string) => {
-  const domain = email.trim().toLowerCase().split("@")[1];
-  if (!domain) return false;
-  return !FREE_EMAIL_DOMAINS.has(domain);
-};
-
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Name is too short").max(80),
-  email: z.string().trim().email("Invalid email").refine(isBusinessEmail, {
-    message: "Please use your business email address (free providers like Gmail are not allowed).",
-  }),
+  email: z.string().trim().email("Invalid email"),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
 });
 const signInSchema = z.object({
