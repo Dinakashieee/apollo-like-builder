@@ -76,7 +76,12 @@ export default function Support() {
         <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep flex items-center gap-2">
           <LifeBuoy className="h-7 w-7 text-primary" /> Support
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Get help from our team. Most tickets answered within 24h.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Get help from our team. Most tickets answered within 24h. You can also email us directly at{" "}
+          <a href="mailto:support@engageiqlk.com" className="text-primary font-medium underline-offset-2 hover:underline">
+            support@engageiqlk.com
+          </a>.
+        </p>
       </div>
 
       <form onSubmit={submit} className="card-elevated p-6 space-y-4">
