@@ -276,6 +276,47 @@ export default function Dashboard() {
     };
   }, [current?.id, days]);
 
+  // Leads-by-country aggregate (independent of date range)
+  useEffect(() => {
+    if (!current?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("country")
+        .eq("workspace_id", current.id)
+        .limit(5000);
+      if (cancelled || !data) return;
+      const counts = new Map<string | null, number>();
+      for (const row of data) {
+        const k = (row as any).country ?? null;
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+      const arr = Array.from(counts.entries())
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count);
+      setLeadsGeo(arr);
+    })();
+    return () => { cancelled = true; };
+  }, [current?.id]);
+
+  // Aggregate by region for the geo tile
+  const geoByRegion = useMemo(() => {
+    const map = new Map<string, number>();
+    let total = 0;
+    for (const row of leadsGeo) {
+      const region = row.country ? regionOf(row.country) : "Unknown";
+      map.set(region, (map.get(region) ?? 0) + row.count);
+      total += row.count;
+    }
+    return {
+      total,
+      regions: Array.from(map.entries())
+        .map(([region, count]) => ({ region, count }))
+        .sort((a, b) => b.count - a.count),
+    };
+  }, [leadsGeo]);
+
   const openRate = stats.delivered > 0 ? (stats.opens / stats.delivered) * 100 : 0;
   const openRatePrev =
     stats.emailsPrev > 0 ? (stats.opensPrev / Math.max(stats.emailsPrev, 1)) * 100 : 0;
