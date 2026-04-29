@@ -224,11 +224,12 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
             <Plus className="h-4 w-4 mr-2" /> Add Lead
           </Button>
         </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="max-h-[85vh] flex flex-col p-0 sm:max-w-lg">
+          <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
             <DialogTitle>Add a new lead</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
             <div>
               <Label>Company *</Label>
               <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
