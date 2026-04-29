@@ -212,25 +212,84 @@ export default function Targets() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {targets.map((t, i) => {
             const lvl = LEVEL_BADGES[t.level] ?? LEVEL_BADGES.medium;
+            const title = t.company ?? t.type ?? "Target";
             return (
               <div key={i} className="card-elevated p-6">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-display font-bold text-primary-deep">{t.type}</h3>
-                  <span className={`text-[10px] font-bold border px-2 py-1 rounded-md ${lvl.color}`}>
+                  <div className="min-w-0">
+                    <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
+                    {t.website && (
+                      <a
+                        href={t.website.startsWith("http") ? t.website : `https://${t.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                      >
+                        {t.website.replace(/^https?:\/\//, "")}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-bold border px-2 py-1 rounded-md whitespace-nowrap ${lvl.color}`}>
                     {lvl.label}
                   </span>
                 </div>
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
-                  {t.industry}
+                  {t.industry}{t.size ? ` • ${t.size}` : ""}
                 </p>
                 <div className="text-sm text-foreground/85 mb-3">
                   <p className="font-semibold text-primary-deep">Their problem</p>
                   <p>{t.problem}</p>
                 </div>
-                <div className="border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                <div className="border-t border-border/60 pt-3 text-xs text-foreground/85 mb-3">
                   <p className="font-semibold text-primary-deep mb-1">Why you can sell</p>
                   <p>{t.why}</p>
                 </div>
+                {t.designations && t.designations.length > 0 && (
+                  <div className="border-t border-border/60 pt-3 mb-3">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
+                      <Users className="h-3 w-3" /> Designations to pitch
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {t.designations.map((d, j) => (
+                        <span key={j} className="text-[11px] bg-secondary text-secondary-foreground rounded px-2 py-0.5">
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {t.focus_areas && t.focus_areas.length > 0 && (
+                  <div className="border-t border-border/60 pt-3 mb-3">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
+                      <Crosshair className="h-3 w-3" /> Areas to pitch
+                    </p>
+                    <ul className="space-y-1 text-xs text-foreground/85">
+                      {t.focus_areas.map((f, j) => (
+                        <li key={j}>• {f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {t.references && t.references.length > 0 && (
+                  <div className="border-t border-border/60 pt-3">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5">References (verify)</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {t.references.map((r, j) => (
+                        <a
+                          key={j}
+                          href={r.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5"
+                        >
+                          {r.label}
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
