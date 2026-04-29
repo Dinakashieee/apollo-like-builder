@@ -29,6 +29,7 @@ import { Trash2, Download, User as UserIcon, Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BillingSection } from "@/components/BillingSection";
 import { TeamSection } from "@/components/TeamSection";
+import { AddonsSection } from "@/components/AddonsSection";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -166,6 +167,9 @@ export default function Settings() {
 
       {/* Billing */}
       <BillingSection />
+
+      {/* Add-ons (extra seats + credits) — available on every plan */}
+      <AddonsSection />
 
       {/* Team & seats */}
       <TeamSection />
