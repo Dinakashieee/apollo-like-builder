@@ -21,6 +21,7 @@ import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 import { ChatWidget } from "./ChatWidget";
 import { CreditsPill } from "./CreditsPill";
 import { EmailConfirmBanner } from "./EmailConfirmBanner";
+import { PresenceIndicator } from "./PresenceIndicator";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -80,6 +81,7 @@ export function AppLayout() {
               />
             </div>
             <div className="ml-auto flex items-center gap-2">
+              <PresenceIndicator />
               <CreditsPill />
               <NotificationBell />
               <DropdownMenu>

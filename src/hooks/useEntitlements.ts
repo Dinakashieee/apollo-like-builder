@@ -5,10 +5,10 @@ import { useAuth } from "./useAuth";
 import { useWorkspace } from "./useWorkspace";
 
 export const PLAN_LIMITS = {
-  free: { leads: 10, ai_emails: 10 },
-  starter: { leads: 2500, ai_emails: 2000 },
-  growth: { leads: 4000, ai_emails: 4000 },
-  pro: { leads: Infinity, ai_emails: Infinity },
+  free: { leads: 10, ai_emails: 10, seats: 1 },
+  starter: { leads: 2500, ai_emails: 2000, seats: 3 },
+  growth: { leads: 4000, ai_emails: 4000, seats: 10 },
+  pro: { leads: Infinity, ai_emails: Infinity, seats: Infinity },
 } as const;
 
 export function useEntitlements() {

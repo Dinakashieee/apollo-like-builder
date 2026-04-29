@@ -28,6 +28,7 @@ import {
 import { Trash2, Download, User as UserIcon, Lock, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BillingSection } from "@/components/BillingSection";
+import { TeamSection } from "@/components/TeamSection";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -165,6 +166,9 @@ export default function Settings() {
 
       {/* Billing */}
       <BillingSection />
+
+      {/* Team & seats */}
+      <TeamSection />
 
       {/* Profile */}
       <section className="card-elevated p-6 space-y-4">

@@ -5,7 +5,7 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
       <header className="container mx-auto px-6 py-6 border-b">
-        <Link to="/"><Logo /></Link>
+        <Logo />
       </header>
       <main className="container mx-auto px-6 py-12 max-w-3xl">
         <h1 className="text-3xl font-display font-bold text-primary-deep">Terms of Service</h1>
