@@ -112,6 +112,10 @@ export default function Composer() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+      <EmailBestPracticesDialog
+        open={tipsOpen}
+        onOpenChange={(o) => setTipsOpen(o ? true : undefined)}
+      />
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
