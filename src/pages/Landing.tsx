@@ -17,6 +17,7 @@ import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
+import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -278,98 +279,7 @@ export default function Landing() {
         >
           <div className="relative max-w-5xl mx-auto">
             <div className="absolute -inset-x-8 -top-8 h-40 bg-gradient-primary opacity-20 blur-3xl rounded-full" aria-hidden />
-            <div className="relative card-elevated overflow-hidden border border-border/60 shadow-elevated">
-              {/* Window chrome */}
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border/60 bg-muted/30">
-                <div className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-                <div className="h-2.5 w-2.5 rounded-full bg-hot/60" />
-                <div className="h-2.5 w-2.5 rounded-full bg-success/60" />
-                <span className="ml-3 text-[11px] text-muted-foreground font-medium">app.engageiq.com / dashboard</span>
-              </div>
-
-              {/* Mini dashboard */}
-              <div className="p-4 sm:p-6 lg:p-8 bg-gradient-soft">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="font-display font-bold text-base sm:text-lg text-primary-deep">Sales Intelligence</h3>
-                    <p className="text-[11px] text-muted-foreground">This week · auto-refreshed</p>
-                  </div>
-                  <span className="text-[10px] font-bold bg-success/15 text-success px-2 py-1 rounded-md flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> LIVE
-                  </span>
-                </div>
-
-                {/* KPI row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
-                  {[
-                    { l: "Qualified accounts", v: "48", d: "+12%", up: true },
-                    { l: "Reply rate", v: "34%", d: "+6pt", up: true },
-                    { l: "Pipeline added", v: "$214k", d: "+22%", up: true },
-                    { l: "Time saved", v: "9.2h", d: "this wk", up: true },
-                  ].map((k) => (
-                    <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
-                      <p className="text-[10px] text-muted-foreground font-medium truncate">{k.l}</p>
-                      <p className="text-lg sm:text-xl font-display font-bold text-primary-deep leading-tight">{k.v}</p>
-                      <p className={`text-[10px] font-semibold ${k.up ? "text-success" : "text-destructive"}`}>{k.d}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-                  {/* Pipeline trend */}
-                  <div className="lg:col-span-3 bg-card border border-border/60 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold text-primary-deep">Pipeline velocity</p>
-                      <span className="text-[10px] text-muted-foreground">8w</span>
-                    </div>
-                    <div className="flex items-end gap-1.5 h-24 sm:h-28">
-                      {[40, 55, 48, 70, 62, 82, 75, 95].map((h, i) => (
-                        <div key={i} className="flex-1 flex flex-col justify-end gap-0.5">
-                          <div
-                            className="rounded-t-md bg-gradient-to-t from-primary to-primary-glow"
-                            style={{ height: `${h}%` }}
-                          />
-                          <div
-                            className="rounded-b-md bg-primary/15"
-                            style={{ height: `${Math.max(15, h - 35)}%` }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
-                      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-primary" /> New pipeline</span>
-                      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-primary/30" /> Stalled</span>
-                    </div>
-                  </div>
-
-                  {/* Top opportunities */}
-                  <div className="lg:col-span-2 bg-card border border-border/60 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold text-primary-deep">Top opportunities</p>
-                      <span className="text-[10px] text-primary font-semibold">View all →</span>
-                    </div>
-                    <ul className="space-y-2.5">
-                      {[
-                        { co: "Northwind Co.", sig: "Hiring 4 RevOps roles", score: 94, color: "from-emerald-400 to-teal-500" },
-                        { co: "Acme Robotics", sig: "Series B · $40M", score: 88, color: "from-violet-400 to-purple-500" },
-                        { co: "Bluebird Labs", sig: "Switched off Salesforce", score: 81, color: "from-amber-400 to-orange-500" },
-                      ].map((o) => (
-                        <li key={o.co} className="flex items-center gap-2.5">
-                          <div className={`h-7 w-7 shrink-0 rounded-md bg-gradient-to-br ${o.color} flex items-center justify-center text-[10px] font-bold text-white`}>
-                            {o.co.slice(0, 2).toUpperCase()}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-[11px] font-semibold text-primary-deep truncate">{o.co}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{o.sig}</p>
-                          </div>
-                          <span className="text-[10px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded">{o.score}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <LiveDashboardPreview />
           </div>
         </div>
       </section>
