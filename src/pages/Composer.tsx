@@ -286,6 +286,22 @@ export default function Composer() {
                   <p className="font-medium text-primary">{lead.email}</p>
                 </div>
               )}
+              {lead.country && findCountry(lead.country) && (
+                <div className="pt-2 border-t border-border/60">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Globe className="h-3 w-3" /> Country
+                  </p>
+                  <p className="font-medium">{findCountry(lead.country)!.name}</p>
+                  <div className="mt-2 rounded-md border border-warm/40 bg-warm/5 p-2 text-[11px]">
+                    <p className="font-semibold text-primary-deep mb-0.5">
+                      Applies: {findCountry(lead.country)!.law}
+                    </p>
+                    <p className="text-muted-foreground leading-snug">
+                      {findCountry(lead.country)!.lawSummary}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">No lead selected.</p>
