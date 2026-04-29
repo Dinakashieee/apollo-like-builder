@@ -171,6 +171,8 @@ export type Database = {
       email_messages: {
         Row: {
           account_id: string
+          analysis_confidence: number | null
+          analyzed_at: string | null
           body_html: string | null
           body_text: string | null
           cc_emails: string[]
@@ -183,16 +185,24 @@ export type Database = {
           is_read: boolean
           provider_message_id: string
           received_at: string | null
+          reply_intent: string | null
+          reply_summary: string | null
+          reply_temperature:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           rfc822_message_id: string | null
           sent_at: string
           snippet: string | null
           subject: string | null
+          suggested_next_step: string | null
           thread_id: string
           to_emails: string[]
           workspace_id: string
         }
         Insert: {
           account_id: string
+          analysis_confidence?: number | null
+          analyzed_at?: string | null
           body_html?: string | null
           body_text?: string | null
           cc_emails?: string[]
@@ -205,16 +215,24 @@ export type Database = {
           is_read?: boolean
           provider_message_id: string
           received_at?: string | null
+          reply_intent?: string | null
+          reply_summary?: string | null
+          reply_temperature?:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           rfc822_message_id?: string | null
           sent_at?: string
           snippet?: string | null
           subject?: string | null
+          suggested_next_step?: string | null
           thread_id: string
           to_emails?: string[]
           workspace_id: string
         }
         Update: {
           account_id?: string
+          analysis_confidence?: number | null
+          analyzed_at?: string | null
           body_html?: string | null
           body_text?: string | null
           cc_emails?: string[]
@@ -227,10 +245,16 @@ export type Database = {
           is_read?: boolean
           provider_message_id?: string
           received_at?: string | null
+          reply_intent?: string | null
+          reply_summary?: string | null
+          reply_temperature?:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           rfc822_message_id?: string | null
           sent_at?: string
           snippet?: string | null
           subject?: string | null
+          suggested_next_step?: string | null
           thread_id?: string
           to_emails?: string[]
           workspace_id?: string
@@ -449,8 +473,13 @@ export type Database = {
           email: string | null
           id: string
           industry: string | null
+          last_reply_at: string | null
+          last_reply_temperature:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           notes: string | null
           pain_points: string[] | null
+          reply_count: number
           role: string | null
           score: number | null
           source: string | null
@@ -469,8 +498,13 @@ export type Database = {
           email?: string | null
           id?: string
           industry?: string | null
+          last_reply_at?: string | null
+          last_reply_temperature?:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           notes?: string | null
           pain_points?: string[] | null
+          reply_count?: number
           role?: string | null
           score?: number | null
           source?: string | null
@@ -489,8 +523,13 @@ export type Database = {
           email?: string | null
           id?: string
           industry?: string | null
+          last_reply_at?: string | null
+          last_reply_temperature?:
+            | Database["public"]["Enums"]["reply_temperature"]
+            | null
           notes?: string | null
           pain_points?: string[] | null
+          reply_count?: number
           role?: string | null
           score?: number | null
           source?: string | null
@@ -1303,6 +1342,7 @@ export type Database = {
       enrollment_status: "active" | "paused" | "completed" | "stopped"
       lead_status: "new" | "contacted" | "qualified" | "won" | "lost"
       opportunity_level: "high" | "medium" | "low"
+      reply_temperature: "hot" | "warm" | "cold" | "neutral"
       step_status: "pending" | "sent" | "skipped"
       ticket_status: "open" | "in_progress" | "resolved"
       waitlist_status: "waiting" | "invited" | "converted" | "rejected"
@@ -1439,6 +1479,7 @@ export const Constants = {
       enrollment_status: ["active", "paused", "completed", "stopped"],
       lead_status: ["new", "contacted", "qualified", "won", "lost"],
       opportunity_level: ["high", "medium", "low"],
+      reply_temperature: ["hot", "warm", "cold", "neutral"],
       step_status: ["pending", "sent", "skipped"],
       ticket_status: ["open", "in_progress", "resolved"],
       waitlist_status: ["waiting", "invited", "converted", "rejected"],
