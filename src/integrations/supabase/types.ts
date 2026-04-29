@@ -881,6 +881,60 @@ export type Database = {
         }
         Relationships: []
       }
+      workspace_addons: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          paddle_customer_id: string
+          paddle_subscription_id: string
+          price_id: string
+          product_id: string
+          quantity: number
+          status: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          paddle_customer_id: string
+          paddle_subscription_id: string
+          price_id: string
+          product_id: string
+          quantity?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          paddle_customer_id?: string
+          paddle_subscription_id?: string
+          price_id?: string
+          product_id?: string
+          quantity?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       workspace_invites: {
         Row: {
           accepted_at: string | null
@@ -1029,6 +1083,14 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      workspace_extra_credits: {
+        Args: { _workspace_id: string }
+        Returns: number
+      }
+      workspace_extra_seats: {
+        Args: { _workspace_id: string }
+        Returns: number
       }
     }
     Enums: {

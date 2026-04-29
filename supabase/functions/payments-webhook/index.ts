@@ -24,6 +24,45 @@ async function sendWelcomeEmail(userId: string, planName: string) {
   }
 }
 
+const ADDON_PRODUCT_IDS = new Set(['addon_seat', 'addon_credits_1k', 'addon_credits_5k']);
+
+async function upsertAddonSubscription(
+  data: any,
+  env: PaddleEnv,
+  userId: string,
+  productId: string,
+  priceId: string,
+  quantity: number,
+) {
+  // Find a workspace owned by this user (add-ons attach to the owner's workspace)
+  const { data: ws } = await getSupabase()
+    .from('workspaces')
+    .select('id')
+    .eq('owner_id', userId)
+    .limit(1)
+    .maybeSingle();
+  if (!ws?.id) {
+    console.warn('No workspace for addon purchase', { userId });
+    return;
+  }
+  const { id, customerId, status, currentBillingPeriod, scheduledChange } = data;
+  await getSupabase().from('workspace_addons').upsert({
+    workspace_id: ws.id,
+    user_id: userId,
+    paddle_subscription_id: id,
+    paddle_customer_id: customerId,
+    product_id: productId,
+    price_id: priceId,
+    quantity: quantity || 1,
+    status,
+    current_period_start: currentBillingPeriod?.startsAt,
+    current_period_end: currentBillingPeriod?.endsAt,
+    cancel_at_period_end: scheduledChange?.action === 'cancel',
+    environment: env,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'paddle_subscription_id' });
+}
+
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
 
@@ -41,6 +80,12 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
       rawPriceId: item.price.id,
       rawProductId: item.product.id,
     });
+    return;
+  }
+
+  // Route add-on purchases to workspace_addons; main plans go to subscriptions.
+  if (ADDON_PRODUCT_IDS.has(productId)) {
+    await upsertAddonSubscription(data, env, userId, productId, priceId, item.quantity ?? 1);
     return;
   }
 
@@ -70,6 +115,25 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const priceId = item?.price?.importMeta?.externalId;
   const productId = item?.product?.importMeta?.externalId;
 
+  // Add-on update path
+  if (productId && ADDON_PRODUCT_IDS.has(productId)) {
+    const update: Record<string, unknown> = {
+      status,
+      current_period_start: currentBillingPeriod?.startsAt,
+      current_period_end: currentBillingPeriod?.endsAt,
+      cancel_at_period_end: scheduledChange?.action === 'cancel',
+      updated_at: new Date().toISOString(),
+    };
+    if (typeof item?.quantity === 'number') update.quantity = item.quantity;
+    if (priceId) update.price_id = priceId;
+    if (productId) update.product_id = productId;
+    await getSupabase().from('workspace_addons')
+      .update(update)
+      .eq('paddle_subscription_id', id)
+      .eq('environment', env);
+    return;
+  }
+
   const update: Record<string, unknown> = {
     status: status,
     current_period_start: currentBillingPeriod?.startsAt,
@@ -87,6 +151,18 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
+  // Try add-ons first; if no row matches, fall through to main subscriptions.
+  const addonRes = await getSupabase().from('workspace_addons')
+    .update({
+      status: 'canceled',
+      current_period_end: data.currentBillingPeriod?.endsAt ?? data.canceledAt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('paddle_subscription_id', data.id)
+    .eq('environment', env)
+    .select('id');
+  if (addonRes.data && addonRes.data.length > 0) return;
+
   await getSupabase().from('subscriptions')
     .update({
       status: 'canceled',

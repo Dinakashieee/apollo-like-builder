@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "./useSubscription";
 import { useAuth } from "./useAuth";
 import { useWorkspace } from "./useWorkspace";
+import { useWorkspaceAddons } from "./useWorkspaceAddons";
 
 export const PLAN_LIMITS = {
   free: { leads: 10, ai_emails: 10, seats: 1 },
@@ -42,9 +43,16 @@ export function useEntitlements() {
     refetch();
   }, [refetch]);
 
-  const limits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
-  const leadsLimit = limits.leads;
-  const aiEmailsLimit = limits.ai_emails;
+  const baseLimits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
+  const { extraSeats, extraCredits } = useWorkspaceAddons();
+
+  const leadsLimit = baseLimits.leads;
+  const aiEmailsLimit = isFinite(baseLimits.ai_emails)
+    ? baseLimits.ai_emails + extraCredits
+    : baseLimits.ai_emails;
+  const seatsLimit = isFinite(baseLimits.seats)
+    ? baseLimits.seats + extraSeats
+    : baseLimits.seats;
 
   const leadsPct = isFinite(leadsLimit) ? leadsUsed / leadsLimit : 0;
   const aiEmailsPct = isFinite(aiEmailsLimit) ? aiEmailsUsed / aiEmailsLimit : 0;
@@ -60,6 +68,9 @@ export function useEntitlements() {
     aiEmailsLimit,
     aiEmailsAtLimit: aiEmailsUsed >= aiEmailsLimit,
     aiEmailsNearLimit: aiEmailsPct >= 0.8 && aiEmailsPct < 1,
+    seatsLimit,
+    extraSeats,
+    extraCredits,
     refetch,
   };
 }

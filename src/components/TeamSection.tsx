@@ -28,19 +28,13 @@ interface Invite {
 export function TeamSection() {
   const { user } = useAuth();
   const { current } = useWorkspace();
-  const { tier } = useEntitlements();
+  const { tier, seatsLimit, extraSeats } = useEntitlements();
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [sending, setSending] = useState(false);
 
-  const SEAT_LIMITS: Record<string, number> = {
-    free: 1,
-    starter: 3,
-    growth: 10,
-    pro: Infinity,
-  };
-  const seatLimit = SEAT_LIMITS[tier] ?? 1;
+  const seatLimit = seatsLimit ?? 1;
   const seatsUsed = members.length + invites.filter((i) => !i.accepted_at).length;
   const seatsLeft = seatLimit === Infinity ? Infinity : Math.max(0, seatLimit - seatsUsed);
   const isOwner = current?.role === "owner";
@@ -148,6 +142,11 @@ export function TeamSection() {
         <Badge variant="secondary" className="text-xs">
           {seatsUsed} / {seatLimit === Infinity ? "∞" : seatLimit} seats used
           <span className="ml-1.5 text-muted-foreground capitalize">· {tier} plan</span>
+          {extraSeats > 0 && (
+            <span className="ml-1.5 text-emerald-600 dark:text-emerald-400">
+              +{extraSeats} add-on
+            </span>
+          )}
         </Badge>
       </div>
 
@@ -178,7 +177,8 @@ export function TeamSection() {
 
       {seatsLeft <= 0 && isOwner && (
         <div className="text-xs p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300">
-          You've used all available seats on the <span className="font-semibold capitalize">{tier}</span> plan. Upgrade your plan to add more teammates.
+          You've used all available seats on the <span className="font-semibold capitalize">{tier}</span> plan.
+          {" "}Upgrade your plan or buy <span className="font-semibold">Additional User Seat</span> add-ons below to invite more teammates.
         </div>
       )}
 
