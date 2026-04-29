@@ -590,6 +590,36 @@ export type Database = {
           },
         ]
       }
+      oauth_state: {
+        Row: {
+          created_at: string
+          expires_at: string
+          provider: string
+          redirect_to: string | null
+          state: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          provider: string
+          redirect_to?: string | null
+          state: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          provider?: string
+          redirect_to?: string | null
+          state?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           created_at: string
@@ -695,6 +725,7 @@ export type Database = {
           email_signature: string | null
           full_name: string | null
           id: string
+          inbox_prompt_dismissed_at: string | null
           preferred_mail_client: string | null
           sender_email: string | null
           sender_name: string | null
@@ -707,6 +738,7 @@ export type Database = {
           email_signature?: string | null
           full_name?: string | null
           id: string
+          inbox_prompt_dismissed_at?: string | null
           preferred_mail_client?: string | null
           sender_email?: string | null
           sender_name?: string | null
@@ -719,6 +751,7 @@ export type Database = {
           email_signature?: string | null
           full_name?: string | null
           id?: string
+          inbox_prompt_dismissed_at?: string | null
           preferred_mail_client?: string | null
           sender_email?: string | null
           sender_name?: string | null
@@ -1081,6 +1114,42 @@ export type Database = {
           updated_at?: string
           user_id?: string
           visible_tiles?: string[]
+        }
+        Relationships: []
+      }
+      user_oauth_apps: {
+        Row: {
+          client_id: string
+          client_secret: string
+          created_at: string
+          created_by: string
+          id: string
+          label: string | null
+          provider: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          client_secret: string
+          created_at?: string
+          created_by: string
+          id?: string
+          label?: string | null
+          provider: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          client_secret?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string | null
+          provider?: string
+          updated_at?: string
+          workspace_id?: string
         }
         Relationships: []
       }
