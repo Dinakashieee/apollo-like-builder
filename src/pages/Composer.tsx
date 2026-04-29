@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Send, RefreshCw, Mail } from "lucide-react";
+import { Sparkles, Send, RefreshCw, Mail, ShieldCheck } from "lucide-react";
+import { EmailBestPracticesDialog } from "@/components/EmailBestPracticesDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +34,7 @@ export default function Composer() {
   const [hasCompany, setHasCompany] = useState(false);
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!current) return;
@@ -110,6 +112,10 @@ export default function Composer() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+      <EmailBestPracticesDialog
+        open={tipsOpen}
+        onOpenChange={(o) => setTipsOpen(o ? true : undefined)}
+      />
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
@@ -125,6 +131,14 @@ export default function Composer() {
               {aiEmailsUsed}/{aiEmailsLimit} AI emails this month
             </span>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTipsOpen(true)}
+            className="gap-1.5"
+          >
+            <ShieldCheck className="h-4 w-4" /> Compliance tips
+          </Button>
           <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
             {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
             {generating ? "Writing..." : "Generate with AI"}
