@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   Star,
   Check,
+  Database,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -50,9 +52,9 @@ const features = [
     desc: "Real-time conversion across every funnel stage. See what's moving — and what's stuck.",
   },
   {
-    icon: Shield,
-    title: "Enterprise Ready",
-    desc: "SOC 2 compliant, granular permissions, and full audit logs.",
+    icon: Database,
+    title: "Bring Your Own Database",
+    desc: "Connect your own Postgres or Supabase. Your leads, your data, your control — zero lock-in.",
   },
 ];
 
@@ -81,66 +83,72 @@ type Tier = {
 const tiers: Tier[] = [
   {
     name: "Free",
-    tagline: "For solo sellers exploring EngageIQ",
+    tagline: "Try EngageIQ — no commitment",
     monthly: 0,
     cta: "Get started free",
     highlight: false,
     features: [
-      "Up to 50 leads",
-      "20 AI emails / month",
+      "10 leads",
+      "10 AI emails / month",
       "Basic AI lead scoring",
       "1 user",
+      "Bring Your Own Database (BYOD) supported",
       "Community support",
     ],
   },
   {
     name: "Starter",
-    tagline: "For small teams getting serious about outbound",
+    tagline: "For solo founders & small teams · 7-day free trial",
     monthly: 49,
-    cta: "Subscribe to Starter",
+    cta: "Start 7-day free trial",
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
     features: [
-      "Up to 2,500 leads",
+      "2,500 leads",
+      "2,000 AI emails / month",
       "Full AI deal intelligence",
       "3 users included",
-      "Unlimited email composer",
       "1 automation sequence",
+      "Bring Your Own Database (BYOD)",
       "Email support",
     ],
   },
   {
-    name: "Pro",
-    tagline: "For growing revenue teams that need scale",
+    name: "Growth",
+    tagline: "For teams scaling outbound seriously",
     monthly: 149,
-    cta: "Subscribe to Pro",
+    cta: "Subscribe to Growth",
     highlight: true,
-    priceMonthly: "pro_monthly",
-    priceYearly: "pro_yearly",
+    priceMonthly: "growth_monthly",
+    priceYearly: "growth_yearly",
     features: [
-      "Unlimited leads",
+      "4,000 leads",
+      "4,000 AI emails / month",
       "Advanced intent + fit scoring",
-      "10 users included",
+      "5 users included",
       "Unlimited automations",
       "Pipeline analytics",
-      "Bring your own AI keys (OpenAI, Anthropic, etc.)",
-      "Priority support",
+      "Bring Your Own Database (BYOD)",
+      "Priority email support",
     ],
   },
   {
-    name: "Enterprise",
-    tagline: "For organizations with custom needs",
-    monthly: null,
-    cta: "Contact sales",
+    name: "Scale",
+    tagline: "Unlimited everything · for power users",
+    monthly: 299,
+    cta: "Subscribe to Scale",
     highlight: false,
-    contact: true,
+    priceMonthly: "scale_monthly",
+    priceYearly: "scale_yearly",
     features: [
-      "Everything in Pro",
-      "Granular permissions & audit logs",
-      "Dedicated success manager",
-      "Priority onboarding & migration support",
-      "99.9% SLA",
+      "Unlimited leads",
+      "Unlimited AI emails",
+      "10 users included",
+      "Bring Your Own Database (BYOD) — recommended",
+      "Bring your own AI keys (OpenAI, Anthropic)",
+      "Priority queue + faster response times",
+      "Add-ons available on request",
     ],
   },
 ];
@@ -248,6 +256,15 @@ export default function Landing() {
             a real opportunity worth your time.
           </p>
 
+          {/* BYOD highlight */}
+          <div
+            className="mt-7 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-sm font-semibold text-emerald-700 dark:text-emerald-400 animate-fade-up"
+            style={{ animationDelay: "180ms" }}
+          >
+            <Database className="h-4 w-4" />
+            <span>Bring Your Own Database — your data never leaves your control</span>
+          </div>
+
           <div
             className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up"
             style={{ animationDelay: "240ms" }}
@@ -265,8 +282,8 @@ export default function Landing() {
             className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground animate-fade-up"
             style={{ animationDelay: "360ms" }}
           >
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free 14-day trial</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> No credit card</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> 7-day Starter trial</span>
+            <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Paddle</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Cancel anytime</span>
           </div>
         </div>
@@ -475,8 +492,8 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
-            All plans include a 14-day free trial · Cancel anytime · Prices exclude payment processing fees
-            (5% + 50¢ per transaction, passed through from our payment gateway)
+            Free plan is fully free — no card needed. Starter includes a 7-day free trial (card on file, cancel anytime).
+            All plans support Bring Your Own Database. Prices exclude payment processing fees.
           </p>
         </div>
       </section>
@@ -490,7 +507,7 @@ export default function Landing() {
               Start closing more deals today
             </h2>
             <p className="relative mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Join thousands of teams who trust EngageIQ to power their revenue engine.
+              Join early adopters using EngageIQ to power their revenue engine — with full control of their data.
             </p>
             <div className="relative mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -504,9 +521,9 @@ export default function Landing() {
                 size="lg"
                 variant="outline"
                 className="h-12 px-8 text-base"
-                onClick={() => (window.location.href = "mailto:sales@engageiqlk.com?subject=EngageIQ%20-%20Talk%20to%20sales")}
+                onClick={() => navigate(user ? "/app" : "/auth?next=/#pricing")}
               >
-                Talk to sales
+                See plans
               </Button>
             </div>
           </div>
