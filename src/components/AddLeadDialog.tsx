@@ -171,6 +171,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       role: parsed.data.role || null,
       email: parsed.data.email || null,
       industry: parsed.data.industry || null,
+      country: parsed.data.country || null,
       systems_in_use: toArray(parsed.data.systems_in_use),
       pain_points: toArray(parsed.data.pain_points),
       notes: parsed.data.notes || null,
