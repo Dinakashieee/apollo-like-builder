@@ -264,6 +264,32 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
               </div>
             </div>
             <div>
+              <Label className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-primary" /> Country you're contacting them in
+              </Label>
+              <Select
+                value={country}
+                onValueChange={(v) => { setCountry(v); setCountryTouched(true); }}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select country (drives compliance rules)" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name} <span className="text-muted-foreground">· {c.region}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {country && findCountry(country) && (
+                <p className="mt-2 text-xs text-muted-foreground rounded-md border border-border/60 bg-muted/40 p-2">
+                  <strong className="text-primary-deep">{findCountry(country)!.law}:</strong>{" "}
+                  {findCountry(country)!.lawSummary}
+                </p>
+              )}
+            </div>
+            <div>
               <Label>Known pain points (comma-separated)</Label>
               <Input
                 value={painPoints}
