@@ -52,9 +52,9 @@ const features = [
     desc: "Real-time conversion across every funnel stage. See what's moving — and what's stuck.",
   },
   {
-    icon: Shield,
-    title: "Enterprise Ready",
-    desc: "SOC 2 compliant, granular permissions, and full audit logs.",
+    icon: Database,
+    title: "Bring Your Own Database",
+    desc: "Connect your own Postgres or Supabase. Your leads, your data, your control — zero lock-in.",
   },
 ];
 
@@ -256,6 +256,15 @@ export default function Landing() {
             a real opportunity worth your time.
           </p>
 
+          {/* BYOD highlight */}
+          <div
+            className="mt-7 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-sm font-semibold text-emerald-700 dark:text-emerald-400 animate-fade-up"
+            style={{ animationDelay: "180ms" }}
+          >
+            <Database className="h-4 w-4" />
+            <span>Bring Your Own Database — your data never leaves your control</span>
+          </div>
+
           <div
             className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up"
             style={{ animationDelay: "240ms" }}
@@ -273,8 +282,8 @@ export default function Landing() {
             className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground animate-fade-up"
             style={{ animationDelay: "360ms" }}
           >
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free 14-day trial</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> No credit card</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> 7-day Starter trial</span>
+            <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Paddle</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Cancel anytime</span>
           </div>
         </div>
