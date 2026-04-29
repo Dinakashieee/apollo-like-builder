@@ -87,7 +87,11 @@ export function ChatWidget({ mode }: Props) {
       setFormErrors(errs);
       return;
     }
-    const v = result.data;
+    const v: VisitorInfo = {
+      name: result.data.name,
+      business: result.data.business,
+      email: result.data.email,
+    };
     setVisitor(v);
     try {
       localStorage.setItem(VISITOR_KEY, JSON.stringify(v));
