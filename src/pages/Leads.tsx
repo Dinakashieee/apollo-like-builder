@@ -169,68 +169,109 @@ export default function Leads() {
               {loading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td className="px-5 py-4" colSpan={5}>
+                    <td className="px-5 py-4" colSpan={7}>
                       <Skeleton className="h-6 w-full" />
                     </td>
                   </tr>
                 ))}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td className="px-5 py-12 text-center text-muted-foreground" colSpan={5}>
+                  <td className="px-5 py-12 text-center text-muted-foreground" colSpan={7}>
                     {leads.length === 0
                       ? "No leads yet. Add one or import a file."
                       : "No leads match your filters."}
                   </td>
                 </tr>
               )}
-              {filtered.map((lead) => (
-                <tr key={lead.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-md bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">
-                        {lead.company_name?.slice(0, 2).toUpperCase()}
+              {filtered.map((lead) => {
+                const tempMeta = lead.last_reply_temperature
+                  ? TEMP_BADGE[lead.last_reply_temperature]
+                  : null;
+                const TempIcon = tempMeta?.icon;
+                return (
+                  <tr key={lead.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-md bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">
+                          {lead.company_name?.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
+                          {lead.industry && (
+                            <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
-                        {lead.industry && (
-                          <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <p className="text-sm text-foreground/90">{lead.contact_name || "—"}</p>
-                    {lead.role && (
-                      <p className="text-[11px] text-muted-foreground">{lead.role}</p>
-                    )}
-                  </td>
-                  <td className="px-5 py-4">
-                    <p className="text-sm text-muted-foreground">{lead.email || "—"}</p>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="text-sm font-bold text-primary-deep">{lead.score ?? 0}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <Select
-                      value={lead.status}
-                      onValueChange={(v) => updateStatus(lead.id, v as Status, lead.company_name)}
-                    >
-                      <SelectTrigger className={`h-7 text-xs w-28 ${STATUS_STYLES[lead.status as Status]}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUSES.map((s) => (
-                          <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="text-sm text-foreground/90">{lead.contact_name || "—"}</p>
+                      {lead.role && (
+                        <p className="text-[11px] text-muted-foreground">{lead.role}</p>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="text-sm text-muted-foreground">{lead.email || "—"}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      {tempMeta && TempIcon ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md w-fit ${tempMeta.cls}`}>
+                            <TempIcon className="h-3 w-3" />
+                            {tempMeta.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {lead.reply_count ?? 0} repl{(lead.reply_count ?? 0) === 1 ? "y" : "ies"}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-sm font-bold text-primary-deep">{lead.score ?? 0}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <Select
+                        value={lead.status}
+                        onValueChange={(v) => updateStatus(lead.id, v as Status, lead.company_name)}
+                      >
+                        <SelectTrigger className={`h-7 text-xs w-28 ${STATUS_STYLES[lead.status as Status]}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATUSES.map((s) => (
+                            <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Button size="sm" variant="ghost" onClick={() => setConvLead(lead)}>
+                        <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                        Conversation
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
+
+      <Sheet open={!!convLead} onOpenChange={(o) => !o && setConvLead(null)}>
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{convLead?.contact_name || convLead?.company_name}</SheetTitle>
+            <SheetDescription>
+              {convLead?.company_name} · {convLead?.email || "no email on file"}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            {convLead && <LeadConversation leadId={convLead.id} />}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
