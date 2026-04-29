@@ -262,80 +262,70 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
                 />
               </div>
             </div>
-            <div>
-              <Label className="flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-primary" /> Country you're contacting them in
-              </Label>
-              <Select
-                value={country}
-                onValueChange={(v) => { setCountry(v); setCountryTouched(true); }}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select country (drives compliance rules)" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.name} <span className="text-muted-foreground">· {c.region}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {country && findCountry(country) && (
-                <p className="mt-2 text-xs text-muted-foreground rounded-md border border-border/60 bg-muted/40 p-2">
-                  <strong className="text-primary-deep">{findCountry(country)!.law}:</strong>{" "}
-                  {findCountry(country)!.lawSummary}
-                </p>
-              )}
-            </div>
-            <div>
-              <Label>Known pain points (comma-separated)</Label>
-              <Input
-                value={painPoints}
-                onChange={(e) => setPainPoints(e.target.value)}
-                placeholder="manual reconciliation, slow month-end close"
-              />
-            </div>
-            <div className="rounded-lg border border-dashed p-3 space-y-2 bg-muted/30">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  Don't know the systems or pain points? Let AI infer them from public signals
-                  (job posts, news, leadership changes).
-                </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={handleAutoFind}
-                  disabled={enriching || !companyName.trim()}
-                >
-                  {enriching ? (
-                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Finding…</>
-                  ) : (
-                    <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-find from web</>
-                  )}
-                </Button>
+              <div>
+                <Label className="flex items-center gap-1.5 mb-1.5">
+                  <Globe className="h-3.5 w-3.5 text-primary" /> Country you're contacting them in
+                </Label>
+                <CountryPicker
+                  value={country}
+                  onChange={(v) => { setCountry(v); setCountryTouched(true); }}
+                />
+                {country && findCountry(country) && (
+                  <p className="mt-2 text-xs text-muted-foreground rounded-md border border-border/60 bg-muted/40 p-2">
+                    <strong className="text-primary-deep">{findCountry(country)!.law}:</strong>{" "}
+                    {findCountry(country)!.lawSummary}
+                  </p>
+                )}
               </div>
-              {(enrichSignals.length > 0 || enrichConfidence) && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  {enrichConfidence && (
-                    <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                      {enrichConfidence} confidence
-                    </span>
-                  )}
-                  {enrichSignals.map((s, i) => (
-                    <span key={i} className="text-[11px] px-1.5 py-0.5 rounded bg-background border text-muted-foreground">
-                      {s}
-                    </span>
-                  ))}
+              <div>
+                <Label>Known pain points (comma-separated)</Label>
+                <Input
+                  value={painPoints}
+                  onChange={(e) => setPainPoints(e.target.value)}
+                  placeholder="manual reconciliation, slow month-end close"
+                />
+              </div>
+              <div className="rounded-lg border border-dashed p-3 space-y-2 bg-muted/30">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-xs text-muted-foreground">
+                    Don't know the systems or pain points? Let AI infer them from public signals
+                    (job posts, news, leadership changes).
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAutoFind}
+                    disabled={enriching || !companyName.trim()}
+                  >
+                    {enriching ? (
+                      <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Finding…</>
+                    ) : (
+                      <><Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-find from web</>
+                    )}
+                  </Button>
                 </div>
-              )}
+                {(enrichSignals.length > 0 || enrichConfidence) && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {enrichConfidence && (
+                      <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                        {enrichConfidence} confidence
+                      </span>
+                    )}
+                    {enrichSignals.map((s, i) => (
+                      <span key={i} className="text-[11px] px-1.5 py-0.5 rounded bg-background border text-muted-foreground">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              </div>
             </div>
-            <div>
-              <Label>Notes</Label>
-              <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
-            </div>
-            <DialogFooter>
+            <DialogFooter className="px-6 py-4 border-t shrink-0 bg-background">
               <Button type="submit" disabled={submitting} className="bg-gradient-primary">
                 {submitting ? "Adding..." : "Add lead"}
               </Button>
