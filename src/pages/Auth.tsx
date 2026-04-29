@@ -64,6 +64,14 @@ export default function Auth() {
           toast({ title: "Invalid input", description: parsed.error.errors[0].message, variant: "destructive" });
           return;
         }
+        if (!complianceAck) {
+          toast({
+            title: "Please acknowledge the compliance terms",
+            description: "You must agree to follow anti-spam and data-protection laws to use EngageIQ.",
+            variant: "destructive",
+          });
+          return;
+        }
         const redirectUrl = `${window.location.origin}/app`;
         const { error } = await supabase.auth.signUp({
           email: parsed.data.email,
