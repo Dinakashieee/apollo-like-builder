@@ -372,6 +372,14 @@ export default function Automation() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTipsOpen(true)}
+            className="gap-1.5"
+          >
+            <ShieldCheck className="h-4 w-4" /> Compliance tips
+          </Button>
           {sequences.length === 0 && (
             <Button onClick={seedDefault} disabled={seeding} variant="outline">
               {seeding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
@@ -381,6 +389,11 @@ export default function Automation() {
           <Button onClick={createBlank}><Plus className="h-4 w-4 mr-1" />New sequence</Button>
         </div>
       </div>
+
+      <EmailBestPracticesDialog
+        open={tipsOpen}
+        onOpenChange={(o) => setTipsOpen(o ? true : undefined)}
+      />
 
       <SenderSettingsCard />
 
