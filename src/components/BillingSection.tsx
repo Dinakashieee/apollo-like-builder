@@ -243,7 +243,7 @@ export function BillingSection() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Plan prices exclude payment processing fees. Upgrades are prorated immediately; downgrades take effect at your next renewal.
+        Upgrades are prorated immediately; downgrades take effect at your next renewal. Local taxes added at checkout where required.
       </p>
     </section>
   );

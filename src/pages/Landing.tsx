@@ -493,7 +493,7 @@ export default function Landing() {
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
             Free plan is fully free — no card needed. Paid plans bill immediately and you can cancel anytime from billing.
-            All plans support Bring Your Own Database. Prices exclude payment processing fees.
+            All plans support Bring Your Own Database. Local taxes added at checkout where required by law.
           </p>
         </div>
       </section>
