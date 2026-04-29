@@ -98,9 +98,9 @@ const tiers: Tier[] = [
   },
   {
     name: "Starter",
-    tagline: "For solo founders & small teams · 7-day free trial",
+    tagline: "For solo founders & small teams",
     monthly: 49,
-    cta: "Start 7-day free trial",
+    cta: "Subscribe to Starter",
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
