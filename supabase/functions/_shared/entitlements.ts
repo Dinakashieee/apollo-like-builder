@@ -3,8 +3,8 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 export const FREE_LIMITS = {
-  leads: 50,
-  ai_emails: 20,
+  leads: 10,
+  ai_emails: 10,
 } as const;
 
 export const STARTER_LIMITS = {
@@ -12,7 +12,12 @@ export const STARTER_LIMITS = {
   ai_emails: 2000,
 } as const;
 
-export type Tier = "free" | "starter" | "pro";
+export const GROWTH_LIMITS = {
+  leads: 4000,
+  ai_emails: 4000,
+} as const;
+
+export type Tier = "free" | "starter" | "growth" | "pro";
 
 export async function getWorkspaceTier(
   admin: SupabaseClient,
