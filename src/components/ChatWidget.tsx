@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "@/hooks/use-toast";
@@ -13,11 +15,28 @@ type Props = {
   mode: "support" | "assistant";
 };
 
-const GREETINGS: Record<Props["mode"], string> = {
-  support:
-    "👋 Hi! I'm EngageIQ's assistant. Ask me about features, pricing, or how to get started.",
-  assistant:
-    "👋 Hey! I can help you prioritize leads, draft outreach ideas, and reason about your pipeline. What's on your mind?",
+type VisitorInfo = {
+  name: string;
+  business: string;
+  email: string;
+};
+
+const VISITOR_KEY = "engageiq_support_visitor";
+
+const visitorSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
+  business: z.string().trim().min(1, "Business name is required").max(150, "Max 150 characters"),
+  email: z.string().trim().email("Enter a valid email").max(255, "Max 255 characters"),
+});
+
+const greeting = (mode: Props["mode"], visitor?: VisitorInfo) => {
+  if (mode === "assistant") {
+    return "👋 Hey! I can help you prioritize leads, draft outreach ideas, and reason about your pipeline. What's on your mind?";
+  }
+  if (visitor) {
+    return `👋 Hi ${visitor.name}! Thanks for reaching out from ${visitor.business}. Ask me anything about EngageIQ — features, pricing, or getting started.`;
+  }
+  return "👋 Hi! I'm EngageIQ's assistant. Ask me about features, pricing, or how to get started.";
 };
 
 export function ChatWidget({ mode }: Props) {
@@ -26,8 +45,22 @@ export function ChatWidget({ mode }: Props) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Pre-chat form (support mode only)
+  const [visitor, setVisitor] = useState<VisitorInfo | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(VISITOR_KEY);
+      return raw ? (JSON.parse(raw) as VisitorInfo) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [form, setForm] = useState<VisitorInfo>({ name: "", business: "", email: "" });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof VisitorInfo, string>>>({});
+
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: GREETINGS[mode] },
+    { role: "assistant", content: greeting(mode, visitor ?? undefined) },
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +72,31 @@ export function ChatWidget({ mode }: Props) {
 
   // Don't render assistant mode if no workspace/user
   if (mode === "assistant" && (!user || !current)) return null;
+
+  const showPreChatForm = mode === "support" && !visitor;
+
+  const submitPreChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = visitorSchema.safeParse(form);
+    if (!result.success) {
+      const errs: Partial<Record<keyof VisitorInfo, string>> = {};
+      result.error.issues.forEach((i) => {
+        const k = i.path[0] as keyof VisitorInfo;
+        if (!errs[k]) errs[k] = i.message;
+      });
+      setFormErrors(errs);
+      return;
+    }
+    const v = result.data;
+    setVisitor(v);
+    try {
+      localStorage.setItem(VISITOR_KEY, JSON.stringify(v));
+    } catch {
+      /* ignore */
+    }
+    setMessages([{ role: "assistant", content: greeting("support", v) }]);
+    setFormErrors({});
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -70,7 +128,10 @@ export function ChatWidget({ mode }: Props) {
 
       const body =
         mode === "support"
-          ? { messages: next.filter((m) => m.role !== "assistant" || messages.indexOf(m) > 0) }
+          ? {
+              messages: next.filter((m) => m.role !== "assistant" || messages.indexOf(m) > 0),
+              visitor: visitor ?? undefined,
+            }
           : { messages: next, workspace_id: current?.id };
 
       const resp = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
@@ -156,58 +217,121 @@ export function ChatWidget({ mode }: Props) {
               {mode === "support" ? "EngageIQ Support" : "AI Assistant"}
             </p>
             <p className="text-xs opacity-80">
-              {mode === "support" ? "Ask anything about the product" : "Powered by your workspace data"}
+              {mode === "support"
+                ? visitor
+                  ? `Chatting as ${visitor.name}`
+                  : "Tell us a bit about you to start"
+                : "Powered by your workspace data"}
             </p>
           </div>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                    m.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
-                  }`}
-                >
-                  {m.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
-                      <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
+          {showPreChatForm ? (
+            <form onSubmit={submitPreChat} className="flex-1 overflow-y-auto p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Before we start, please share a few details so we can help you better.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="pc-name">Your name</Label>
+                <Input
+                  id="pc-name"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Jane Doe"
+                  maxLength={100}
+                  autoComplete="name"
+                />
+                {formErrors.name && (
+                  <p className="text-xs text-destructive">{formErrors.name}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pc-business">Business name</Label>
+                <Input
+                  id="pc-business"
+                  value={form.business}
+                  onChange={(e) => setForm((f) => ({ ...f, business: e.target.value }))}
+                  placeholder="Acme Inc."
+                  maxLength={150}
+                  autoComplete="organization"
+                />
+                {formErrors.business && (
+                  <p className="text-xs text-destructive">{formErrors.business}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pc-email">Business email</Label>
+                <Input
+                  id="pc-email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="jane@acme.com"
+                  maxLength={255}
+                  autoComplete="email"
+                />
+                {formErrors.email && (
+                  <p className="text-xs text-destructive">{formErrors.email}</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full">
+                Start chat
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">
+                We use this only to follow up on your inquiry.
+              </p>
+            </form>
+          ) : (
+            <>
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.map((m, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground"
+                      }`}
+                    >
+                      {m.role === "assistant" ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
+                          <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        m.content
+                      )}
                     </div>
-                  ) : (
-                    m.content
-                  )}
-                </div>
+                  </div>
+                ))}
+                {busy && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> thinking…
+                  </div>
+                )}
               </div>
-            ))}
-            {busy && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" /> thinking…
-              </div>
-            )}
-          </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              send();
-            }}
-            className="p-3 border-t border-border flex gap-2"
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={mode === "support" ? "Ask about pricing, features…" : "Ask about your leads…"}
-              disabled={busy}
-              className="flex-1"
-            />
-            <Button type="submit" size="icon" disabled={busy || !input.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  send();
+                }}
+                className="p-3 border-t border-border flex gap-2"
+              >
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={mode === "support" ? "Ask about pricing, features…" : "Ask about your leads…"}
+                  disabled={busy}
+                  className="flex-1"
+                />
+                <Button type="submit" size="icon" disabled={busy || !input.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </>
+          )}
         </div>
       )}
     </>
