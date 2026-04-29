@@ -17,7 +17,15 @@ export function usePaddleCheckout() {
       const paddlePriceId = await getPaddlePriceId(options.priceId);
 
       window.Paddle.Checkout.open({
-        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        items: [
+          {
+            priceId: paddlePriceId,
+            quantity: 1,
+            // 7-day free trial. Paddle will auto-charge the card on day 8
+            // unless the customer cancels from the customer portal.
+            trialPeriod: { interval: "day", frequency: 7 },
+          },
+        ],
         customer: options.customerEmail ? { email: options.customerEmail } : undefined,
         customData: options.userId ? { userId: options.userId } : undefined,
         settings: {
