@@ -21,9 +21,6 @@ export function usePaddleCheckout() {
           {
             priceId: paddlePriceId,
             quantity: 1,
-            // 7-day free trial. Paddle will auto-charge the card on day 8
-            // unless the customer cancels from the customer portal.
-            trialPeriod: { interval: "day", frequency: 7 },
           },
         ],
         customer: options.customerEmail ? { email: options.customerEmail } : undefined,

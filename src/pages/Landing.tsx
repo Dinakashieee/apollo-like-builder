@@ -98,9 +98,9 @@ const tiers: Tier[] = [
   },
   {
     name: "Starter",
-    tagline: "For solo founders & small teams · 7-day free trial",
+    tagline: "For solo founders & small teams",
     monthly: 49,
-    cta: "Start 7-day free trial",
+    cta: "Subscribe to Starter",
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
@@ -282,7 +282,7 @@ export default function Landing() {
             className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground animate-fade-up"
             style={{ animationDelay: "360ms" }}
           >
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> 7-day Starter trial</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free plan available</span>
             <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Paddle</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Cancel anytime</span>
           </div>
@@ -492,7 +492,7 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
-            Free plan is fully free — no card needed. Starter includes a 7-day free trial (card on file, cancel anytime).
+            Free plan is fully free — no card needed. Paid plans bill immediately and you can cancel anytime from billing.
             All plans support Bring Your Own Database. Prices exclude payment processing fees.
           </p>
         </div>

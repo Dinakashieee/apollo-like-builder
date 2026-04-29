@@ -11,25 +11,9 @@ import { toast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
 import { Sparkles, Mail, Lock, User as UserIcon } from "lucide-react";
 
-const FREE_EMAIL_DOMAINS = new Set([
-  "gmail.com","googlemail.com","yahoo.com","yahoo.co.uk","yahoo.co.in","ymail.com","rocketmail.com",
-  "hotmail.com","hotmail.co.uk","outlook.com","outlook.in","live.com","msn.com",
-  "icloud.com","me.com","mac.com",
-  "aol.com","protonmail.com","proton.me","pm.me","gmx.com","gmx.net","mail.com","zoho.com",
-  "yandex.com","yandex.ru","tutanota.com","fastmail.com","hey.com","qq.com","163.com","126.com",
-]);
-
-const isBusinessEmail = (email: string) => {
-  const domain = email.trim().toLowerCase().split("@")[1];
-  if (!domain) return false;
-  return !FREE_EMAIL_DOMAINS.has(domain);
-};
-
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Name is too short").max(80),
-  email: z.string().trim().email("Invalid email").refine(isBusinessEmail, {
-    message: "Please use your business email address (free providers like Gmail are not allowed).",
-  }),
+  email: z.string().trim().email("Invalid email"),
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
 });
 const signInSchema = z.object({
@@ -170,10 +154,10 @@ export default function Auth() {
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
-              ? "Sign in to your EngageIQ workspace."
+          ? "Sign in to your EngageIQ workspace."
               : mode === "signup"
-              ? "Use your business email to create an account."
-              : "Enter your business email and we'll send you a reset link."}
+              ? "Use any email — business or personal — to create an account."
+              : "Enter your email and we'll send you a reset link."}
           </p>
 
           {mode !== "forgot" && (
@@ -222,7 +206,7 @@ export default function Auth() {
               </div>
             )}
             <div>
-              <Label htmlFor="email">Business email</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -230,14 +214,14 @@ export default function Auth() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
+                  placeholder="you@example.com"
                   className="pl-9 h-11"
                   required
                 />
               </div>
               {mode === "signup" && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Free email providers (Gmail, Yahoo, Outlook, etc.) are not allowed.
+                  Business or personal email — both are welcome.
                 </p>
               )}
             </div>

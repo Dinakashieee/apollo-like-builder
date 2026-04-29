@@ -187,14 +187,14 @@ export function BillingSection() {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             <Button variant="outline" onClick={() => subscribe(billing === "year" ? "starter_yearly" : "starter_monthly")}>
-              Start 7-day free trial — Starter ({billing === "year" ? "$470/yr" : "$49/mo"} after)
+              Subscribe to Starter ({billing === "year" ? "$470/yr" : "$49/mo"})
             </Button>
             <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
-              Start 7-day free trial — Pro ({billing === "year" ? "$1,430/yr" : "$149/mo"} after)
+              Subscribe to Pro ({billing === "year" ? "$1,430/yr" : "$149/mo"})
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Card required. We won't charge during the 7-day trial — cancel anytime from billing. After day 7, your card is charged automatically and billing continues until you cancel.
+            Card required. You'll be charged immediately and billing continues until you cancel — cancel anytime from billing.
           </p>
         </div>
       )}
