@@ -31,6 +31,7 @@ const schema = z.object({
   role: z.string().trim().max(80).optional(),
   email: z.string().trim().email().max(120).optional().or(z.literal("")),
   industry: z.string().trim().max(80).optional(),
+  country: z.string().trim().max(2).optional(),
   systems_in_use: z.string().trim().max(300).optional(),
   pain_points: z.string().trim().max(500).optional(),
   notes: z.string().trim().max(1000).optional(),
