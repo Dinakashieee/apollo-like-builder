@@ -34,7 +34,12 @@ Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
 Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}
 
-Generate competitor analysis and ideal target companies.`;
+Generate competitor analysis AND a list of specific real companies this seller should target. For each target company, include:
+- the real company name & website
+- WHY they are a fit (concrete reason tied to the seller's product)
+- DESIGNATIONS / job titles to pitch to (decision makers + influencers)
+- FOCUS AREAS / departments or use-cases to pitch
+- 1-3 REFERENCE LINKS (official site, recent news, careers page, press release, funding announcement) so the user can verify the reasoning. Use only real, well-known URLs you are confident exist (homepages, /about, /careers, Wikipedia, Crunchbase). Never invent URLs.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -42,7 +47,7 @@ Generate competitor analysis and ideal target companies.`;
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a B2B market analyst. Provide realistic competitive and ICP analysis." },
+          { role: "system", content: "You are a B2B market analyst. Provide realistic competitive analysis AND name specific real-world target companies with verifiable reference links. Only use URLs you are highly confident exist (official homepages, Wikipedia, Crunchbase, well-known press). Never fabricate URLs or company names." },
           { role: "user", content: userPrompt },
         ],
         tools: [{
@@ -64,23 +69,59 @@ Generate competitor analysis and ideal target companies.`;
                       weaknesses: { type: "array", items: { type: "string" } },
                       audience: { type: "string" },
                       your_advantage: { type: "string" },
+                      references: {
+                        type: "array",
+                        description: "1-2 verifiable URLs about this competitor (homepage, Wikipedia, Crunchbase).",
+                        items: {
+                          type: "object",
+                          properties: {
+                            label: { type: "string" },
+                            url: { type: "string" },
+                          },
+                          required: ["label", "url"],
+                        },
+                      },
                     },
-                    required: ["name", "category", "strengths", "weaknesses", "audience", "your_advantage"],
+                    required: ["name", "category", "strengths", "weaknesses", "audience", "your_advantage", "references"],
                   },
                 },
                 targets: {
                   type: "array",
-                  description: "4-6 ideal customer profiles",
+                  description: "5-8 specific real companies to target",
                   items: {
                     type: "object",
                     properties: {
-                      type: { type: "string", description: "Company type/size" },
+                      company: { type: "string", description: "Real company name" },
+                      website: { type: "string", description: "Official website URL" },
                       industry: { type: "string" },
-                      problem: { type: "string" },
-                      why: { type: "string", description: "Why you can sell to them" },
+                      size: { type: "string", description: "e.g. 'Mid-market (200-1000)', 'Enterprise (5000+)'" },
+                      problem: { type: "string", description: "Specific pain this company likely has" },
+                      why: { type: "string", description: "Why this seller is a fit — concrete reason" },
+                      designations: {
+                        type: "array",
+                        description: "3-6 job titles/designations to pitch (e.g. 'VP of Sales', 'Head of Revenue Operations')",
+                        items: { type: "string" },
+                      },
+                      focus_areas: {
+                        type: "array",
+                        description: "3-5 departments / use-cases / pitch angles (e.g. 'Outbound SDR team efficiency', 'Pipeline forecasting')",
+                        items: { type: "string" },
+                      },
+                      references: {
+                        type: "array",
+                        description: "1-3 reference links so the user can verify (homepage, recent news, careers, funding announcement, Crunchbase, Wikipedia).",
+                        items: {
+                          type: "object",
+                          properties: {
+                            label: { type: "string", description: "Short label e.g. 'Official site', 'Series C funding (TechCrunch)', 'Careers'" },
+                            url: { type: "string" },
+                          },
+                          required: ["label", "url"],
+                        },
+                      },
                       level: { type: "string", enum: ["high", "medium", "low"] },
                     },
-                    required: ["type", "industry", "problem", "why", "level"],
+                    required: ["company", "website", "industry", "size", "problem", "why", "designations", "focus_areas", "references", "level"],
                   },
                 },
               },
