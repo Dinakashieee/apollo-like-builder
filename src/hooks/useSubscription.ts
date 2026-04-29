@@ -62,8 +62,16 @@ export function useSubscription(userId: string | undefined) {
         subscription.current_period_end != null &&
         new Date(subscription.current_period_end) > new Date()));
 
-  const tier: "free" | "starter" | "pro" =
-    !isActive ? "free" : subscription?.product_id === "pro_plan" ? "pro" : "starter";
+  const tier: "free" | "starter" | "growth" | "pro" =
+    !isActive
+      ? "free"
+      : subscription?.product_id === "scale_plan"
+      ? "pro"
+      : subscription?.product_id === "growth_plan"
+      ? "growth"
+      : subscription?.product_id === "pro_plan"
+      ? "pro"
+      : "starter";
 
   return { subscription, loading, isActive, tier, refetch: fetchSub };
 }
