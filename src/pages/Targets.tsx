@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair } from "lucide-react";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -47,7 +47,9 @@ export default function Targets() {
   const { current } = useWorkspace();
   const [similar, setSimilar] = useState<SimilarProduct[]>([]);
   const [targets, setTargets] = useState<TargetCompany[]>([]);
+  const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [hasCompany, setHasCompany] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,25 @@ export default function Targets() {
         setTargets(j.targets ?? []);
       } catch {}
     }
+    const claimedRaw = localStorage.getItem(`targets-claimed-${current.id}`);
+    if (claimedRaw) {
+      try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch {}
+    }
   }, [current]);
+
+  const persist = (nextSimilar: SimilarProduct[], nextTargets: TargetCompany[]) => {
+    if (!current) return;
+    localStorage.setItem(
+      `targets-${current.id}`,
+      JSON.stringify({ similar: nextSimilar, targets: nextTargets })
+    );
+  };
+
+  const persistClaimed = (next: string[]) => {
+    if (!current) return;
+    setClaimed(next);
+    localStorage.setItem(`targets-claimed-${current.id}`, JSON.stringify(next));
+  };
 
   const generate = async () => {
     if (!current) return;
@@ -87,15 +107,51 @@ export default function Targets() {
       if (data?.error) throw new Error(data.error);
       setSimilar(data.similar ?? []);
       setTargets(data.targets ?? []);
-      localStorage.setItem(
-        `targets-${current.id}`,
-        JSON.stringify({ similar: data.similar, targets: data.targets })
-      );
+      persist(data.similar ?? [], data.targets ?? []);
       toast({ title: "Insights generated" });
     } catch (e: any) {
       toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
     }
     setLoading(false);
+  };
+
+  const claimAndReplace = async (idx: number) => {
+    if (!current) return;
+    const original = targets[idx];
+    const name = original?.company ?? original?.type ?? "Target";
+    setReplacingIdx(idx);
+    try {
+      const exclude = Array.from(
+        new Set([
+          ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
+          ...claimed,
+        ])
+      );
+      const { data, error } = await supabase.functions.invoke("generate-targets", {
+        body: { workspace_id: current.id, mode: "replace", exclude },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const replacement: TargetCompany | undefined = data.targets?.[0];
+      const nextClaimed = Array.from(new Set([...claimed, name]));
+      persistClaimed(nextClaimed);
+
+      let nextTargets = [...targets];
+      if (replacement) {
+        nextTargets[idx] = replacement;
+      } else {
+        nextTargets.splice(idx, 1);
+      }
+      setTargets(nextTargets);
+      persist(similar, nextTargets);
+      toast({
+        title: `Claimed ${name}`,
+        description: replacement ? "A fresh target has been added in its place." : "Removed from your focus list.",
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't refresh", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setReplacingIdx(null);
   };
 
   return (
@@ -203,7 +259,20 @@ export default function Targets() {
 
       {/* Best companies */}
       <section>
-        <h2 className="text-xl font-display font-bold text-primary-deep mb-3">Best companies to target</h2>
+        <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
+          <div>
+            <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Hit <span className="font-semibold text-primary">Claim</span> on the ones you'll focus on — we'll instantly swap in a fresh prospect.
+            </p>
+          </div>
+          {claimed.length > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {claimed.length} claimed
+            </span>
+          )}
+        </div>
         {!loading && targets.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
             Generate to see ideal customer profiles.
@@ -213,8 +282,17 @@ export default function Targets() {
           {targets.map((t, i) => {
             const lvl = LEVEL_BADGES[t.level] ?? LEVEL_BADGES.medium;
             const title = t.company ?? t.type ?? "Target";
+            const isReplacing = replacingIdx === i;
             return (
-              <div key={i} className="card-elevated p-6">
+              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isReplacing ? "opacity-60" : ""}`}>
+                {isReplacing && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/70 backdrop-blur-sm rounded-2xl">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Finding a fresh target...
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
                     <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
@@ -290,6 +368,21 @@ export default function Targets() {
                     </div>
                   </div>
                 )}
+                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3">
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    <Flag className="h-3 w-3 inline mr-1 -mt-0.5" />
+                    Focusing on <span className="font-semibold text-primary-deep">{title}</span>? Claim it and we'll surface a new prospect.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => claimAndReplace(i)}
+                    disabled={isReplacing || replacingIdx !== null}
+                    className="bg-gradient-primary shadow-glow shrink-0"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    Claim lead
+                  </Button>
+                </div>
               </div>
             );
           })}

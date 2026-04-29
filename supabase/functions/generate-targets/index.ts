@@ -9,7 +9,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { workspace_id } = await req.json();
+    const { workspace_id, mode, exclude } = await req.json();
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized");
     const supabase = createClient(
@@ -29,10 +29,20 @@ serve(async (req) => {
       .from("products").select("name, description, category").eq("workspace_id", workspace_id);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const userPrompt = `Company: ${company.company_name}
+    const isReplace = mode === "replace";
+    const excludeList: string[] = Array.isArray(exclude) ? exclude.filter(Boolean) : [];
+
+    const baseContext = `Company: ${company.company_name}
 Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
-Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}
+Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}`;
+
+    const userPrompt = isReplace
+      ? `${baseContext}
+
+Suggest exactly ONE NEW specific real company this seller should target. It must be DIFFERENT from these already-shown companies: ${excludeList.join(", ") || "(none)"}.
+For the new target, include the real company name & website, why they are a fit, designations to pitch, focus areas, and 1-3 reference links (official site, recent news, Crunchbase, Wikipedia). Never invent URLs. Return an empty 'similar' array — only fill the 'targets' array with that single new company.`
+      : `${baseContext}
 
 Generate competitor analysis AND a list of specific real companies this seller should target. For each target company, include:
 - the real company name & website
