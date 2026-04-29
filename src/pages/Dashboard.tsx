@@ -35,6 +35,7 @@ import { useDashboardPrefs, type TileKey } from "@/hooks/useDashboardPrefs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Globe } from "lucide-react";
 import { findCountry, regionOf } from "@/lib/countries";
+import { ReplyTemperatureTile } from "@/components/ReplyTemperatureTile";
 
 type Range = "1D" | "7D" | "30D" | "QTD";
 const RANGE_DAYS: Record<Range, number> = { "1D": 1, "7D": 7, "30D": 30, "QTD": 90 };
@@ -583,6 +584,9 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Reply temperature */}
+      {showTile("reply_temperature") && <ReplyTemperatureTile />}
 
       {/* Leads by country / region */}
       {showTile("leads_geo") && (
