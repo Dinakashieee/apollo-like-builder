@@ -17,6 +17,7 @@ import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
+import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
