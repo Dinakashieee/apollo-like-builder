@@ -154,10 +154,10 @@ export default function Auth() {
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
-              ? "Sign in to your EngageIQ workspace."
+          ? "Sign in to your EngageIQ workspace."
               : mode === "signup"
-              ? "Use your business email to create an account."
-              : "Enter your business email and we'll send you a reset link."}
+              ? "Use any email — business or personal — to create an account."
+              : "Enter your email and we'll send you a reset link."}
           </p>
 
           {mode !== "forgot" && (
