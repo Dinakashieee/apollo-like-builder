@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Send, RefreshCw, Mail, ShieldCheck } from "lucide-react";
+import { Sparkles, Send, RefreshCw, Mail, ShieldCheck, Globe } from "lucide-react";
 import { EmailBestPracticesDialog } from "@/components/EmailBestPracticesDialog";
+import { findCountry } from "@/lib/countries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
