@@ -8,8 +8,8 @@ export const FREE_LIMITS = {
 } as const;
 
 export const STARTER_LIMITS = {
-  leads: 2500,
-  ai_emails: 5000,
+  leads: 1000,
+  ai_emails: 2500,
 } as const;
 
 export const GROWTH_LIMITS = {
