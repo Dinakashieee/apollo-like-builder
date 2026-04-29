@@ -89,7 +89,12 @@ export default function Terms() {
         <p>These Terms are governed by the laws of the jurisdiction in which EngageIQ is established, without regard to conflict-of-laws principles. Disputes will be resolved by the competent courts of that jurisdiction, unless mandatory consumer law provides otherwise.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">16. Contact</h2>
-        <p>Questions about these Terms? Contact EngageIQ through in-app support.</p>
+        <p>Questions about these Terms? Contact EngageIQ at <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or by post:</p>
+        <address className="not-italic mt-2 leading-relaxed">
+          <strong>EngageIQ</strong><br />
+          275 New North Road, Islington #1772<br />
+          London, N1 7AA, United Kingdom
+        </address>
       </main>
     </div>
   );

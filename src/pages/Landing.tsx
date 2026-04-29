@@ -532,15 +532,24 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-border/60 py-10 bg-card/30">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Logo />
-          <p className="text-xs text-muted-foreground">
-            © 2026 EngageIQ. Built for revenue teams who refuse to settle.
-          </p>
-          <div className="flex items-center gap-5 text-xs text-muted-foreground">
-            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link to="/terms" className="hover:text-foreground">Terms</Link>
-            <Link to="/refund" className="hover:text-foreground">Refund</Link>
+        <div className="container mx-auto px-6 flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <Logo />
+            <div className="flex items-center gap-5 text-xs text-muted-foreground">
+              <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link to="/terms" className="hover:text-foreground">Terms</Link>
+              <Link to="/refund" className="hover:text-foreground">Refund</Link>
+              <a href="mailto:support@engageiqlk.com" className="hover:text-foreground">Support</a>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 text-xs text-muted-foreground border-t border-border/40 pt-6">
+            <address className="not-italic leading-relaxed">
+              <span className="font-semibold text-foreground">EngageIQ</span><br />
+              275 New North Road, Islington #1772<br />
+              London, N1 7AA, United Kingdom<br />
+              <a href="mailto:support@engageiqlk.com" className="hover:text-foreground underline-offset-2 hover:underline">support@engageiqlk.com</a>
+            </address>
+            <p>© 2026 EngageIQ. Built for revenue teams who refuse to settle.</p>
           </div>
         </div>
       </footer>

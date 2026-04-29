@@ -29,7 +29,12 @@ export default function Refund() {
         <p>After the 14 working day refund window has passed, charges (including subscription renewals) are not automatically refundable. If a renewal was charged and you intended to cancel, contact us through in-app support — we review these requests on a case-by-case basis and aim to be fair.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">Questions</h2>
-        <p>If you have questions about this policy or a specific charge, contact EngageIQ through in-app support, or refer to <a className="underline" href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer">Paddle's Refund Policy</a>.</p>
+        <p>If you have questions about this policy or a specific charge, email <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or refer to <a className="underline" href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer">Paddle's Refund Policy</a>.</p>
+        <address className="not-italic mt-4 leading-relaxed text-sm">
+          <strong>EngageIQ</strong><br />
+          275 New North Road, Islington #1772<br />
+          London, N1 7AA, United Kingdom
+        </address>
       </main>
     </div>
   );
