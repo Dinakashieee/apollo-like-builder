@@ -8,7 +8,8 @@ import {
 
 export function PresenceIndicator() {
   const { online, count } = usePresence();
-  if (count === 0) return null;
+  // Always render — the current user is "active" by virtue of being on the page.
+  const safeCount = Math.max(count, 1);
 
   const visible = online.slice(0, 3);
   const extra = count - visible.length;
@@ -51,8 +52,11 @@ export function PresenceIndicator() {
                 </div>
               )}
             </div>
-            <span className="text-xs font-medium text-muted-foreground">
-              {count} active
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              Active
+            </span>
+            <span className="text-xs text-muted-foreground">
+              · {safeCount} online
             </span>
           </div>
         </TooltipTrigger>
