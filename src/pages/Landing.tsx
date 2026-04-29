@@ -89,7 +89,7 @@ const tiers: Tier[] = [
     highlight: false,
     features: [
       "10 leads",
-      "10 AI emails / month",
+      "25 AI emails / month",
       "Basic AI lead scoring",
       "1 user",
       "Bring Your Own Database (BYOD) supported",
