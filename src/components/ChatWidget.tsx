@@ -215,18 +215,34 @@ export function ChatWidget({ mode }: Props) {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-5 z-50 w-[360px] max-w-[calc(100vw-2.5rem)] h-[520px] max-h-[calc(100vh-8rem)] bg-card border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-          <div className="px-4 py-3 border-b border-border bg-gradient-primary text-primary-foreground">
-            <p className="font-display font-bold text-sm">
-              {mode === "support" ? "EngageIQ Support" : "AI Assistant"}
-            </p>
-            <p className="text-xs opacity-80">
-              {mode === "support"
-                ? visitor
-                  ? `Chatting as ${visitor.name}`
-                  : "Tell us a bit about you to start"
-                : "Powered by your workspace data"}
-            </p>
+        <div className="fixed bottom-24 right-5 z-50 w-[380px] max-w-[calc(100vw-2.5rem)] h-[560px] max-h-[calc(100vh-8rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+          <div className="px-4 py-3.5 border-b border-border bg-gradient-primary text-primary-foreground flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-white/15 backdrop-blur flex items-center justify-center shrink-0 ring-2 ring-white/20">
+              <MessageCircle className="h-4.5 w-4.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-bold text-sm leading-tight">
+                {mode === "support" ? "EngageIQ Support" : "AI Assistant"}
+              </p>
+              <p className="text-[11px] opacity-80 leading-tight mt-0.5 flex items-center gap-1.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                </span>
+                {mode === "support"
+                  ? visitor
+                    ? `Chatting as ${visitor.name}`
+                    : "Tell us a bit about you to start"
+                  : "Powered by your workspace data"}
+              </p>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="h-7 w-7 rounded-full hover:bg-white/15 flex items-center justify-center transition-colors"
+              aria-label="Close chat"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
           {showPreChatForm ? (
@@ -293,10 +309,10 @@ export function ChatWidget({ mode }: Props) {
                     className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                      className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${
                         m.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-foreground"
+                          ? "bg-primary text-primary-foreground rounded-br-md max-w-[80%]"
+                          : "bg-muted text-foreground rounded-bl-md max-w-[85%]"
                       }`}
                     >
                       {m.role === "assistant" ? (
@@ -304,7 +320,7 @@ export function ChatWidget({ mode }: Props) {
                           <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
                         </div>
                       ) : (
-                        m.content
+                        <span className="whitespace-pre-wrap">{m.content}</span>
                       )}
                     </div>
                   </div>
@@ -321,17 +337,23 @@ export function ChatWidget({ mode }: Props) {
                   e.preventDefault();
                   send();
                 }}
-                className="p-3 border-t border-border flex gap-2"
+                className="p-3 border-t border-border bg-card flex gap-2 items-center"
               >
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={mode === "support" ? "Ask about pricing, features…" : "Ask about your leads…"}
                   disabled={busy}
-                  className="flex-1"
+                  className="flex-1 rounded-full bg-muted/40 border-border/60 focus-visible:ring-1"
                 />
-                <Button type="submit" size="icon" disabled={busy || !input.trim()}>
-                  <Send className="h-4 w-4" />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={busy || !input.trim()}
+                  className="rounded-full bg-gradient-primary shadow-glow shrink-0 h-10 w-10"
+                  aria-label="Send message"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </form>
             </>
