@@ -81,7 +81,12 @@ export default function Privacy() {
         <p>We may update this notice from time to time. Material changes will be communicated through the app or by email.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">12. Contact</h2>
-        <p>For privacy questions or to exercise your rights, contact EngageIQ through in-app support.</p>
+        <p>For privacy questions or to exercise your rights, contact EngageIQ at <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or by post:</p>
+        <address className="not-italic mt-2 leading-relaxed">
+          <strong>EngageIQ</strong><br />
+          275 New North Road, Islington #1772<br />
+          London, N1 7AA, United Kingdom
+        </address>
       </main>
     </div>
   );
