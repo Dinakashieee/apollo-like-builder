@@ -368,6 +368,21 @@ export default function Targets() {
                     </div>
                   </div>
                 )}
+                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3">
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    <Flag className="h-3 w-3 inline mr-1 -mt-0.5" />
+                    Focusing on <span className="font-semibold text-primary-deep">{title}</span>? Claim it and we'll surface a new prospect.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => claimAndReplace(i)}
+                    disabled={isReplacing || replacingIdx !== null}
+                    className="bg-gradient-primary shadow-glow shrink-0"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                    Claim lead
+                  </Button>
+                </div>
               </div>
             );
           })}
