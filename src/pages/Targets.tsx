@@ -6,6 +6,11 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface RefLink {
+  label: string;
+  url: string;
+}
+
 interface SimilarProduct {
   name: string;
   category: string;
@@ -13,10 +18,19 @@ interface SimilarProduct {
   weaknesses: string[];
   audience: string;
   your_advantage: string;
+  references?: RefLink[];
 }
 
 interface TargetCompany {
-  type: string;
+  // new shape
+  company?: string;
+  website?: string;
+  size?: string;
+  designations?: string[];
+  focus_areas?: string[];
+  references?: RefLink[];
+  // legacy shape (kept for backward compat with cached data)
+  type?: string;
   industry: string;
   problem: string;
   why: string;
