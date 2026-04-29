@@ -106,7 +106,7 @@ const tiers: Tier[] = [
     priceYearly: "starter_yearly",
     features: [
       "2,500 leads",
-      "2,000 AI emails / month",
+      "5,000 AI emails / month",
       "Full AI deal intelligence",
       "3 users included",
       "1 automation sequence",
