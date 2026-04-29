@@ -20,10 +20,8 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Plus, Sparkles, Loader2, Globe } from "lucide-react";
 import { z } from "zod";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { COUNTRIES, findCountry, guessCountryFromEmail } from "@/lib/countries";
+import { CountryPicker } from "@/components/CountryPicker";
+import { findCountry, guessCountryFromEmail } from "@/lib/countries";
 
 const schema = z.object({
   company_name: z.string().trim().min(1, "Company required").max(120),
