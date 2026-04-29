@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
-import { Sparkles, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Sparkles, Mail, Lock, User as UserIcon, ShieldCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Name is too short").max(80),
