@@ -34,6 +34,7 @@ export default function Composer() {
   const [hasCompany, setHasCompany] = useState(false);
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!current) return;
