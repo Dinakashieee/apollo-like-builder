@@ -824,6 +824,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_dashboard_prefs: {
+        Row: {
+          updated_at: string
+          user_id: string
+          visible_tiles: string[]
+        }
+        Insert: {
+          updated_at?: string
+          user_id: string
+          visible_tiles?: string[]
+        }
+        Update: {
+          updated_at?: string
+          user_id?: string
+          visible_tiles?: string[]
+        }
+        Relationships: []
+      }
       waitlist_signups: {
         Row: {
           business_name: string
