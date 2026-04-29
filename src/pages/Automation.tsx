@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Workflow, Mail, Clock, Sparkles, Plus, Trash2, Pencil, Play, Pause,
-  UserPlus, Send, CheckCircle2, SkipForward, Loader2,
+  UserPlus, Send, CheckCircle2, SkipForward, Loader2, ShieldCheck,
 } from "lucide-react";
+import { EmailBestPracticesDialog } from "@/components/EmailBestPracticesDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -108,6 +109,7 @@ export default function Automation() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [due, setDue] = useState<DueRow[]>([]);
   const [seeding, setSeeding] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
 
   // editor state
   const [editingSeq, setEditingSeq] = useState<Sequence | null>(null);
@@ -370,6 +372,14 @@ export default function Automation() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTipsOpen(true)}
+            className="gap-1.5"
+          >
+            <ShieldCheck className="h-4 w-4" /> Compliance tips
+          </Button>
           {sequences.length === 0 && (
             <Button onClick={seedDefault} disabled={seeding} variant="outline">
               {seeding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
@@ -379,6 +389,11 @@ export default function Automation() {
           <Button onClick={createBlank}><Plus className="h-4 w-4 mr-1" />New sequence</Button>
         </div>
       </div>
+
+      <EmailBestPracticesDialog
+        open={tipsOpen}
+        onOpenChange={(o) => setTipsOpen(o ? true : undefined)}
+      />
 
       <SenderSettingsCard />
 
