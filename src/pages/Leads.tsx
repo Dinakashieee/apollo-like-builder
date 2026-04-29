@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter, Download, Flame, Sun, Snowflake, Minus, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,8 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddLeadDialog } from "@/components/AddLeadDialog";
 import { ImportDialog } from "@/components/ImportDialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { LeadConversation } from "@/components/LeadConversation";
 import {
   Select,
   SelectContent,
@@ -17,6 +19,13 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { useAuth } from "@/hooks/useAuth";
+
+const TEMP_BADGE: Record<string, { cls: string; icon: typeof Flame; label: string }> = {
+  hot: { cls: "bg-hot/15 text-hot", icon: Flame, label: "Hot" },
+  warm: { cls: "bg-warm/15 text-warm", icon: Sun, label: "Warm" },
+  cold: { cls: "bg-primary/15 text-primary", icon: Snowflake, label: "Cold" },
+  neutral: { cls: "bg-muted text-muted-foreground", icon: Minus, label: "Neutral" },
+};
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 type Status = (typeof STATUSES)[number];
