@@ -127,6 +127,14 @@ export default function Composer() {
               {aiEmailsUsed}/{aiEmailsLimit} AI emails this month
             </span>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTipsOpen(true)}
+            className="gap-1.5"
+          >
+            <ShieldCheck className="h-4 w-4" /> Compliance tips
+          </Button>
           <Button onClick={generate} disabled={generating || !selectedLead} className="bg-gradient-primary shadow-glow">
             {generating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
             {generating ? "Writing..." : "Generate with AI"}
