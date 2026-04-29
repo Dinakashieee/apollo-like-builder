@@ -282,8 +282,17 @@ export default function Targets() {
           {targets.map((t, i) => {
             const lvl = LEVEL_BADGES[t.level] ?? LEVEL_BADGES.medium;
             const title = t.company ?? t.type ?? "Target";
+            const isReplacing = replacingIdx === i;
             return (
-              <div key={i} className="card-elevated p-6">
+              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isReplacing ? "opacity-60" : ""}`}>
+                {isReplacing && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/70 backdrop-blur-sm rounded-2xl">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Finding a fresh target...
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
                     <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
