@@ -492,7 +492,7 @@ export default function Landing() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
-            Free plan is fully free — no card needed. Starter includes a 7-day free trial (card on file, cancel anytime).
+            Free plan is fully free — no card needed. Paid plans bill immediately and you can cancel anytime from billing.
             All plans support Bring Your Own Database. Prices exclude payment processing fees.
           </p>
         </div>
