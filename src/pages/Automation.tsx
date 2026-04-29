@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Workflow, Mail, Clock, Sparkles, Plus, Trash2, Pencil, Play, Pause,
-  UserPlus, Send, CheckCircle2, SkipForward, Loader2,
+  UserPlus, Send, CheckCircle2, SkipForward, Loader2, ShieldCheck,
 } from "lucide-react";
+import { EmailBestPracticesDialog } from "@/components/EmailBestPracticesDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
