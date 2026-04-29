@@ -215,7 +215,7 @@ export default function Dashboard() {
       );
       const pipeline = pipelineLeads.length * 4000;
       const pipelinePrev = pipelinePrevLeads.length * 4000;
-      const meetings = leads.filter((l) => l.status === "meeting" || l.status === "won").length;
+      const meetings = leads.filter((l) => l.status === "qualified" || l.status === "won").length;
 
       setStats({
         emails: sent,
@@ -240,7 +240,7 @@ export default function Dashboard() {
           (l) => l.created_at.slice(0, 10) === dayKey,
         );
         const stalled = dayLeads.filter(
-          (l) => l.status === "lost" || l.status === "cold",
+          (l) => l.status === "lost",
         ).length;
         vel.push({
           day: d.toLocaleDateString("en", { month: "short", day: "numeric" }),
