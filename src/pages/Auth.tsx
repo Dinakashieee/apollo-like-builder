@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
-import { Sparkles, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Sparkles, Mail, Lock, User as UserIcon, ShieldCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Name is too short").max(80),
@@ -26,6 +27,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [complianceAck, setComplianceAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,6 +62,14 @@ export default function Auth() {
         const parsed = signUpSchema.safeParse({ fullName, email, password });
         if (!parsed.success) {
           toast({ title: "Invalid input", description: parsed.error.errors[0].message, variant: "destructive" });
+          return;
+        }
+        if (!complianceAck) {
+          toast({
+            title: "Please acknowledge the compliance terms",
+            description: "You must agree to follow anti-spam and data-protection laws to use EngageIQ.",
+            variant: "destructive",
+          });
           return;
         }
         const redirectUrl = `${window.location.origin}/app`;
@@ -253,9 +263,42 @@ export default function Auth() {
                 </div>
               </div>
             )}
+            {mode === "signup" && (
+              <div className="rounded-md border border-border/60 bg-muted/30 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  Email compliance acknowledgement
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  EngageIQ is a B2B sales-enablement tool — not a bulk-mail platform. By creating an account you confirm that, when sending outreach, you will:
+                </p>
+                <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
+                  <li>Have a lawful basis (consent, legitimate interest, or existing relationship) for every contact</li>
+                  <li>Include a clear <strong>unsubscribe link</strong> and your <strong>postal address</strong> in every email</li>
+                  <li>Identify yourself accurately — no deceptive sender names or subject lines</li>
+                  <li>Honour opt-out, access, and erasure requests promptly at your own cost</li>
+                  <li>Comply with <strong>GDPR, UK GDPR, CAN-SPAM, CASL, PECR, CCPA, PIPEDA, LGPD</strong> and equivalent laws</li>
+                  <li>Not send unsolicited bulk email, phishing, or messages to consumers (B2C)</li>
+                </ul>
+                <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                  <Checkbox
+                    checked={complianceAck}
+                    onCheckedChange={(v) => setComplianceAck(v === true)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs leading-relaxed">
+                    I agree to follow these rules and accept the{" "}
+                    <Link to="/terms" target="_blank" className="underline text-primary">Terms (§5 — user is the data controller)</Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" target="_blank" className="underline text-primary">Privacy Notice</Link>.
+                    I understand my account may be suspended for violations.
+                  </span>
+                </label>
+              </div>
+            )}
             <Button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || (mode === "signup" && !complianceAck)}
               className="w-full h-11 bg-gradient-primary shadow-glow"
             >
               {submitting
