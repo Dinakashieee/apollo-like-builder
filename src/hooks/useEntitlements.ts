@@ -7,7 +7,7 @@ import { useWorkspaceAddons } from "./useWorkspaceAddons";
 
 export const PLAN_LIMITS = {
   free: { leads: 10, ai_emails: 25, seats: 1 },
-  starter: { leads: 2500, ai_emails: 5000, seats: 3 },
+  starter: { leads: 1000, ai_emails: 2500, seats: 3 },
   growth: { leads: 4000, ai_emails: 10000, seats: 10 },
   pro: { leads: Infinity, ai_emails: Infinity, seats: Infinity },
 } as const;
