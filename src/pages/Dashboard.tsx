@@ -33,6 +33,8 @@ import { ImportDialog } from "@/components/ImportDialog";
 import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { useDashboardPrefs, type TileKey } from "@/hooks/useDashboardPrefs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Globe } from "lucide-react";
+import { findCountry, regionOf } from "@/lib/countries";
 
 type Range = "1D" | "7D" | "30D" | "QTD";
 const RANGE_DAYS: Record<Range, number> = { "1D": 1, "7D": 7, "30D": 30, "QTD": 90 };
