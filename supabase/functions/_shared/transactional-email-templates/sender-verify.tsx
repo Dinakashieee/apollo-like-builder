@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import {
   Body, Container, Head, Heading, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandHeader } from '../email-templates/brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
 const SITE_NAME = 'engageiqlk'
@@ -18,6 +19,7 @@ const SenderVerifyEmail = ({ code, fromAddress, workspaceName }: SenderVerifyPro
     <Preview>Verify this address to send follow-ups from {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Confirm your sending address</Heading>
         <Text style={text}>
           {workspaceName ? `${workspaceName} on ` : ''}{SITE_NAME} would like to send follow-up
