@@ -123,6 +123,14 @@ export function LeadConversation({ leadId }: { leadId: string }) {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-[11px] text-primary-deep flex items-start gap-2">
+        <Sparkles className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+        <span>
+          <strong>Heads up:</strong> AI reply analysis (warm / cold / next step) only fills in
+          after you click <em>Analyze</em> on an inbound reply, or once a real reply syncs in
+          from a connected Gmail / Outlook mailbox. Until then those badges stay empty.
+        </span>
+      </div>
       {threads.map((th) => {
         const msgs = messagesByThread[th.id] ?? [];
         return (
