@@ -73,6 +73,20 @@ Deno.serve(async (req) => {
       }
     }
 
+    // email_send_log uses metadata.workspace_id (no FK) — wipe demo rows for this workspace
+    {
+      const { count, error } = await admin
+        .from("email_send_log")
+        .delete({ count: "exact" })
+        .eq("is_demo", true)
+        .filter("metadata->>workspace_id", "eq", workspaceId);
+      if (error) {
+        console.warn("clear-demo: email_send_log failed", error.message);
+      } else {
+        counts["email_send_log"] = count ?? 0;
+      }
+    }
+
     // Reset workspace flags
     await admin
       .from("workspaces")

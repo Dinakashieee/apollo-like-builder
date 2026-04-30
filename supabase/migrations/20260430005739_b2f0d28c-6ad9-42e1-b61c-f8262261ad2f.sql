@@ -1,0 +1,2 @@
+ALTER TABLE public.email_send_log ADD COLUMN IF NOT EXISTS is_demo boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_email_send_log_is_demo ON public.email_send_log(is_demo) WHERE is_demo = true;

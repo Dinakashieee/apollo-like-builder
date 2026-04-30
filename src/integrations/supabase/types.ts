@@ -290,6 +290,7 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          is_demo: boolean
           message_id: string | null
           metadata: Json | null
           recipient_email: string
@@ -300,6 +301,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          is_demo?: boolean
           message_id?: string | null
           metadata?: Json | null
           recipient_email: string
@@ -310,6 +312,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          is_demo?: boolean
           message_id?: string | null
           metadata?: Json | null
           recipient_email?: string

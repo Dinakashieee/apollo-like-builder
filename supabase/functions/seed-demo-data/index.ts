@@ -74,7 +74,14 @@ Deno.serve(async (req) => {
       { company_name: "Solace IoT", contact_name: "Hana Müller", email: "hana@solaceiot.de", role: "CMO", industry: "IoT", country: "Germany", status: "qualified", score: 79, source: "Inbound", pain_points: ["device-side analytics"], systems_in_use: ["HubSpot"] },
     ];
 
-    const leadRows = leads.map((l) => ({ ...l, workspace_id: workspaceId, created_by: userId, is_demo: true }));
+    // Stagger lead created_at across the last 15 days so velocity chart isn't a single spike
+    const leadRows = leads.map((l, i) => ({
+      ...l,
+      workspace_id: workspaceId,
+      created_by: userId,
+      is_demo: true,
+      created_at: new Date(now - (14 - Math.floor(i * 1.4)) * 86400000 - Math.floor(Math.random() * 6 * 3600 * 1000)).toISOString(),
+    }));
     const { data: insertedLeads, error: leadErr } = await admin
       .from("leads")
       .insert(leadRows)
@@ -220,18 +227,76 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---------- EMAIL SEND LOG (powers dashboard tiles) ----------
+    // Generate ~180 sends across the last 14 days with a realistic funnel:
+    // ~95% delivered, ~52% opened, ~14% replied, ~3% failed.
+    const sendLogRows: any[] = [];
+    const templates = [
+      "cold-outreach-saas",
+      "follow-up-3day",
+      "re-engagement",
+      "intro-meeting",
+      "case-study-share",
+    ];
+    const allLeads = insertedLeads ?? [];
+    const totalSends = 180;
+    for (let i = 0; i < totalSends; i++) {
+      const lead = allLeads[i % allLeads.length];
+      if (!lead?.email) continue;
+      const hoursAgo = Math.random() * 14 * 24;
+      const created = new Date(now - hoursAgo * 3600 * 1000);
+      const r = Math.random();
+      let status = "delivered";
+      if (r < 0.03) status = "dlq";
+      else if (r < 0.05) status = "suppressed";
+      else if (r < 0.19) status = "replied";
+      else if (r < 0.55) status = "opened";
+      else status = "delivered";
+      const tpl = templates[i % templates.length];
+      const msgId = `demo-${workspaceId}-${i}`;
+      sendLogRows.push({
+        message_id: msgId,
+        template_name: tpl,
+        recipient_email: lead.email,
+        status: "pending",
+        metadata: { workspace_id: workspaceId, lead_id: lead.id, demo: true },
+        created_at: new Date(created.getTime() - 30000).toISOString(),
+        is_demo: true,
+      });
+      sendLogRows.push({
+        message_id: msgId,
+        template_name: tpl,
+        recipient_email: lead.email,
+        status,
+        error_message: status === "dlq" ? "SMTP 550: mailbox unavailable" : null,
+        metadata: { workspace_id: workspaceId, lead_id: lead.id, demo: true },
+        created_at: created.toISOString(),
+        is_demo: true,
+      });
+    }
+    for (let i = 0; i < sendLogRows.length; i += 100) {
+      const chunk = sendLogRows.slice(i, i + 100);
+      const { error: logErr } = await admin.from("email_send_log").insert(chunk);
+      if (logErr) console.warn("send_log chunk failed", logErr.message);
+    }
+
     // ---------- ACTIVITIES ----------
     const acts = [
       { type: "lead_created", description: "New lead Helix Health (James Okafor)", metadata: { source: "Inbound" } },
       { type: "email_sent", description: "Sent intro email to Northwind Co.", metadata: {} },
+      { type: "email_opened", description: "Sara Lin opened your email (3rd time)", metadata: {} },
       { type: "reply_received", description: "🔥 Hot reply from Helix Health", metadata: { temperature: "hot" } },
+      { type: "meeting_booked", description: "Meeting booked with James Okafor — Thu 3pm", metadata: {} },
       { type: "opportunity_created", description: "New opportunity: Quanta AI — intent-driven prospecting", metadata: {} },
-      { type: "lead_won", description: "Lumen Studios marked as Won", metadata: {} },
+      { type: "sequence_started", description: "Started 'Cold outbound — SaaS founders' for 8 leads", metadata: {} },
+      { type: "lead_won", description: "Lumen Studios marked as Won — $24k ACV", metadata: {} },
+      { type: "reply_received", description: "🟡 Warm reply from Quanta AI", metadata: { temperature: "warm" } },
+      { type: "lead_qualified", description: "Acme Robotics moved to Qualified", metadata: {} },
     ];
     await admin.from("activities").insert(
       acts.map((a, i) => ({
         ...a, workspace_id: workspaceId, user_id: userId,
-        created_at: ago(i * 6 + 1), is_demo: true,
+        created_at: ago(i * 4 + 1), is_demo: true,
       })),
     );
 
