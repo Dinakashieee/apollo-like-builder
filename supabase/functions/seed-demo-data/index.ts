@@ -74,7 +74,14 @@ Deno.serve(async (req) => {
       { company_name: "Solace IoT", contact_name: "Hana Müller", email: "hana@solaceiot.de", role: "CMO", industry: "IoT", country: "Germany", status: "qualified", score: 79, source: "Inbound", pain_points: ["device-side analytics"], systems_in_use: ["HubSpot"] },
     ];
 
-    const leadRows = leads.map((l) => ({ ...l, workspace_id: workspaceId, created_by: userId, is_demo: true }));
+    // Stagger lead created_at across the last 15 days so velocity chart isn't a single spike
+    const leadRows = leads.map((l, i) => ({
+      ...l,
+      workspace_id: workspaceId,
+      created_by: userId,
+      is_demo: true,
+      created_at: new Date(now - (14 - Math.floor(i * 1.4)) * 86400000 - Math.floor(Math.random() * 6 * 3600 * 1000)).toISOString(),
+    }));
     const { data: insertedLeads, error: leadErr } = await admin
       .from("leads")
       .insert(leadRows)
