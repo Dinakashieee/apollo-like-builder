@@ -31,6 +31,7 @@ import { BillingSection } from "@/components/BillingSection";
 import { TeamSection } from "@/components/TeamSection";
 import { AddonsSection } from "@/components/AddonsSection";
 import { SenderSettingsCard } from "@/components/SenderSettingsCard";
+import { DemoDataCard } from "@/components/DemoDataCard";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -263,6 +264,9 @@ john@engageiq.com  ·  +1 555 123 4567`}
 
       {/* Connect company mailbox (OAuth — Gmail / Outlook) */}
       <SenderSettingsCard />
+
+      {/* Demo data manager */}
+      <DemoDataCard />
 
       {/* Security */}
       <section className="card-elevated p-6 space-y-4">

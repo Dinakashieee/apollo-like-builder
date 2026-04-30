@@ -23,6 +23,7 @@ import { CreditsPill } from "./CreditsPill";
 import { EmailConfirmBanner } from "./EmailConfirmBanner";
 import { PresenceIndicator } from "./PresenceIndicator";
 import { ConnectInboxBanner } from "./ConnectInboxBanner";
+import { DemoDataBanner } from "./DemoDataBanner";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -69,6 +70,7 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full bg-background flex-col">
         <PaymentTestModeBanner />
         <EmailConfirmBanner />
+        <DemoDataBanner />
         <ConnectInboxBanner />
         <div className="flex-1 flex w-full">
         <AppSidebar />

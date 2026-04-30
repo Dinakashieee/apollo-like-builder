@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_demo: boolean
           metadata: Json | null
           type: string
           user_id: string | null
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          is_demo?: boolean
           metadata?: Json | null
           type: string
           user_id?: string | null
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_demo?: boolean
           metadata?: Json | null
           type?: string
           user_id?: string | null
@@ -112,6 +115,7 @@ export type Database = {
           gmail_history_id: string | null
           gmail_watch_expires_at: string | null
           id: string
+          is_demo: boolean
           last_error: string | null
           last_synced_at: string | null
           ms_subscription_expires_at: string | null
@@ -133,6 +137,7 @@ export type Database = {
           gmail_history_id?: string | null
           gmail_watch_expires_at?: string | null
           id?: string
+          is_demo?: boolean
           last_error?: string | null
           last_synced_at?: string | null
           ms_subscription_expires_at?: string | null
@@ -154,6 +159,7 @@ export type Database = {
           gmail_history_id?: string | null
           gmail_watch_expires_at?: string | null
           id?: string
+          is_demo?: boolean
           last_error?: string | null
           last_synced_at?: string | null
           ms_subscription_expires_at?: string | null
@@ -182,6 +188,7 @@ export type Database = {
           from_name: string | null
           id: string
           in_reply_to: string | null
+          is_demo: boolean
           is_read: boolean
           provider_message_id: string
           received_at: string | null
@@ -212,6 +219,7 @@ export type Database = {
           from_name?: string | null
           id?: string
           in_reply_to?: string | null
+          is_demo?: boolean
           is_read?: boolean
           provider_message_id: string
           received_at?: string | null
@@ -242,6 +250,7 @@ export type Database = {
           from_name?: string | null
           id?: string
           in_reply_to?: string | null
+          is_demo?: boolean
           is_read?: boolean
           provider_message_id?: string
           received_at?: string | null
@@ -394,6 +403,7 @@ export type Database = {
           account_id: string
           created_at: string
           id: string
+          is_demo: boolean
           last_message_at: string
           lead_id: string | null
           participants: string[]
@@ -407,6 +417,7 @@ export type Database = {
           account_id: string
           created_at?: string
           id?: string
+          is_demo?: boolean
           last_message_at?: string
           lead_id?: string | null
           participants?: string[]
@@ -420,6 +431,7 @@ export type Database = {
           account_id?: string
           created_at?: string
           id?: string
+          is_demo?: boolean
           last_message_at?: string
           lead_id?: string | null
           participants?: string[]
@@ -473,6 +485,7 @@ export type Database = {
           email: string | null
           id: string
           industry: string | null
+          is_demo: boolean
           last_reply_at: string | null
           last_reply_temperature:
             | Database["public"]["Enums"]["reply_temperature"]
@@ -498,6 +511,7 @@ export type Database = {
           email?: string | null
           id?: string
           industry?: string | null
+          is_demo?: boolean
           last_reply_at?: string | null
           last_reply_temperature?:
             | Database["public"]["Enums"]["reply_temperature"]
@@ -523,6 +537,7 @@ export type Database = {
           email?: string | null
           id?: string
           industry?: string | null
+          is_demo?: boolean
           last_reply_at?: string | null
           last_reply_temperature?:
             | Database["public"]["Enums"]["reply_temperature"]
@@ -625,6 +640,7 @@ export type Database = {
           created_at: string
           id: string
           industry: string | null
+          is_demo: boolean
           level: Database["public"]["Enums"]["opportunity_level"] | null
           problem: string | null
           rationale: string | null
@@ -636,6 +652,7 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          is_demo?: boolean
           level?: Database["public"]["Enums"]["opportunity_level"] | null
           problem?: string | null
           rationale?: string | null
@@ -647,6 +664,7 @@ export type Database = {
           created_at?: string
           id?: string
           industry?: string | null
+          is_demo?: boolean
           level?: Database["public"]["Enums"]["opportunity_level"] | null
           problem?: string | null
           rationale?: string | null
@@ -765,6 +783,7 @@ export type Database = {
           created_at: string
           enrolled_at: string
           id: string
+          is_demo: boolean
           lead_id: string
           sequence_id: string
           status: Database["public"]["Enums"]["enrollment_status"]
@@ -776,6 +795,7 @@ export type Database = {
           created_at?: string
           enrolled_at?: string
           id?: string
+          is_demo?: boolean
           lead_id: string
           sequence_id: string
           status?: Database["public"]["Enums"]["enrollment_status"]
@@ -787,6 +807,7 @@ export type Database = {
           created_at?: string
           enrolled_at?: string
           id?: string
+          is_demo?: boolean
           lead_id?: string
           sequence_id?: string
           status?: Database["public"]["Enums"]["enrollment_status"]
@@ -867,6 +888,7 @@ export type Database = {
           created_at: string
           day_offset: number
           id: string
+          is_demo: boolean
           sequence_id: string
           step_order: number
           subject_template: string
@@ -877,6 +899,7 @@ export type Database = {
           created_at?: string
           day_offset?: number
           id?: string
+          is_demo?: boolean
           sequence_id: string
           step_order: number
           subject_template?: string
@@ -887,6 +910,7 @@ export type Database = {
           created_at?: string
           day_offset?: number
           id?: string
+          is_demo?: boolean
           sequence_id?: string
           step_order?: number
           subject_template?: string
@@ -908,6 +932,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_demo: boolean
           name: string
           updated_at: string
           workspace_id: string
@@ -917,6 +942,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_demo?: boolean
           name: string
           updated_at?: string
           workspace_id: string
@@ -926,6 +952,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_demo?: boolean
           name?: string
           updated_at?: string
           workspace_id?: string
@@ -1322,18 +1349,24 @@ export type Database = {
       workspaces: {
         Row: {
           created_at: string
+          demo_banner_dismissed_at: string | null
+          demo_seeded_at: string | null
           id: string
           name: string
           owner_id: string
         }
         Insert: {
           created_at?: string
+          demo_banner_dismissed_at?: string | null
+          demo_seeded_at?: string | null
           id?: string
           name: string
           owner_id: string
         }
         Update: {
           created_at?: string
+          demo_banner_dismissed_at?: string | null
+          demo_seeded_at?: string | null
           id?: string
           name?: string
           owner_id?: string
