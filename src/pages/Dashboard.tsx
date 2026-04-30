@@ -36,6 +36,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Globe } from "lucide-react";
 import { findCountry, regionOf } from "@/lib/countries";
 import { ReplyTemperatureTile } from "@/components/ReplyTemperatureTile";
+import { DemoDataPrompt } from "@/components/DemoDataPrompt";
 
 type Range = "1D" | "7D" | "30D" | "QTD";
 const RANGE_DAYS: Record<Range, number> = { "1D": 1, "7D": 7, "30D": 30, "QTD": 90 };
@@ -343,6 +344,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+      <DemoDataPrompt />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
