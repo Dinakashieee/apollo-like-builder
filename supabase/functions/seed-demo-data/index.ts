@@ -245,13 +245,21 @@ Deno.serve(async (req) => {
       if (!lead?.email) continue;
       const hoursAgo = Math.random() * 14 * 24;
       const created = new Date(now - hoursAgo * 3600 * 1000);
+      // Allowed statuses: pending, sent, suppressed, failed, bounced, complained, dlq.
+      // We model the funnel (opened/replied) via metadata flags so the dashboard
+      // can compute open/reply rates without violating the DB constraint.
       const r = Math.random();
-      let status = "delivered";
+      let status = "sent";
+      let opened = false;
+      let replied = false;
       if (r < 0.03) status = "dlq";
       else if (r < 0.05) status = "suppressed";
-      else if (r < 0.19) status = "replied";
-      else if (r < 0.55) status = "opened";
-      else status = "delivered";
+      else if (r < 0.08) status = "bounced";
+      else {
+        status = "sent";
+        if (r < 0.22) { opened = true; replied = true; }
+        else if (r < 0.60) { opened = true; }
+      }
       const tpl = templates[i % templates.length];
       const msgId = `demo-${workspaceId}-${i}`;
       sendLogRows.push({
@@ -268,8 +276,8 @@ Deno.serve(async (req) => {
         template_name: tpl,
         recipient_email: lead.email,
         status,
-        error_message: status === "dlq" ? "SMTP 550: mailbox unavailable" : null,
-        metadata: { workspace_id: workspaceId, lead_id: lead.id, demo: true },
+        error_message: status === "dlq" ? "SMTP 550: mailbox unavailable" : status === "bounced" ? "550 5.1.1 user unknown" : null,
+        metadata: { workspace_id: workspaceId, lead_id: lead.id, demo: true, opened, replied },
         created_at: created.toISOString(),
         is_demo: true,
       });
