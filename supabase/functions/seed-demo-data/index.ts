@@ -284,14 +284,19 @@ Deno.serve(async (req) => {
     const acts = [
       { type: "lead_created", description: "New lead Helix Health (James Okafor)", metadata: { source: "Inbound" } },
       { type: "email_sent", description: "Sent intro email to Northwind Co.", metadata: {} },
+      { type: "email_opened", description: "Sara Lin opened your email (3rd time)", metadata: {} },
       { type: "reply_received", description: "🔥 Hot reply from Helix Health", metadata: { temperature: "hot" } },
+      { type: "meeting_booked", description: "Meeting booked with James Okafor — Thu 3pm", metadata: {} },
       { type: "opportunity_created", description: "New opportunity: Quanta AI — intent-driven prospecting", metadata: {} },
-      { type: "lead_won", description: "Lumen Studios marked as Won", metadata: {} },
+      { type: "sequence_started", description: "Started 'Cold outbound — SaaS founders' for 8 leads", metadata: {} },
+      { type: "lead_won", description: "Lumen Studios marked as Won — $24k ACV", metadata: {} },
+      { type: "reply_received", description: "🟡 Warm reply from Quanta AI", metadata: { temperature: "warm" } },
+      { type: "lead_qualified", description: "Acme Robotics moved to Qualified", metadata: {} },
     ];
     await admin.from("activities").insert(
       acts.map((a, i) => ({
         ...a, workspace_id: workspaceId, user_id: userId,
-        created_at: ago(i * 6 + 1), is_demo: true,
+        created_at: ago(i * 4 + 1), is_demo: true,
       })),
     );
 
