@@ -57,26 +57,25 @@ export function DemoDataBanner() {
 
   return (
     <div className="bg-gradient-to-r from-warm/15 via-primary/10 to-primary/5 border-b border-primary/20">
-      <div className="max-w-screen-2xl mx-auto px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      <div className="px-4 py-2 flex items-center gap-2 flex-wrap">
         <Sparkles className="h-4 w-4 text-primary shrink-0" />
-        <p className="text-xs text-primary-deep flex-1 min-w-[200px]">
-          <strong>You're viewing demo data</strong> — sample leads, replies, and
-          opportunities to show you the look & feel. Clear it before going live.
+        <p className="text-xs text-primary-deep flex-1 min-w-0">
+          <strong>Demo data active</strong> — sample leads & replies. Clear before going live.
         </p>
         <Link
           to="/settings"
           className="text-xs font-semibold text-primary hover:underline whitespace-nowrap"
         >
-          Manage demo data →
+          Manage →
         </Link>
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 w-7 p-0"
+          className="h-6 w-6 p-0"
           onClick={dismiss}
           aria-label="Dismiss"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-3 w-3" />
         </Button>
       </div>
     </div>
