@@ -70,7 +70,6 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full bg-background flex-col">
         <PaymentTestModeBanner />
         <EmailConfirmBanner />
-        <DemoDataBanner />
         <ConnectInboxBanner />
         <div className="flex-1 flex w-full">
         <AppSidebar />
