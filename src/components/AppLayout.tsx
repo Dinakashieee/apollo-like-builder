@@ -22,6 +22,7 @@ import { ChatWidget } from "./ChatWidget";
 import { CreditsPill } from "./CreditsPill";
 import { EmailConfirmBanner } from "./EmailConfirmBanner";
 import { PresenceIndicator } from "./PresenceIndicator";
+import { ConnectInboxBanner } from "./ConnectInboxBanner";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -68,6 +69,7 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full bg-background flex-col">
         <PaymentTestModeBanner />
         <EmailConfirmBanner />
+        <ConnectInboxBanner />
         <div className="flex-1 flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
