@@ -71,6 +71,27 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  // Auto-seed demo data once per workspace (only for the owner, only if never seeded)
+  useEffect(() => {
+    if (!current || current.role !== "owner") return;
+    let cancelled = false;
+    (async () => {
+      const { data: ws } = await supabase
+        .from("workspaces")
+        .select("demo_seeded_at")
+        .eq("id", current.id)
+        .maybeSingle();
+      if (cancelled || !ws || ws.demo_seeded_at) return;
+      // Fire-and-forget — function is idempotent server-side too
+      supabase.functions
+        .invoke("seed-demo-data", { body: { workspaceId: current.id } })
+        .catch((e) => console.warn("auto-seed failed", e));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [current?.id, current?.role]);
+
   const setCurrent = (w: Workspace) => {
     setCurrentState(w);
     localStorage.setItem(STORAGE_KEY, w.id);
