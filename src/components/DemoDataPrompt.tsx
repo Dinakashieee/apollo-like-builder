@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Settings2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
@@ -81,7 +81,7 @@ export function DemoDataPrompt() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 shrink-0 flex-wrap">
           <Button onClick={load} disabled={working} className="shadow-md">
             {working ? (
               <>
@@ -92,6 +92,11 @@ export function DemoDataPrompt() {
                 <Sparkles className="h-4 w-4 mr-2" /> Load sample data
               </>
             )}
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/settings">
+              <Settings2 className="h-4 w-4 mr-2" /> Manage in Settings
+            </Link>
           </Button>
         </div>
       </div>

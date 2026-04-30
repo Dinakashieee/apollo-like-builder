@@ -64,7 +64,7 @@ export function DemoDataBanner() {
           opportunities to show you the look & feel. Clear it before going live.
         </p>
         <Link
-          to="/app/settings"
+          to="/settings"
           className="text-xs font-semibold text-primary hover:underline whitespace-nowrap"
         >
           Manage demo data →
