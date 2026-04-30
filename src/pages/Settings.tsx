@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { BillingSection } from "@/components/BillingSection";
 import { TeamSection } from "@/components/TeamSection";
 import { AddonsSection } from "@/components/AddonsSection";
+import { SenderSettingsCard } from "@/components/SenderSettingsCard";
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -259,6 +260,9 @@ john@engageiq.com  ·  +1 555 123 4567`}
           {savingEmail ? "Saving..." : "Save email settings"}
         </Button>
       </section>
+
+      {/* Connect company mailbox (OAuth — Gmail / Outlook) */}
+      <SenderSettingsCard />
 
       {/* Security */}
       <section className="card-elevated p-6 space-y-4">
