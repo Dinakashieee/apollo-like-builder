@@ -119,6 +119,7 @@ export function AppLayout() {
             </div>
           </header>
           <main className="flex-1 overflow-auto">
+            <DemoDataBanner />
             <Outlet />
           </main>
         </div>
