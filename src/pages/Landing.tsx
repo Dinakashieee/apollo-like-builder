@@ -474,8 +474,8 @@ export default function Landing() {
                 {tier.paypal ? (
                   <div className="mb-6">
                     <PayPalSmartButtons
-                      amount={(annual ? Math.round((tier.monthly ?? 0) * (1 - ANNUAL_DISCOUNT) * 12) : tier.monthly ?? 0).toFixed(2)}
-                      description={`EngageIQ ${tier.name} (${annual ? "annual" : "monthly"})`}
+                      amount={(tier.monthly ?? 0).toFixed(2)}
+                      description={`EngageIQ ${tier.name} (monthly)`}
                     />
                   </div>
                 ) : (
