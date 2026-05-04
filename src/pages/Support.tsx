@@ -85,7 +85,7 @@ export default function Support() {
             +94 77 726 3673
           </a>.
         </p>
-        <p className="text-xs text-muted-foreground mt-1">EngageIQ · R&amp;D, Colombo 10350, Sri Lanka</p>
+        <p className="text-xs text-muted-foreground mt-1">EngageIQ · HQ: 275 New North Road, Islington #1772, London, N1 7AA, UK · R&amp;D: Colombo 10350, Sri Lanka</p>
       </div>
 
       <form onSubmit={submit} className="card-elevated p-6 space-y-4">
