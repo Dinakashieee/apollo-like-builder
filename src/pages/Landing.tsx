@@ -100,7 +100,7 @@ const tiers: Tier[] = [
   {
     name: "Starter",
     tagline: "For solo founders & small teams",
-    monthly: 5,
+    monthly: 1.99,
     cta: "Subscribe to Starter",
     highlight: false,
     priceMonthly: "starter_monthly",
@@ -191,8 +191,9 @@ export default function Landing() {
   const formatPrice = (monthly: number | null) => {
     if (monthly === null) return "Custom";
     if (monthly === 0) return "$0";
-    const value = annual ? Math.round(monthly * (1 - ANNUAL_DISCOUNT)) : monthly;
-    return `$${value}`;
+    const value = annual ? monthly * (1 - ANNUAL_DISCOUNT) : monthly;
+    const display = Number.isInteger(value) ? value.toString() : value.toFixed(2);
+    return `$${display}`;
   };
   return (
     <div className="min-h-screen bg-background">
