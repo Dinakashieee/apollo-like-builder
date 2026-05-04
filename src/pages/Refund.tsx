@@ -15,10 +15,10 @@ export default function Refund() {
         <p><strong>EngageIQ</strong> offers a refund window of <strong>14 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>14 working days</strong> of placing your order.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">How to request a refund</h2>
-        <p>Refunds for EngageIQ are processed by our payment provider and Merchant of Record, <strong>Paddle</strong>. To request a refund:</p>
+        <p>Refunds for EngageIQ are processed by our payment provider and Merchant of Record, <strong>Lemon Squeezy</strong>. To request a refund:</p>
         <ul className="list-disc pl-6 space-y-1">
-          <li>Visit <a className="underline" href="https://paddle.net" target="_blank" rel="noopener noreferrer">paddle.net</a> and look up your order using the email address used at checkout, or</li>
-          <li>Contact EngageIQ through in-app support and we will help you initiate the refund with Paddle.</li>
+          <li>Look up your order using the email address used at checkout via your Lemon Squeezy receipt, or</li>
+          <li>Contact EngageIQ through in-app support and we will help you initiate the refund with Lemon Squeezy.</li>
         </ul>
         <p>Once approved, refunds are typically returned to your original payment method within 5–10 business days, depending on your bank or card issuer.</p>
 
@@ -29,12 +29,12 @@ export default function Refund() {
         <p>After the 14 working day refund window has passed, charges (including subscription renewals) are not automatically refundable. If a renewal was charged and you intended to cancel, contact us through in-app support — we review these requests on a case-by-case basis and aim to be fair.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">Questions</h2>
-        <p>If you have questions about this policy or a specific charge, email <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or refer to <a className="underline" href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer">Paddle's Refund Policy</a>.</p>
+        <p>If you have questions about this policy or a specific charge, email support@engageiqlk.com or refer to Lemon Squeezy's Refund Policy.</p>
         <address className="not-italic mt-4 leading-relaxed text-sm">
           <strong>EngageIQ</strong><br />
           HQ: 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
           R&amp;D: Colombo 10350, Sri Lanka<br />
-          Phone: <a className="underline" href="tel:+94777263673">+94 77 726 3673</a>
+          Phone: +94 77 726 3673
         </address>
       </main>
     </div>

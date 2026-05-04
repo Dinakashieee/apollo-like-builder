@@ -283,7 +283,7 @@ export default function Landing() {
             style={{ animationDelay: "360ms" }}
           >
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Free plan available</span>
-            <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Paddle</span>
+            <span className="flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-success" /> Card secured by Lemon Squeezy</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Cancel anytime</span>
           </div>
         </div>
