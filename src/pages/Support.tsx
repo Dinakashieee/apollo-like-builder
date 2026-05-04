@@ -80,9 +80,6 @@ export default function Support() {
           Get help from our team. Most tickets answered within 24h. You can also email us at{" "}
           <a href="mailto:support@engageiqlk.com" className="text-primary font-medium underline-offset-2 hover:underline">
             support@engageiqlk.com
-          </a>{" "}or call{" "}
-          <a href="tel:+94777263673" className="text-primary font-medium underline-offset-2 hover:underline">
-            +94 77 726 3673
           </a>.
         </p>
         <p className="text-xs text-muted-foreground mt-1">EngageIQ · HQ: 275 New North Road, Islington #1772, London, N1 7AA, UK · R&amp;D: Colombo 10350, Sri Lanka</p>
