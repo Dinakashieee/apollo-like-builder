@@ -171,10 +171,6 @@ export default function Landing() {
       navigate(user ? "/app" : "/auth");
       return;
     }
-    if (tier.paypalUrl) {
-      window.open(tier.paypalUrl, "_blank", "noopener");
-      return;
-    }
     if (!user) {
       navigate("/auth?next=/#pricing");
       return;
