@@ -477,16 +477,22 @@ export default function Landing() {
                   </p>
                 </div>
 
-                <Button
-                  className={`w-full mb-6 ${
-                    tier.highlight ? "bg-gradient-primary shadow-glow" : ""
-                  }`}
-                  variant={tier.highlight ? "default" : "outline"}
-                  onClick={() => handleTierCta(tier)}
-                  disabled={checkoutLoading}
-                >
-                  {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
-                </Button>
+                {tier.paypalHostedButtonId ? (
+                  <div className="mb-6">
+                    <PayPalHostedButton hostedButtonId={tier.paypalHostedButtonId} />
+                  </div>
+                ) : (
+                  <Button
+                    className={`w-full mb-6 ${
+                      tier.highlight ? "bg-gradient-primary shadow-glow" : ""
+                    }`}
+                    variant={tier.highlight ? "default" : "outline"}
+                    onClick={() => handleTierCta(tier)}
+                    disabled={checkoutLoading}
+                  >
+                    {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
+                  </Button>
+                )}
 
                 <ul className="space-y-2.5 text-sm">
                   {tier.features.map((f) => (
