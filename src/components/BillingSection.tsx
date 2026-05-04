@@ -190,7 +190,7 @@ export function BillingSection() {
               Subscribe to Starter ({billing === "year" ? "$182/yr" : "$19/mo"})
             </Button>
             <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
-              Subscribe to Pro ({billing === "year" ? "$470/yr" : "$49/mo"})
+              Subscribe to Pro ({billing === "year" ? "$374/yr" : "$39/mo"})
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
