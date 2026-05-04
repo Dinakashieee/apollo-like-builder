@@ -79,6 +79,7 @@ type Tier = {
   priceYearly?: string;
   contact?: boolean;
   paypalUrl?: string;
+  paypalHostedButtonId?: string;
 };
 
 const tiers: Tier[] = [
