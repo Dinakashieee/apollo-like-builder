@@ -194,8 +194,7 @@ export default function Landing() {
     if (monthly === null) return "Custom";
     if (monthly === 0) return "$0";
     const value = annual ? monthly * (1 - ANNUAL_DISCOUNT) : monthly;
-    const display = Number.isInteger(value) ? value.toString() : value.toFixed(2);
-    return `$${display}`;
+    return `$${Math.round(value)}`;
   };
   return (
     <div className="min-h-screen bg-background">
