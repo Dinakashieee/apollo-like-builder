@@ -9,9 +9,11 @@ function loadSdk(clientId: string): Promise<void> {
   if ((window as any).paypal?.Buttons) return Promise.resolve();
   if (sdkPromise) return sdkPromise;
 
+  // Smart Buttons include a "Debit or Credit Card" button automatically
+  // (no special PayPal account approval needed, unlike Advanced Card Fields).
   const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
     clientId,
-  )}&components=buttons,card-fields&enable-funding=card&disable-funding=venmo&currency=USD&intent=capture`;
+  )}&components=buttons&enable-funding=card&disable-funding=venmo,paylater&currency=USD&intent=capture`;
 
   sdkPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[data-paypal-sdk="1"]`);
@@ -39,7 +41,6 @@ interface Props {
 
 export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +55,7 @@ export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: 
         await loadSdk(data.clientId);
         if (cancelled || renderedRef.current) return;
         const paypal = (window as any).paypal;
-        if (!paypal) throw new Error("PayPal SDK not available");
+        if (!paypal?.Buttons) throw new Error("PayPal SDK not available");
 
         renderedRef.current = true;
         setLoading(false);
@@ -84,7 +85,6 @@ export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: 
           onSuccess?.(result);
         };
 
-        // PayPal + funding-source buttons (includes card on supported regions)
         if (buttonsRef.current) {
           paypal
             .Buttons({
@@ -97,29 +97,6 @@ export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: 
               },
             })
             .render(buttonsRef.current);
-        }
-
-        // Standalone advanced card fields (debit/credit) when eligible
-        if (paypal.CardFields && cardRef.current) {
-          const cardFields = paypal.CardFields({ createOrder, onApprove });
-          if (cardFields.isEligible()) {
-            cardFields.NumberField().render(`#paypal-card-number`);
-            cardFields.ExpiryField().render(`#paypal-card-expiry`);
-            cardFields.CVVField().render(`#paypal-card-cvv`);
-            cardFields.NameField().render(`#paypal-card-name`);
-
-            const submit = document.getElementById("paypal-card-submit");
-            submit?.addEventListener("click", async () => {
-              try {
-                await cardFields.submit();
-              } catch (e) {
-                console.error("Card submit error", e);
-                toast.error("Card payment failed. Please check your details.");
-              }
-            });
-          } else {
-            cardRef.current.style.display = "none";
-          }
         }
       } catch (e) {
         console.error(e);
@@ -136,40 +113,13 @@ export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: 
   }, [amount, description, onSuccess]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {loading && <div className="text-xs text-muted-foreground">Loading payment options…</div>}
       {error && <div className="text-xs text-destructive">{error}</div>}
       <div ref={buttonsRef} />
-      <div ref={cardRef} className="space-y-2">
-        <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider pt-1">
-          Or pay with debit / credit card
-        </div>
-        <div
-          id="paypal-card-name"
-          className="border border-border/60 rounded-md px-3 py-2 bg-background min-h-[40px]"
-        />
-        <div
-          id="paypal-card-number"
-          className="border border-border/60 rounded-md px-3 py-2 bg-background min-h-[40px]"
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <div
-            id="paypal-card-expiry"
-            className="border border-border/60 rounded-md px-3 py-2 bg-background min-h-[40px]"
-          />
-          <div
-            id="paypal-card-cvv"
-            className="border border-border/60 rounded-md px-3 py-2 bg-background min-h-[40px]"
-          />
-        </div>
-        <button
-          id="paypal-card-submit"
-          type="button"
-          className="w-full bg-primary text-primary-foreground rounded-md py-2 text-sm font-semibold hover:opacity-90"
-        >
-          Pay ${amount}
-        </button>
-      </div>
+      <p className="text-[11px] text-muted-foreground text-center">
+        Pay with PayPal or debit / credit card.
+      </p>
     </div>
   );
 }
