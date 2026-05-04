@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { PayPalHostedButton } from "@/components/PayPalHostedButton";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
@@ -79,6 +80,7 @@ type Tier = {
   priceYearly?: string;
   contact?: boolean;
   paypalUrl?: string;
+  paypalHostedButtonId?: string;
 };
 
 const tiers: Tier[] = [
@@ -105,7 +107,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
-    paypalUrl: "https://www.paypal.com/ncp/payment/X959RCA5CCKNY",
+    paypalHostedButtonId: "E2N95JCQMTCFA",
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
@@ -475,16 +477,22 @@ export default function Landing() {
                   </p>
                 </div>
 
-                <Button
-                  className={`w-full mb-6 ${
-                    tier.highlight ? "bg-gradient-primary shadow-glow" : ""
-                  }`}
-                  variant={tier.highlight ? "default" : "outline"}
-                  onClick={() => handleTierCta(tier)}
-                  disabled={checkoutLoading}
-                >
-                  {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
-                </Button>
+                {tier.paypalHostedButtonId ? (
+                  <div className="mb-6">
+                    <PayPalHostedButton hostedButtonId={tier.paypalHostedButtonId} />
+                  </div>
+                ) : (
+                  <Button
+                    className={`w-full mb-6 ${
+                      tier.highlight ? "bg-gradient-primary shadow-glow" : ""
+                    }`}
+                    variant={tier.highlight ? "default" : "outline"}
+                    onClick={() => handleTierCta(tier)}
+                    disabled={checkoutLoading}
+                  >
+                    {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
+                  </Button>
+                )}
 
                 <ul className="space-y-2.5 text-sm">
                   {tier.features.map((f) => (
