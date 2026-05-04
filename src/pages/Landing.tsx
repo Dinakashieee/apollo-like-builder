@@ -102,7 +102,7 @@ const tiers: Tier[] = [
   {
     name: "Starter",
     tagline: "For solo founders & small teams",
-    monthly: 1.99,
+    monthly: 4,
     cta: "Subscribe to Starter",
     highlight: false,
     priceMonthly: "starter_monthly",
