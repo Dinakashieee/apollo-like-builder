@@ -72,13 +72,18 @@ export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: 
           return order.id;
         };
 
-        const onApprove = async (data: any) => {
+        const onApprove = async (data: any, actions: any) => {
           const { data: result, error: err } = await supabase.functions.invoke(
             "paypal-capture-order",
             { body: { orderId: data.orderID } },
           );
           if (err) {
             toast.error("Payment could not be completed.");
+            return;
+          }
+          if (result?.ok === false) {
+            toast.error(result.message ?? "Payment could not be completed.");
+            if (result.recoverable && actions?.restart) return actions.restart();
             return;
           }
           toast.success("Payment successful!");
