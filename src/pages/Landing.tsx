@@ -78,6 +78,7 @@ type Tier = {
   priceMonthly?: string;
   priceYearly?: string;
   contact?: boolean;
+  paypalUrl?: string;
 };
 
 const tiers: Tier[] = [
@@ -104,6 +105,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
+    paypalUrl: "https://www.paypal.com/ncp/payment/X959RCA5CCKNY",
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
@@ -166,6 +168,10 @@ export default function Landing() {
     }
     if (tier.monthly === 0) {
       navigate(user ? "/app" : "/auth");
+      return;
+    }
+    if (tier.paypalUrl) {
+      window.open(tier.paypalUrl, "_blank", "noopener");
       return;
     }
     if (!user) {
