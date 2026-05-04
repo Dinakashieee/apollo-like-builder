@@ -77,11 +77,15 @@ export default function Support() {
           <LifeBuoy className="h-7 w-7 text-primary" /> Support
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Get help from our team. Most tickets answered within 24h. You can also email us directly at{" "}
+          Get help from our team. Most tickets answered within 24h. You can also email us at{" "}
           <a href="mailto:support@engageiqlk.com" className="text-primary font-medium underline-offset-2 hover:underline">
             support@engageiqlk.com
+          </a>{" "}or call{" "}
+          <a href="tel:+94777263673" className="text-primary font-medium underline-offset-2 hover:underline">
+            +94 77 726 3673
           </a>.
         </p>
+        <p className="text-xs text-muted-foreground mt-1">EngageIQ · R&amp;D, Colombo 10350, Sri Lanka</p>
       </div>
 
       <form onSubmit={submit} className="card-elevated p-6 space-y-4">

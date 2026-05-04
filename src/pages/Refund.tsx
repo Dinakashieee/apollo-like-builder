@@ -32,8 +32,9 @@ export default function Refund() {
         <p>If you have questions about this policy or a specific charge, email <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or refer to <a className="underline" href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer">Paddle's Refund Policy</a>.</p>
         <address className="not-italic mt-4 leading-relaxed text-sm">
           <strong>EngageIQ</strong><br />
-          275 New North Road, Islington #1772<br />
-          London, N1 7AA, United Kingdom
+          R&amp;D, Colombo 10350<br />
+          Sri Lanka<br />
+          Phone: <a className="underline" href="tel:+94777263673">+94 77 726 3673</a>
         </address>
       </main>
     </div>

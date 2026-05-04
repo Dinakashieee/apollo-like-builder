@@ -108,8 +108,9 @@ export default function Terms() {
         <p>Questions about these Terms? Contact EngageIQ at <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or by post:</p>
         <address className="not-italic mt-2 leading-relaxed">
           <strong>EngageIQ</strong><br />
-          275 New North Road, Islington #1772<br />
-          London, N1 7AA, United Kingdom
+          R&amp;D, Colombo 10350<br />
+          Sri Lanka<br />
+          Phone: <a className="underline" href="tel:+94777263673">+94 77 726 3673</a>
         </address>
       </main>
     </div>
