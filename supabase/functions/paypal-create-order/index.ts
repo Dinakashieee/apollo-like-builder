@@ -26,7 +26,8 @@ async function getAccessToken() {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   try {
-    const { amount = '4.00', description = 'EngageIQ Starter Plan' } = await req.json().catch(() => ({}));
+    const { description = 'EngageIQ Starter Plan (monthly)' } = await req.json().catch(() => ({}));
+    const amount = '4.00';
     const token = await getAccessToken();
     const r = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
       method: 'POST',
@@ -36,6 +37,11 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         intent: 'CAPTURE',
+         application_context: {
+           brand_name: 'EngageIQ',
+           shipping_preference: 'NO_SHIPPING',
+           user_action: 'PAY_NOW',
+         },
         purchase_units: [{
           amount: { currency_code: 'USD', value: amount },
           description,

@@ -43,11 +43,23 @@ Deno.serve(async (req) => {
     const data = await r.json();
     if (!r.ok) {
       console.error('PayPal capture error:', data);
-      return new Response(JSON.stringify({ error: data }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      const issue = data?.details?.[0]?.issue ?? data?.name ?? 'PAYMENT_FAILED';
+      const message = issue === 'INSTRUMENT_DECLINED'
+        ? 'Your card was declined by PayPal. Please use another card or PayPal account and try again.'
+        : issue === 'PAYER_ACTION_REQUIRED'
+          ? 'PayPal needs you to confirm extra information before this payment can be completed.'
+          : 'Payment could not be completed by PayPal. Please try again or use another payment method.';
+      return new Response(JSON.stringify({
+        ok: false,
+        issue,
+        message,
+        recoverable: issue === 'INSTRUMENT_DECLINED',
+        error: data,
+      }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ ok: true, ...data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
