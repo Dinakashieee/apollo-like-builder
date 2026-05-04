@@ -85,8 +85,7 @@ export default function Privacy() {
         <address className="not-italic mt-2 leading-relaxed">
           <strong>EngageIQ</strong><br />
           HQ: 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
-          R&amp;D: Colombo 10350, Sri Lanka<br />
-          Phone: <a className="underline" href="tel:+94777263673">+94 77 726 3673</a>
+          R&amp;D: Colombo 10350, Sri Lanka
         </address>
       </main>
     </div>

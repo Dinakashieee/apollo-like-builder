@@ -561,7 +561,7 @@ export default function Landing() {
               <span className="font-semibold text-foreground">EngageIQ</span><br />
               <span className="font-medium text-foreground/90">HQ:</span> 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
               <span className="font-medium text-foreground/90">R&amp;D:</span> Colombo 10350, Sri Lanka<br />
-              <a href="tel:+94777263673" className="hover:text-foreground">+94 77 726 3673</a> · <a href="mailto:support@engageiqlk.com" className="hover:text-foreground underline-offset-2 hover:underline">support@engageiqlk.com</a>
+              <a href="mailto:support@engageiqlk.com" className="hover:text-foreground underline-offset-2 hover:underline">support@engageiqlk.com</a>
             </address>
             <p>© 2026 EngageIQ. Built for revenue teams who refuse to settle.</p>
           </div>
