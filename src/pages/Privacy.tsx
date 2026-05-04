@@ -36,7 +36,7 @@ export default function Privacy() {
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">4. Who we share data with</h2>
         <ul className="list-disc pl-6 space-y-1">
-          <li><strong>Paddle.com Market Limited ("Paddle")</strong> — our Merchant of Record. Paddle processes all orders, payments, subscription billing, tax compliance, invoicing, and refund handling. When you make a purchase, Paddle collects and processes your billing data under its own privacy policy: <a className="underline" href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer">paddle.com/legal/privacy</a>.</li>
+          <li><strong>Lemon Squeezy</strong> — our Merchant of Record. Lemon Squeezy processes all orders, payments, subscription billing, tax compliance, invoicing, and refund handling. When you make a purchase, Lemon Squeezy collects and processes your billing data under its own privacy policy.</li>
           <li><strong>Hosting and infrastructure providers</strong> — for application hosting, database storage, file storage, and edge compute.</li>
           <li><strong>AI model providers</strong> — when you use AI features, the relevant prompt content (e.g. company profile, lead notes) is sent to the model provider to generate a response. We do not allow providers to train on your data.</li>
           <li><strong>Email delivery providers</strong> — to deliver transactional and authentication emails.</li>
@@ -47,7 +47,7 @@ export default function Privacy() {
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">5. Data retention</h2>
         <ul className="list-disc pl-6 space-y-1">
           <li>Account and workspace data: retained while your account is active and deleted within 30 days of account closure (unless we must retain it longer for legal, tax, or fraud-prevention reasons).</li>
-          <li>Billing records held by Paddle: retained according to Paddle's policy, typically 7 years for tax purposes.</li>
+          <li>Billing records held by Lemon Squeezy: retained according to Lemon Squeezy's policy, typically 7 years for tax purposes.</li>
           <li>Logs and telemetry: typically retained for up to 12 months.</li>
           <li>Backups: rotated within 35 days of deletion from production.</li>
         </ul>
