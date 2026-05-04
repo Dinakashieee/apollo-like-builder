@@ -78,6 +78,7 @@ type Tier = {
   priceMonthly?: string;
   priceYearly?: string;
   contact?: boolean;
+  paypalUrl?: string;
 };
 
 const tiers: Tier[] = [
