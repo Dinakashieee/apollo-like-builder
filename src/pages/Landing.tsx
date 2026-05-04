@@ -117,7 +117,7 @@ const tiers: Tier[] = [
   {
     name: "Growth",
     tagline: "For teams scaling outbound seriously",
-    monthly: 49,
+    monthly: 39,
     cta: "Subscribe to Growth",
     highlight: true,
     priceMonthly: "growth_monthly",
@@ -136,7 +136,7 @@ const tiers: Tier[] = [
   {
     name: "Scale",
     tagline: "Unlimited everything · for power users",
-    monthly: 99,
+    monthly: 79,
     cta: "Subscribe to Scale",
     highlight: false,
     priceMonthly: "scale_monthly",
