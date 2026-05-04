@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
-import { PayPalHostedButton } from "@/components/PayPalHostedButton";
+import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
@@ -79,8 +79,7 @@ type Tier = {
   priceMonthly?: string;
   priceYearly?: string;
   contact?: boolean;
-  paypalUrl?: string;
-  paypalHostedButtonId?: string;
+  paypal?: boolean;
 };
 
 const tiers: Tier[] = [
@@ -107,7 +106,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
-    
+    paypal: true,
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
@@ -476,9 +475,12 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {tier.paypalHostedButtonId ? (
+                {tier.paypal ? (
                   <div className="mb-6">
-                    <PayPalHostedButton hostedButtonId={tier.paypalHostedButtonId} />
+                    <PayPalSmartButtons
+                      amount={(annual ? Math.round((tier.monthly ?? 0) * (1 - ANNUAL_DISCOUNT) * 12) : tier.monthly ?? 0).toFixed(2)}
+                      description={`EngageIQ ${tier.name} (${annual ? "annual" : "monthly"})`}
+                    />
                   </div>
                 ) : (
                   <Button
