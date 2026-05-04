@@ -187,10 +187,10 @@ export function BillingSection() {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             <Button variant="outline" onClick={() => subscribe(billing === "year" ? "starter_yearly" : "starter_monthly")}>
-              Subscribe to Starter ({billing === "year" ? "$470/yr" : "$49/mo"})
+              Subscribe to Starter ({billing === "year" ? "$182/yr" : "$19/mo"})
             </Button>
             <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
-              Subscribe to Pro ({billing === "year" ? "$1,430/yr" : "$149/mo"})
+              Subscribe to Pro ({billing === "year" ? "$470/yr" : "$49/mo"})
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
