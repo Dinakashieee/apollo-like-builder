@@ -34,10 +34,36 @@ function generateToken(): string {
 // gateway validates the caller's JWT (anon or service_role) before the request
 // reaches this code. No in-function auth check is needed.
 
+function isServiceRoleJwt(authHeader: string | null): boolean {
+  if (!authHeader) return false
+  const token = authHeader.replace(/^Bearer\s+/i, '')
+  const parts = token.split('.')
+  if (parts.length !== 3) return false
+  try {
+    // base64url decode payload
+    const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4)
+    const json = atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    const claims = JSON.parse(json)
+    return claims?.role === 'service_role'
+  } catch {
+    return false
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
+  }
+
+  // Only the service role may invoke this function. Anon JWTs (which any
+  // internet user can mint with the public publishable key) must be rejected
+  // to prevent transactional email spam.
+  if (!isServiceRoleJwt(req.headers.get('Authorization'))) {
+    return new Response(
+      JSON.stringify({ error: 'Forbidden' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
