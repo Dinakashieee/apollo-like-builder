@@ -20,18 +20,49 @@ About EngageIQ:
 
 Tone: concise, friendly, no fluff. If you don't know something, say so and suggest contacting support. Never invent features. Never claim integrations not listed. Encourage users to start with the Free plan or book a demo.`;
 
+// Per-IP token bucket: 20 requests per 10 minutes per IP. In-memory is fine
+// here because abuse traffic from a single IP would hit the same warm
+// instance; this is a coarse first line of defense, not a hard guarantee.
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 20;
+const ipHits: Map<string, number[]> = new Map();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (ipHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  arr.push(now);
+  ipHits.set(ip, arr);
+  return arr.length > RATE_MAX;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim()
+      || req.headers.get("cf-connecting-ip")
+      || "unknown";
+    if (rateLimited(ip)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please slow down." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
-    if (!Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: "messages array required" }), {
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 30) {
+      return new Response(JSON.stringify({ error: "messages array required (max 30)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+    // Cap individual message size to prevent prompt-stuffing abuse.
+    for (const m of messages) {
+      if (typeof m?.content === "string" && m.content.length > 4000) {
+        return new Response(JSON.stringify({ error: "Message too long." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
