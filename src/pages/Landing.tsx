@@ -474,9 +474,9 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {tier.paypal ? (
+                {tier.paypalUrl ? (
                   <a
-                    href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
+                    href={tier.paypalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block mb-6"
