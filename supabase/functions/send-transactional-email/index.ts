@@ -34,19 +34,17 @@ function generateToken(): string {
 // gateway validates the caller's JWT (anon or service_role) before the request
 // reaches this code. No in-function auth check is needed.
 
-function isServiceRoleJwt(authHeader: string | null): boolean {
-  if (!authHeader) return false
+function decodeJwtClaims(authHeader: string | null): Record<string, any> | null {
+  if (!authHeader) return null
   const token = authHeader.replace(/^Bearer\s+/i, '')
   const parts = token.split('.')
-  if (parts.length !== 3) return false
+  if (parts.length !== 3) return null
   try {
-    // base64url decode payload
     const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4)
     const json = atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
-    const claims = JSON.parse(json)
-    return claims?.role === 'service_role'
+    return JSON.parse(json)
   } catch {
-    return false
+    return null
   }
 }
 
@@ -56,10 +54,14 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  // Only the service role may invoke this function. Anon JWTs (which any
-  // internet user can mint with the public publishable key) must be rejected
-  // to prevent transactional email spam.
-  if (!isServiceRoleJwt(req.headers.get('Authorization'))) {
+  // Require an authenticated caller: either the service role (server-to-server)
+  // or a logged-in end user (JWT with `sub`). Plain anon JWTs (which any
+  // internet user can mint with the public publishable key) are rejected to
+  // prevent transactional email spam to arbitrary recipients.
+  const claims = decodeJwtClaims(req.headers.get('Authorization'))
+  const isServiceRole = claims?.role === 'service_role'
+  const isAuthenticatedUser = claims?.role === 'authenticated' && !!claims?.sub
+  if (!isServiceRole && !isAuthenticatedUser) {
     return new Response(
       JSON.stringify({ error: 'Forbidden' }),
       { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
