@@ -107,7 +107,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
-    paypal: true,
+    paypalUrl: "https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y",
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
