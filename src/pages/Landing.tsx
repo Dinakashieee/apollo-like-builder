@@ -19,6 +19,7 @@ import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
+import { PayPalHostedButton } from "@/components/PayPalHostedButton";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
@@ -473,10 +474,7 @@ export default function Landing() {
 
                 {tier.paypal ? (
                   <div className="mb-6">
-                    <PayPalSmartButtons
-                      amount={(tier.monthly ?? 0).toFixed(2)}
-                      description={`EngageIQ ${tier.name} (monthly)`}
-                    />
+                    <PayPalHostedButton hostedButtonId="A8PBJ4AQYQ9G4" />
                   </div>
                 ) : (
                   <Button
