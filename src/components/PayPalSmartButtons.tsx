@@ -13,7 +13,7 @@ function loadSdk(clientId: string): Promise<void> {
   // (no special PayPal account approval needed, unlike Advanced Card Fields).
   const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
     clientId,
-  )}&components=buttons&enable-funding=card,venmo,paylater&currency=USD&intent=capture`;
+  )}&components=buttons&enable-funding=card,venmo&disable-funding=paylater&currency=USD&intent=capture`;
 
   sdkPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[data-paypal-sdk="1"]`);
