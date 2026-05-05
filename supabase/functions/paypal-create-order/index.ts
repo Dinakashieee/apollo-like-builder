@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   try {
     const { description = 'EngageIQ Starter Plan (monthly)' } = await req.json().catch(() => ({}));
-    const amount = '4.00';
+    const amount = '1.00';
     const token = await getAccessToken();
     const r = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
       method: 'POST',
