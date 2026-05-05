@@ -170,21 +170,9 @@ export function BillingSection() {
 
       {!isActive && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm text-muted-foreground">Billed</span>
-            <button
-              onClick={() => setBilling("month")}
-              className={`text-xs px-2.5 py-1 rounded-md ${billing === "month" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBilling("year")}
-              className={`text-xs px-2.5 py-1 rounded-md ${billing === "year" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-            >
-              Annual <span className="ml-1 opacity-70">save 20%</span>
-            </button>
-          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            Choose a plan — all subscriptions are processed securely via PayPal.
+          </p>
           <div className="grid sm:grid-cols-1 gap-3">
             <a
               href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
@@ -195,12 +183,27 @@ export function BillingSection() {
                 Subscribe to Starter via PayPal ($1)
               </Button>
             </a>
-            <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
-              Subscribe to Pro ({billing === "year" ? "$374/yr" : "$39/mo"})
-            </Button>
+            <a
+              href="https://www.paypal.com/ncp/payment/QX3YGCGUPSDQW"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
+                Subscribe to Growth via PayPal
+              </Button>
+            </a>
+            <a
+              href="https://www.paypal.com/ncp/payment/7JR5P88ME5B4N"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
+                Subscribe to Pro via PayPal
+              </Button>
+            </a>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Card required. You'll be charged immediately and billing continues until you cancel — cancel anytime from billing.
+            You'll be redirected to PayPal to complete your subscription. Cancel anytime from your PayPal account.
           </p>
         </div>
       )}
