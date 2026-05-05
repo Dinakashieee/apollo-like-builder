@@ -473,9 +473,16 @@ export default function Landing() {
                 </div>
 
                 {tier.paypal ? (
-                  <div className="mb-6">
-                    <PayPalHostedButton hostedButtonId="A8PBJ4AQYQ9G4" />
-                  </div>
+                  <a
+                    href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mb-6"
+                  >
+                    <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
+                      Pay with PayPal
+                    </Button>
+                  </a>
                 ) : (
                   <Button
                     className={`w-full mb-6 ${
