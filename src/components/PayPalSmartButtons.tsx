@@ -39,7 +39,7 @@ interface Props {
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ amount = "4.00", description, onSuccess }: Props) {
+export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
