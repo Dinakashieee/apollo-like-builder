@@ -45,6 +45,20 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Verify caller is a member of the requested workspace before doing
+    // any quota work or AI calls (prevents cross-workspace quota exhaustion).
+    const { data: membership } = await admin
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!membership) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Quota check (Free = 20 AI calls / month, shared with Composer).
     const quota = await checkAiEmailQuota(admin, workspace_id);
     if (quota) {
