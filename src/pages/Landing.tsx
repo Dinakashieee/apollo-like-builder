@@ -80,7 +80,7 @@ type Tier = {
   priceMonthly?: string;
   priceYearly?: string;
   contact?: boolean;
-  paypal?: boolean;
+  paypalUrl?: string;
 };
 
 const tiers: Tier[] = [
@@ -107,7 +107,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
-    paypal: true,
+    paypalUrl: "https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y",
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
@@ -126,6 +126,7 @@ const tiers: Tier[] = [
     highlight: true,
     priceMonthly: "growth_monthly",
     priceYearly: "growth_yearly",
+    paypalUrl: "https://www.paypal.com/ncp/payment/QX3YGCGUPSDQW",
     features: [
       "4,000 leads",
       "10,000 AI emails / month",
@@ -145,6 +146,7 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "scale_monthly",
     priceYearly: "scale_yearly",
+    paypalUrl: "https://www.paypal.com/ncp/payment/7JR5P88ME5B4N",
     features: [
       "Unlimited leads",
       "Unlimited AI emails",
@@ -472,9 +474,9 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {tier.paypal ? (
+                {tier.paypalUrl ? (
                   <a
-                    href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
+                    href={tier.paypalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block mb-6"
