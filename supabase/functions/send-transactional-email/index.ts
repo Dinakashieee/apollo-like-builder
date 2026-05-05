@@ -34,10 +34,38 @@ function generateToken(): string {
 // gateway validates the caller's JWT (anon or service_role) before the request
 // reaches this code. No in-function auth check is needed.
 
+function decodeJwtClaims(authHeader: string | null): Record<string, any> | null {
+  if (!authHeader) return null
+  const token = authHeader.replace(/^Bearer\s+/i, '')
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  try {
+    const pad = (s: string) => s + '='.repeat((4 - (s.length % 4)) % 4)
+    const json = atob(pad(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
+  }
+
+  // Require an authenticated caller: either the service role (server-to-server)
+  // or a logged-in end user (JWT with `sub`). Plain anon JWTs (which any
+  // internet user can mint with the public publishable key) are rejected to
+  // prevent transactional email spam to arbitrary recipients.
+  const claims = decodeJwtClaims(req.headers.get('Authorization'))
+  const isServiceRole = claims?.role === 'service_role'
+  const isAuthenticatedUser = claims?.role === 'authenticated' && !!claims?.sub
+  if (!isServiceRole && !isAuthenticatedUser) {
+    return new Response(
+      JSON.stringify({ error: 'Forbidden' }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')

@@ -3,14 +3,46 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const ALLOWED_REDIRECT_ORIGINS = [
+  "https://engageiqlk.com",
+  "https://www.engageiqlk.com",
+  "https://engageiqlk.lovable.app",
+  "https://id-preview--aa623c5c-385f-4ba7-b839-ca1cfa59f854.lovable.app",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+
+function safeRedirect(redirectTo?: string | null): string | undefined {
+  if (!redirectTo) return undefined;
+  try {
+    const u = new URL(redirectTo);
+    const origin = `${u.protocol}//${u.host}`;
+    if (ALLOWED_REDIRECT_ORIGINS.includes(origin)) return origin;
+  } catch { /* ignore */ }
+  return undefined;
+}
+
 function htmlResponse(title: string, body: string, redirectTo?: string) {
+  const safeTitle = escapeHtml(title);
+  const safeBody = escapeHtml(body);
+  const safe = safeRedirect(redirectTo);
   return new Response(
-    `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+    `<!doctype html><html><head><meta charset="utf-8"><title>${safeTitle}</title>
+    ${safe ? `<meta http-equiv="refresh" content="2;url=${escapeHtml(safe)}/settings?inbox=connected">` : ""}
     <style>body{font-family:system-ui;background:#0F172A;color:#F8FAFC;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
     .card{max-width:480px;padding:32px;background:#1E293B;border-radius:12px;text-align:center}
     h1{margin:0 0 12px;font-size:20px}p{color:#94A3B8;line-height:1.5}a{color:#60A5FA}</style></head>
-    <body><div class="card"><h1>${title}</h1><p>${body}</p>
-    ${redirectTo ? `<script>setTimeout(()=>{window.location.href="${redirectTo}/settings?inbox=connected"},1500)</script><p><a href="${redirectTo}/settings">Return to app</a></p>` : ""}
+    <body><div class="card"><h1>${safeTitle}</h1><p>${safeBody}</p>
+    ${safe ? `<p><a href="${escapeHtml(safe)}/settings">Return to app</a></p>` : ""}
     </div></body></html>`,
     { headers: { "Content-Type": "text/html" } },
   );
