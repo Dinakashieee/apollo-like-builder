@@ -19,6 +19,7 @@ import { Logo } from "@/components/Logo";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
+import { PayPalHostedButton } from "@/components/PayPalHostedButton";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
