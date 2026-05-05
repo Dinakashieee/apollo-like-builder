@@ -185,10 +185,16 @@ export function BillingSection() {
               Annual <span className="ml-1 opacity-70">save 20%</span>
             </button>
           </div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Button variant="outline" onClick={() => subscribe(billing === "year" ? "starter_yearly" : "starter_monthly")}>
-              Subscribe to Starter ({billing === "year" ? "$38/yr" : "$4/mo"})
-            </Button>
+          <div className="grid sm:grid-cols-1 gap-3">
+            <a
+              href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
+                Subscribe to Starter via PayPal ($1)
+              </Button>
+            </a>
             <Button className="bg-gradient-primary shadow-glow" onClick={() => subscribe(billing === "year" ? "pro_yearly" : "pro_monthly")}>
               Subscribe to Pro ({billing === "year" ? "$374/yr" : "$39/mo"})
             </Button>
