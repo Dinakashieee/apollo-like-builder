@@ -24,3 +24,15 @@ verify_jwt = false
 
 [functions.oauth-microsoft-callback]
 verify_jwt = false
+
+[functions.process-scheduled-emails]
+verify_jwt = false
+
+[functions.suggest-reply]
+verify_jwt = true
+
+[functions.extract-followup-date]
+verify_jwt = true
+
+[functions.whatsapp-send]
+verify_jwt = true
