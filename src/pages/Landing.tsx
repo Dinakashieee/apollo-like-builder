@@ -13,6 +13,7 @@ import {
   Check,
   Database,
   Lock,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -506,6 +507,51 @@ export default function Landing() {
                 </ul>
               </div>
             ))}
+          </div>
+
+          {/* Add-ons */}
+          <div className="mt-20 max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <p className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">Add-ons</p>
+              <h3 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep tracking-tight">
+                Top up any plan, anytime
+              </h3>
+              <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+                Need more seats or AI credits? Stack add-ons on Starter or Pro — no plan upgrade required.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { icon: UserPlus, name: "Additional User Seat", price: "$8", unit: "/seat/mo", desc: "Add another teammate to your workspace. Cancel anytime." },
+                { icon: Zap, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
+                { icon: Sparkles, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
+              ].map((a) => (
+                <div
+                  key={a.name}
+                  className={`card-elevated p-6 relative ${a.highlight ? "border-2 border-primary/40 shadow-glow" : ""}`}
+                >
+                  {a.highlight && (
+                    <span className="absolute -top-3 left-6 text-xs font-semibold bg-gradient-primary text-primary-foreground px-3 py-1 rounded-full">
+                      Best value
+                    </span>
+                  )}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                      <a.icon className="h-5 w-5" />
+                    </div>
+                    <p className="font-semibold text-primary-deep">{a.name}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground min-h-[40px]">{a.desc}</p>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-3xl font-display font-bold text-primary-deep">{a.price}</span>
+                    <span className="text-xs text-muted-foreground">{a.unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-xs text-muted-foreground mt-6">
+              Add-ons are managed from <strong>Settings → Billing</strong> after you sign up. Available on Starter & Pro plans.
+            </p>
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
