@@ -13,6 +13,7 @@ import {
   Check,
   Database,
   Lock,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
