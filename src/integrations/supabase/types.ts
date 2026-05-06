@@ -478,6 +478,51 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_up_reminders: {
+        Row: {
+          created_at: string
+          due_at: string
+          id: string
+          lead_id: string | null
+          note: string | null
+          source: string
+          source_message_id: string | null
+          status: string
+          thread_id: string | null
+          updated_at: string
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_at: string
+          id?: string
+          lead_id?: string | null
+          note?: string | null
+          source?: string
+          source_message_id?: string | null
+          status?: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          id?: string
+          lead_id?: string | null
+          note?: string | null
+          source?: string
+          source_message_id?: string | null
+          status?: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           company_name: string
@@ -495,6 +540,7 @@ export type Database = {
             | null
           notes: string | null
           pain_points: string[] | null
+          phone: string | null
           reply_count: number
           role: string | null
           score: number | null
@@ -503,6 +549,7 @@ export type Database = {
           systems_in_use: string[] | null
           tools: string[] | null
           updated_at: string
+          whatsapp_phone: string | null
           workspace_id: string
         }
         Insert: {
@@ -521,6 +568,7 @@ export type Database = {
             | null
           notes?: string | null
           pain_points?: string[] | null
+          phone?: string | null
           reply_count?: number
           role?: string | null
           score?: number | null
@@ -529,6 +577,7 @@ export type Database = {
           systems_in_use?: string[] | null
           tools?: string[] | null
           updated_at?: string
+          whatsapp_phone?: string | null
           workspace_id: string
         }
         Update: {
@@ -547,6 +596,7 @@ export type Database = {
             | null
           notes?: string | null
           pain_points?: string[] | null
+          phone?: string | null
           reply_count?: number
           role?: string | null
           score?: number | null
@@ -555,6 +605,7 @@ export type Database = {
           systems_in_use?: string[] | null
           tools?: string[] | null
           updated_at?: string
+          whatsapp_phone?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -777,6 +828,66 @@ export type Database = {
           sender_email?: string | null
           sender_name?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      scheduled_emails: {
+        Row: {
+          account_id: string | null
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          in_reply_to_message_id: string | null
+          lead_id: string | null
+          scheduled_for: string
+          send_via: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          thread_id: string | null
+          to_email: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          body: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          in_reply_to_message_id?: string | null
+          lead_id?: string | null
+          scheduled_for: string
+          send_via?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          to_email: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          account_id?: string | null
+          body?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          in_reply_to_message_id?: string | null
+          lead_id?: string | null
+          scheduled_for?: string
+          send_via?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          to_email?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
         }
         Relationships: []
       }
@@ -1219,6 +1330,51 @@ export type Database = {
           notes?: string | null
           status?: Database["public"]["Enums"]["waitlist_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          body: string
+          created_at: string
+          direction: string
+          id: string
+          lead_id: string
+          phone: string
+          phone_matches_lead: boolean
+          sent_at: string
+          sent_via: string | null
+          twilio_sid: string | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          direction: string
+          id?: string
+          lead_id: string
+          phone: string
+          phone_matches_lead?: boolean
+          sent_at?: string
+          sent_via?: string | null
+          twilio_sid?: string | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          lead_id?: string
+          phone?: string
+          phone_matches_lead?: boolean
+          sent_at?: string
+          sent_via?: string | null
+          twilio_sid?: string | null
+          user_id?: string | null
+          workspace_id?: string
         }
         Relationships: []
       }
