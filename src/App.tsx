@@ -29,6 +29,7 @@ import Company from "./pages/Company";
 import Help from "./pages/Help";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
+import Reminders from "./pages/Reminders";
 
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
                   <Route path="targets" element={<Targets />} />
                   <Route path="composer" element={<Composer />} />
                   <Route path="automation" element={<Automation />} />
+                  <Route path="reminders" element={<Reminders />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="company" element={<Company />} />
                   <Route path="help" element={<Help />} />
