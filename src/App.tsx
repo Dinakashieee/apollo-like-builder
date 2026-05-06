@@ -30,6 +30,7 @@ import Help from "./pages/Help";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import Reminders from "./pages/Reminders";
+import GettingStarted from "./pages/GettingStarted";
 
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/app" element={<AppLayout />}>
                   <Route index element={<Dashboard />} />
+                  <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
