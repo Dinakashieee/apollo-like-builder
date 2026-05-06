@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   ShieldCheck,
   Bell,
+  Rocket,
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,6 +32,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
 
 const mainItems = [
+  { title: "Getting Started", url: "/app/getting-started", icon: Rocket, badge: "New" },
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Leads", url: "/app/leads", icon: Users },
   
