@@ -240,6 +240,15 @@ export function LeadConversation({ leadId }: { leadId: string }) {
                             Not analyzed yet — click "Analyze" to score this reply.
                           </p>
                         )}
+                        <div className="flex gap-2 pt-1">
+                          <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => detectFollowup(m)} disabled={extractingId === m.id}>
+                            {extractingId === m.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CalendarPlus className="h-3 w-3" />}
+                            <span className="ml-1">Detect follow-up date</span>
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => setScheduleFor(m)}>
+                            <Clock className="h-3 w-3" /><span className="ml-1">Schedule reply</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -249,6 +258,19 @@ export function LeadConversation({ leadId }: { leadId: string }) {
           </div>
         );
       })}
+      {scheduleFor && current && user && (
+        <ScheduleReplyDialog
+          open={!!scheduleFor}
+          onOpenChange={(o) => !o && setScheduleFor(null)}
+          workspaceId={current.id}
+          userId={user.id}
+          leadId={leadId}
+          threadId={scheduleFor.thread_id}
+          defaultTo={scheduleFor.from_email}
+          defaultSubject={scheduleFor.subject ?? undefined}
+          contextBody={scheduleFor.body_text ?? scheduleFor.snippet ?? ""}
+        />
+      )}
     </div>
   );
 }
