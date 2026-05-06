@@ -11,6 +11,7 @@ import {
   Target,
   LifeBuoy,
   ShieldCheck,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,6 +38,7 @@ const mainItems = [
   { title: "Targets", url: "/app/targets", icon: Target },
   { title: "Email Composer", url: "/app/composer", icon: Mail },
   { title: "Automation", url: "/app/automation", icon: Workflow },
+  { title: "Follow-ups", url: "/app/reminders", icon: Bell },
 ];
 
 const secondaryItems = [

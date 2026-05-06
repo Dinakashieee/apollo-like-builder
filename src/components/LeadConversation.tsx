@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Mail, ArrowDownLeft, ArrowUpRight, Sparkles, Flame, Snowflake, Sun, Minus } from "lucide-react";
+import { Loader2, Mail, ArrowDownLeft, ArrowUpRight, Sparkles, Flame, Snowflake, Sun, Minus, Clock, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { ScheduleReplyDialog } from "./ScheduleReplyDialog";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Message {
   id: string;
@@ -44,6 +47,10 @@ export function LeadConversation({ leadId }: { leadId: string }) {
   const [messagesByThread, setMessagesByThread] = useState<Record<string, Message[]>>({});
   const [loading, setLoading] = useState(true);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [extractingId, setExtractingId] = useState<string | null>(null);
+  const [scheduleFor, setScheduleFor] = useState<Message | null>(null);
+  const { current } = useWorkspace();
+  const { user } = useAuth();
 
   const refresh = async () => {
     setLoading(true);
@@ -102,6 +109,17 @@ export function LeadConversation({ leadId }: { leadId: string }) {
     }
     toast({ title: "Reply analyzed" });
     refresh();
+  };
+
+  const detectFollowup = async (msg: Message) => {
+    setExtractingId(msg.id);
+    const { data, error } = await supabase.functions.invoke("extract-followup-date", {
+      body: { messageId: msg.id },
+    });
+    setExtractingId(null);
+    if (error) return toast({ title: "Detection failed", description: error.message, variant: "destructive" });
+    if ((data as any)?.found) toast({ title: "Reminder created", description: `Due ${new Date((data as any).due_at).toLocaleString()}` });
+    else toast({ title: "No follow-up date found" });
   };
 
   if (loading) {
@@ -222,6 +240,15 @@ export function LeadConversation({ leadId }: { leadId: string }) {
                             Not analyzed yet — click "Analyze" to score this reply.
                           </p>
                         )}
+                        <div className="flex gap-2 pt-1">
+                          <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => detectFollowup(m)} disabled={extractingId === m.id}>
+                            {extractingId === m.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CalendarPlus className="h-3 w-3" />}
+                            <span className="ml-1">Detect follow-up date</span>
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => setScheduleFor(m)}>
+                            <Clock className="h-3 w-3" /><span className="ml-1">Schedule reply</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -231,6 +258,19 @@ export function LeadConversation({ leadId }: { leadId: string }) {
           </div>
         );
       })}
+      {scheduleFor && current && user && (
+        <ScheduleReplyDialog
+          open={!!scheduleFor}
+          onOpenChange={(o) => !o && setScheduleFor(null)}
+          workspaceId={current.id}
+          userId={user.id}
+          leadId={leadId}
+          threadId={scheduleFor.thread_id}
+          defaultTo={scheduleFor.from_email}
+          defaultSubject={scheduleFor.subject ?? undefined}
+          contextBody={scheduleFor.body_text ?? scheduleFor.snippet ?? ""}
+        />
+      )}
     </div>
   );
 }

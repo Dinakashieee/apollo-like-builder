@@ -9,6 +9,8 @@ import { AddLeadDialog } from "@/components/AddLeadDialog";
 import { ImportDialog } from "@/components/ImportDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { LeadConversation } from "@/components/LeadConversation";
+import { WhatsAppPanel } from "@/components/WhatsAppPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -268,7 +270,20 @@ export default function Leads() {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-4">
-            {convLead && <LeadConversation leadId={convLead.id} />}
+            {convLead && (
+              <Tabs defaultValue="email">
+                <TabsList>
+                  <TabsTrigger value="email">Email</TabsTrigger>
+                  <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
+                </TabsList>
+                <TabsContent value="email" className="mt-4">
+                  <LeadConversation leadId={convLead.id} />
+                </TabsContent>
+                <TabsContent value="whatsapp" className="mt-4">
+                  <WhatsAppPanel leadId={convLead.id} />
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </SheetContent>
       </Sheet>
