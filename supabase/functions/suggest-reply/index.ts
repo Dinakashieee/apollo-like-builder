@@ -27,12 +27,14 @@ Deno.serve(async (req) => {
 
     let leadCtx = "";
     if (leadId) {
-      const { data: lead } = await admin
+      // Use the user-scoped client so RLS enforces workspace membership.
+      const { data: lead } = await userClient
         .from("leads")
         .select("contact_name, company_name, role, status, pain_points")
         .eq("id", leadId)
         .maybeSingle();
-      if (lead) leadCtx = `Lead: ${lead.contact_name ?? ""} at ${lead.company_name ?? ""} (${lead.role ?? "—"}). Status: ${lead.status}. Pain: ${(lead.pain_points ?? []).join(", ")}.`;
+      if (!lead) return json({ error: "forbidden" }, 403);
+      leadCtx = `Lead: ${lead.contact_name ?? ""} at ${lead.company_name ?? ""} (${lead.role ?? "—"}). Status: ${lead.status}. Pain: ${(lead.pain_points ?? []).join(", ")}.`;
     }
 
     const sys = `You are a senior B2B sales rep crafting the BEST next reply for the user to send.

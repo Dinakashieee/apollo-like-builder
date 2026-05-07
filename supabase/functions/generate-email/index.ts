@@ -26,6 +26,18 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+    // Verify the caller is actually a member of the workspace before touching its quota.
+    const { data: membership } = await admin
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!membership) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const quota = await checkAiEmailQuota(admin, workspace_id);
     if (quota) {
       return new Response(
