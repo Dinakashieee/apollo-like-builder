@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 let sdkPromise: Promise<void> | null = null;
 
-function loadSdk(clientId: string): Promise<void> {
+function loadSdk(clientId: string, currency: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if ((window as any).paypal?.Buttons) return Promise.resolve();
   if (sdkPromise) return sdkPromise;
@@ -13,7 +13,7 @@ function loadSdk(clientId: string): Promise<void> {
   // (no special PayPal account approval needed, unlike Advanced Card Fields).
   const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
     clientId,
-  )}&components=buttons&enable-funding=venmo,paylater,card&currency=USD&intent=capture`;
+  )}&components=buttons&enable-funding=venmo,paylater,card&currency=${encodeURIComponent(currency)}&intent=capture`;
 
   sdkPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[data-paypal-sdk="1"]`);
