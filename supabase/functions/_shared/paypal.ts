@@ -3,6 +3,42 @@
 // Supports sandbox/live switching via PAYPAL_ENV.
 
 export type PayPalEnv = 'sandbox' | 'live';
+export type PayPalPlanId =
+  | 'starter_monthly'
+  | 'starter_yearly'
+  | 'growth_monthly'
+  | 'growth_yearly'
+  | 'scale_monthly'
+  | 'scale_yearly';
+
+const PAYPAL_PLANS: Record<PayPalPlanId, {
+  amount: string;
+  currency: 'USD';
+  description: string;
+  productId: string;
+  priceId: string;
+  intervalMonths: number;
+}> = {
+  starter_monthly: { amount: '1.00', currency: 'USD', description: 'EngageIQ Starter Plan - monthly', productId: 'starter_plan', priceId: 'starter_monthly', intervalMonths: 1 },
+  starter_yearly: { amount: '9.60', currency: 'USD', description: 'EngageIQ Starter Plan - yearly', productId: 'starter_plan', priceId: 'starter_yearly', intervalMonths: 12 },
+  growth_monthly: { amount: '39.00', currency: 'USD', description: 'EngageIQ Growth Plan - monthly', productId: 'growth_plan', priceId: 'growth_monthly', intervalMonths: 1 },
+  growth_yearly: { amount: '374.40', currency: 'USD', description: 'EngageIQ Growth Plan - yearly', productId: 'growth_plan', priceId: 'growth_yearly', intervalMonths: 12 },
+  scale_monthly: { amount: '79.00', currency: 'USD', description: 'EngageIQ Scale Plan - monthly', productId: 'scale_plan', priceId: 'scale_monthly', intervalMonths: 1 },
+  scale_yearly: { amount: '758.40', currency: 'USD', description: 'EngageIQ Scale Plan - yearly', productId: 'scale_plan', priceId: 'scale_yearly', intervalMonths: 12 },
+};
+
+export function getPayPalPlan(planId: unknown) {
+  if (typeof planId !== 'string' || !(planId in PAYPAL_PLANS)) {
+    throw new Error('Invalid PayPal plan');
+  }
+  return PAYPAL_PLANS[planId as PayPalPlanId];
+}
+
+export function addMonths(date: Date, months: number): Date {
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + months);
+  return next;
+}
 
 export function getPayPalEnv(): PayPalEnv {
   const raw = (Deno.env.get('PAYPAL_ENV') ?? 'live').toLowerCase().trim();

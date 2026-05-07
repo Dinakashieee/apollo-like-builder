@@ -34,13 +34,12 @@ function loadSdk(clientId: string, currency: string): Promise<void> {
 }
 
 interface Props {
-  amount?: string;
   currency?: string;
-  description?: string;
+  planId: string;
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ amount = "1.00", currency = "USD", description, onSuccess }: Props) {
+export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -64,10 +63,13 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
         const createOrder = async () => {
           const { data: order, error: err } = await supabase.functions.invoke(
             "paypal-create-order",
-            { body: { amount, currency, description } },
+            { body: { planId } },
           );
           if (err || !order?.id) {
-            toast.error("Could not start checkout. Please try again.");
+            const message = err?.message?.includes("401")
+              ? "Please sign in before starting checkout."
+              : "Could not start checkout. Please try again.";
+            toast.error(message);
             throw new Error("create order failed");
           }
           return order.id;
@@ -76,7 +78,7 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
         const onApprove = async (data: any, actions: any) => {
           const { data: result, error: err } = await supabase.functions.invoke(
             "paypal-capture-order",
-            { body: { orderId: data.orderID } },
+            { body: { orderId: data.orderID, planId } },
           );
           if (err) {
             toast.error("Payment could not be completed.");
@@ -87,8 +89,11 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
             if (result.recoverable && actions?.restart) return actions.restart();
             return;
           }
-          toast.success("Payment successful!");
+          toast.success("Payment successful! Your plan is active.");
           onSuccess?.(result);
+          const successUrl = new URL("/app/settings", window.location.origin);
+          successUrl.searchParams.set("checkout", "success");
+          window.location.assign(successUrl.toString());
         };
 
         if (buttonsRef.current) {
@@ -116,7 +121,7 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
     return () => {
       cancelled = true;
     };
-  }, [amount, currency, description, onSuccess]);
+  }, [currency, planId, onSuccess]);
 
   return (
     <div className="space-y-2">

@@ -13,8 +13,16 @@ import { PayPalSmartButtons } from "./PayPalSmartButtons";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
+  growth_plan: "Growth",
+  scale_plan: "Scale",
   pro_plan: "Pro",
 };
+
+const PAYPAL_PLANS = [
+  { label: "Starter", monthly: "starter_monthly", yearly: "starter_yearly", price: "$1/mo" },
+  { label: "Growth", monthly: "growth_monthly", yearly: "growth_yearly", price: "$39/mo" },
+  { label: "Scale", monthly: "scale_monthly", yearly: "scale_yearly", price: "$79/mo" },
+] as const;
 
 export function BillingSection() {
   const { user } = useAuth();
@@ -174,52 +182,27 @@ export function BillingSection() {
           <p className="text-sm text-muted-foreground mb-3">
             Choose a plan — all subscriptions are processed securely via PayPal.
           </p>
-          <div className="grid sm:grid-cols-1 gap-3">
-            <a
-              href="https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
-                Subscribe to Starter via PayPal ($1)
-              </Button>
-            </a>
-            <a
-              href="https://www.paypal.com/ncp/payment/QX3YGCGUPSDQW"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
-                Subscribe to Growth via PayPal
-              </Button>
-            </a>
-            <a
-              href="https://www.paypal.com/ncp/payment/7JR5P88ME5B4N"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
-                Subscribe to Pro via PayPal
-              </Button>
-            </a>
+          <div className="flex items-center gap-1 mb-4 p-1 rounded-full border border-border/60 bg-muted/30 w-fit">
+            <Button size="sm" variant={billing === "month" ? "default" : "ghost"} onClick={() => setBilling("month")}>Monthly</Button>
+            <Button size="sm" variant={billing === "year" ? "default" : "ghost"} onClick={() => setBilling("year")}>Annual -20%</Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {PAYPAL_PLANS.map((plan) => (
+              <div key={plan.label} className="rounded-lg border border-border/60 bg-background p-4 space-y-3">
+                <div>
+                  <p className="font-semibold text-primary-deep">{plan.label}</p>
+                  <p className="text-xs text-muted-foreground">From {plan.price}</p>
+                </div>
+                <PayPalSmartButtons
+                  planId={billing === "year" ? plan.yearly : plan.monthly}
+                  onSuccess={() => setTimeout(refetch, 1500)}
+                />
+              </div>
+            ))}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            You'll be redirected to PayPal to complete your subscription. Cancel anytime from your PayPal account.
+            Pay securely with PayPal, debit, or credit card. Your plan activates automatically after successful payment.
           </p>
-
-          <div className="mt-5 pt-5 border-t border-border/60">
-            <p className="text-sm font-medium mb-2">Or pay a one-time amount</p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Securely processed via PayPal — pay with PayPal balance, debit, or credit card.
-            </p>
-            <div className="max-w-sm">
-              <PayPalSmartButtons
-                amount="1.00"
-                description="EngageIQ Starter Plan (one-time)"
-                onSuccess={() => setTimeout(refetch, 1500)}
-              />
-            </div>
-          </div>
         </div>
       )}
 
