@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   CreditCard, ArrowUpRight, ArrowDownRight, Loader2, RotateCcw, Wallet, RefreshCw, AlertTriangle,
 } from "lucide-react";
+import { PayPalSmartButtons } from "./PayPalSmartButtons";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
