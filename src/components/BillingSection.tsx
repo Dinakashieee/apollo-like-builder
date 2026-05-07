@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   CreditCard, ArrowUpRight, ArrowDownRight, Loader2, RotateCcw, Wallet, RefreshCw, AlertTriangle,
 } from "lucide-react";
+import { PayPalSmartButtons } from "./PayPalSmartButtons";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
@@ -205,6 +206,20 @@ export function BillingSection() {
           <p className="text-xs text-muted-foreground mt-2">
             You'll be redirected to PayPal to complete your subscription. Cancel anytime from your PayPal account.
           </p>
+
+          <div className="mt-5 pt-5 border-t border-border/60">
+            <p className="text-sm font-medium mb-2">Or pay a one-time amount</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Securely processed via PayPal — pay with PayPal balance, debit, or credit card.
+            </p>
+            <div className="max-w-sm">
+              <PayPalSmartButtons
+                amount="1.00"
+                description="EngageIQ Starter Plan (one-time)"
+                onSuccess={() => setTimeout(refetch, 1500)}
+              />
+            </div>
+          </div>
         </div>
       )}
 

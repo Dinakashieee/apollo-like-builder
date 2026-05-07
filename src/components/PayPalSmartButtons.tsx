@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 let sdkPromise: Promise<void> | null = null;
 
-function loadSdk(clientId: string): Promise<void> {
+function loadSdk(clientId: string, currency: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if ((window as any).paypal?.Buttons) return Promise.resolve();
   if (sdkPromise) return sdkPromise;
@@ -13,7 +13,7 @@ function loadSdk(clientId: string): Promise<void> {
   // (no special PayPal account approval needed, unlike Advanced Card Fields).
   const src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
     clientId,
-  )}&components=buttons&enable-funding=venmo,paylater,card&currency=USD&intent=capture`;
+  )}&components=buttons&enable-funding=venmo,paylater,card&currency=${encodeURIComponent(currency)}&intent=capture`;
 
   sdkPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[data-paypal-sdk="1"]`);
@@ -35,11 +35,12 @@ function loadSdk(clientId: string): Promise<void> {
 
 interface Props {
   amount?: string;
+  currency?: string;
   description?: string;
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: Props) {
+export function PayPalSmartButtons({ amount = "1.00", currency = "USD", description, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: 
       try {
         const { data, error } = await supabase.functions.invoke("paypal-config");
         if (error || !data?.clientId) throw new Error("Could not load PayPal config");
-        await loadSdk(data.clientId);
+        await loadSdk(data.clientId, currency);
         if (cancelled || renderedRef.current) return;
         const paypal = (window as any).paypal;
         if (!paypal?.Buttons) throw new Error("PayPal SDK not available");
@@ -63,7 +64,7 @@ export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: 
         const createOrder = async () => {
           const { data: order, error: err } = await supabase.functions.invoke(
             "paypal-create-order",
-            { body: { amount, description } },
+            { body: { amount, currency, description } },
           );
           if (err || !order?.id) {
             toast.error("Could not start checkout. Please try again.");
@@ -115,7 +116,7 @@ export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: 
     return () => {
       cancelled = true;
     };
-  }, [amount, description, onSuccess]);
+  }, [amount, currency, description, onSuccess]);
 
   return (
     <div className="space-y-2">
