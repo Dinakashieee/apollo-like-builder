@@ -21,6 +21,7 @@ import { Logo } from "@/components/Logo";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
+import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -460,17 +461,10 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {tier.paypalUrl ? (
-                  <a
-                    href={tier.paypalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block mb-6"
-                  >
-                    <Button className="w-full bg-[#FFC439] text-black hover:bg-[#f0b82d]">
-                      Pay with PayPal
-                    </Button>
-                  </a>
+                {user && tier.monthly && tier.monthly > 0 && tier.priceMonthly && tier.priceYearly ? (
+                  <div className="mb-6">
+                    <PayPalSmartButtons planId={annual ? tier.priceYearly : tier.priceMonthly} />
+                  </div>
                 ) : (
                   <Button
                     className={`w-full mb-6 ${
@@ -478,9 +472,8 @@ export default function Landing() {
                     }`}
                     variant={tier.highlight ? "default" : "outline"}
                     onClick={() => handleTierCta(tier)}
-                    disabled={checkoutLoading}
                   >
-                    {checkoutLoading && tier.monthly && tier.monthly > 0 ? "Opening checkout…" : tier.cta}
+                    {tier.cta}
                   </Button>
                 )}
 
