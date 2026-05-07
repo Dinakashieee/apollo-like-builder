@@ -21,7 +21,6 @@ import { Logo } from "@/components/Logo";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
-import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -79,7 +78,6 @@ type Tier = {
   priceMonthly?: string;
   priceYearly?: string;
   contact?: boolean;
-  paypalUrl?: string;
 };
 
 const tiers: Tier[] = [
@@ -106,7 +104,6 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "starter_monthly",
     priceYearly: "starter_yearly",
-    paypalUrl: "https://www.paypal.com/ncp/payment/BSS9TD6Q7JT9Y",
     features: [
       "1,000 leads",
       "2,500 AI emails / month",
@@ -125,7 +122,6 @@ const tiers: Tier[] = [
     highlight: true,
     priceMonthly: "growth_monthly",
     priceYearly: "growth_yearly",
-    paypalUrl: "https://www.paypal.com/ncp/payment/QX3YGCGUPSDQW",
     features: [
       "4,000 leads",
       "10,000 AI emails / month",
@@ -145,7 +141,6 @@ const tiers: Tier[] = [
     highlight: false,
     priceMonthly: "scale_monthly",
     priceYearly: "scale_yearly",
-    paypalUrl: "https://www.paypal.com/ncp/payment/7JR5P88ME5B4N",
     features: [
       "Unlimited leads",
       "Unlimited AI emails",
@@ -160,7 +155,6 @@ const tiers: Tier[] = [
 
 export default function Landing() {
   const [annual, setAnnual] = useState(true);
-  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -177,14 +171,7 @@ export default function Landing() {
       navigate("/auth?next=/#pricing");
       return;
     }
-    const priceId = annual ? tier.priceYearly : tier.priceMonthly;
-    if (!priceId) return;
-    openCheckout({
-      priceId,
-      customerEmail: user.email ?? undefined,
-      userId: user.id,
-      successUrl: `${window.location.origin}/app?checkout=success`,
-    });
+    navigate("/app/settings");
   };
 
   const formatPrice = (monthly: number | null) => {
