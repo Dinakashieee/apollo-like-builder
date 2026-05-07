@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { getPayPalAccessToken, getPayPalBase } from '../_shared/paypal.ts';
+import { getPayPalAccessToken, getPayPalBase, getPayPalPlan } from '../_shared/paypal.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,11 +27,10 @@ Deno.serve(async (req) => {
       });
     }
     const body = await req.json().catch(() => ({}));
-    const description: string = body.description ?? 'EngageIQ Plan';
-    const amount: string = String(body.amount ?? '1.00');
-    const currency: string = (body.currency ?? 'USD').toUpperCase();
-
-    if (!/^\d+(\.\d{1,2})?$/.test(amount)) {
+    let plan;
+    try {
+      plan = getPayPalPlan(body.planId);
+    } catch {
       return new Response(JSON.stringify({ error: 'Invalid amount' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -52,8 +51,9 @@ Deno.serve(async (req) => {
           user_action: 'PAY_NOW',
         },
         purchase_units: [{
-          amount: { currency_code: currency, value: amount },
-          description,
+          amount: { currency_code: plan.currency, value: plan.amount },
+          description: plan.description,
+          custom_id: JSON.stringify({ userId: u.user.id, planId: plan.priceId }),
         }],
       }),
     });
