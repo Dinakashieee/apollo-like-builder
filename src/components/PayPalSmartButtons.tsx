@@ -64,7 +64,7 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
         const createOrder = async () => {
           const { data: order, error: err } = await supabase.functions.invoke(
             "paypal-create-order",
-            { body: { amount, description } },
+            { body: { amount, currency, description } },
           );
           if (err || !order?.id) {
             toast.error("Could not start checkout. Please try again.");
