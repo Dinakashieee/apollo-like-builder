@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { getPayPalAccessToken, getPayPalBase } from '../_shared/paypal.ts';
+import { addMonths, getPayPalAccessToken, getPayPalBase, getPayPalEnv, getPayPalPlan } from '../_shared/paypal.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,9 +26,17 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const { orderId } = await req.json();
+    const { orderId, planId } = await req.json();
     if (!orderId || typeof orderId !== 'string') {
       return new Response(JSON.stringify({ error: 'orderId required' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    let plan;
+    try {
+      plan = getPayPalPlan(planId);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid plan' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -59,7 +67,25 @@ Deno.serve(async (req) => {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    return new Response(JSON.stringify({ ok: true, ...data }), {
+    const capturedAt = new Date();
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const payerId = data?.payer?.payer_id ?? 'paypal';
+    const payerEmail = data?.payer?.email_address ?? u.user.email ?? 'paypal-buyer';
+    const { error: dbError } = await admin.from('subscriptions').upsert({
+      user_id: u.user.id,
+      paddle_subscription_id: `paypal:${orderId}`,
+      paddle_customer_id: `paypal:${payerId}:${payerEmail}`,
+      product_id: plan.productId,
+      price_id: plan.priceId,
+      status: 'active',
+      current_period_start: capturedAt.toISOString(),
+      current_period_end: addMonths(capturedAt, plan.intervalMonths).toISOString(),
+      environment: getPayPalEnv(),
+      updated_at: capturedAt.toISOString(),
+    }, { onConflict: 'paddle_subscription_id' });
+    if (dbError) throw dbError;
+
+    return new Response(JSON.stringify({ ok: true, planId: plan.priceId, ...data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
