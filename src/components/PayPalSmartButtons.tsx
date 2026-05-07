@@ -35,11 +35,12 @@ function loadSdk(clientId: string, currency: string): Promise<void> {
 
 interface Props {
   amount?: string;
+  currency?: string;
   description?: string;
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: Props) {
+export function PayPalSmartButtons({ amount = "1.00", currency = "USD", description, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ export function PayPalSmartButtons({ amount = "1.00", description, onSuccess }: 
       try {
         const { data, error } = await supabase.functions.invoke("paypal-config");
         if (error || !data?.clientId) throw new Error("Could not load PayPal config");
-        await loadSdk(data.clientId);
+        await loadSdk(data.clientId, currency);
         if (cancelled || renderedRef.current) return;
         const paypal = (window as any).paypal;
         if (!paypal?.Buttons) throw new Error("PayPal SDK not available");
