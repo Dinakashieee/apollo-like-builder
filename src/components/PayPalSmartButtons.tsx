@@ -116,7 +116,7 @@ export function PayPalSmartButtons({ amount = "1.00", currency = "USD", descript
     return () => {
       cancelled = true;
     };
-  }, [amount, description, onSuccess]);
+  }, [amount, currency, description, onSuccess]);
 
   return (
     <div className="space-y-2">
