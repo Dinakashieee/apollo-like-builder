@@ -19,8 +19,8 @@ const PAYPAL_PLANS: Record<PayPalPlanId, {
   priceId: string;
   intervalMonths: number;
 }> = {
-  starter_monthly: { amount: '1.00', currency: 'USD', description: 'EngageIQ Starter Plan - monthly', productId: 'starter_plan', priceId: 'starter_monthly', intervalMonths: 1 },
-  starter_yearly: { amount: '9.60', currency: 'USD', description: 'EngageIQ Starter Plan - yearly', productId: 'starter_plan', priceId: 'starter_yearly', intervalMonths: 12 },
+  starter_monthly: { amount: '19.00', currency: 'USD', description: 'EngageIQ Starter Plan - monthly', productId: 'starter_plan', priceId: 'starter_monthly', intervalMonths: 1 },
+  starter_yearly: { amount: '182.40', currency: 'USD', description: 'EngageIQ Starter Plan - yearly', productId: 'starter_plan', priceId: 'starter_yearly', intervalMonths: 12 },
   growth_monthly: { amount: '39.00', currency: 'USD', description: 'EngageIQ Growth Plan - monthly', productId: 'growth_plan', priceId: 'growth_monthly', intervalMonths: 1 },
   growth_yearly: { amount: '374.40', currency: 'USD', description: 'EngageIQ Growth Plan - yearly', productId: 'growth_plan', priceId: 'growth_yearly', intervalMonths: 12 },
   scale_monthly: { amount: '79.00', currency: 'USD', description: 'EngageIQ Scale Plan - monthly', productId: 'scale_plan', priceId: 'scale_monthly', intervalMonths: 1 },
