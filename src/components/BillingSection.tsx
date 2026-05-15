@@ -84,8 +84,8 @@ export function BillingSection() {
     if (!confirm("Cancel your subscription at the end of the current billing period?")) return;
     setBusy("cancel");
     try {
-      const { error } = await supabase.functions.invoke("change-plan", {
-        body: { action: "cancel", environment: getPaddleEnvironment() },
+      const { error } = await supabase.functions.invoke("paypal-cancel-subscription", {
+        body: {},
       });
       if (error) throw error;
       toast.success("Subscription will end at the end of your billing period.");
