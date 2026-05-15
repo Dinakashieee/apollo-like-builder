@@ -152,8 +152,11 @@ export function BillingSection() {
             <p className="font-semibold text-destructive">Your last payment failed.</p>
             <p className="text-muted-foreground">Update your payment method to avoid losing access.</p>
           </div>
-          <Button size="sm" onClick={() => openPortal("updatePayment")} disabled={busy === "portal"}>
-            Update card
+          <Button
+            size="sm"
+            onClick={() => window.open("https://www.paypal.com/myaccount/money", "_blank", "noopener")}
+          >
+            Update in PayPal
           </Button>
         </div>
       )}
