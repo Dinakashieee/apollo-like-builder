@@ -152,8 +152,11 @@ export function BillingSection() {
             <p className="font-semibold text-destructive">Your last payment failed.</p>
             <p className="text-muted-foreground">Update your payment method to avoid losing access.</p>
           </div>
-          <Button size="sm" onClick={() => openPortal("updatePayment")} disabled={busy === "portal"}>
-            Update card
+          <Button
+            size="sm"
+            onClick={() => window.open("https://www.paypal.com/myaccount/money", "_blank", "noopener")}
+          >
+            Update in PayPal
           </Button>
         </div>
       )}
@@ -232,7 +235,17 @@ export function BillingSection() {
             </Button>
           )}
 
-          <Button variant="outline" onClick={() => openPortal("updatePayment")} disabled={!!busy}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.info(
+                "Payments are processed by PayPal. To change your card or PayPal funding source, open PayPal → Settings → Payments and update it there. Your next renewal will use the new method automatically.",
+                { duration: 8000 }
+              );
+              window.open("https://www.paypal.com/myaccount/money", "_blank", "noopener");
+            }}
+            disabled={!!busy}
+          >
             <Wallet className="h-4 w-4 mr-2" /> Update payment method
           </Button>
 
