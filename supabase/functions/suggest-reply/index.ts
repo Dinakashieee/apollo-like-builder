@@ -1,5 +1,6 @@
 // Generates a suggested reply for an inbound message (email or WhatsApp).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { checkAiEmailQuota, incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,19 +24,27 @@ Deno.serve(async (req) => {
     if (!u?.user) return json({ error: "unauthenticated" }, 401);
 
     const { channel, context, leadId } = await req.json();
+    if (!leadId || typeof leadId !== "string") {
+      return json({ error: "leadId required" }, 400);
+    }
+    if (channel !== "email" && channel !== "whatsapp") {
+      return json({ error: "invalid channel" }, 400);
+    }
     const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    let leadCtx = "";
-    if (leadId) {
-      // Use the user-scoped client so RLS enforces workspace membership.
-      const { data: lead } = await userClient
-        .from("leads")
-        .select("contact_name, company_name, role, status, pain_points")
-        .eq("id", leadId)
-        .maybeSingle();
-      if (!lead) return json({ error: "forbidden" }, 403);
-      leadCtx = `Lead: ${lead.contact_name ?? ""} at ${lead.company_name ?? ""} (${lead.role ?? "—"}). Status: ${lead.status}. Pain: ${(lead.pain_points ?? []).join(", ")}.`;
-    }
+    // Use the user-scoped client so RLS enforces workspace membership.
+    const { data: lead } = await userClient
+      .from("leads")
+      .select("contact_name, company_name, role, status, pain_points, workspace_id")
+      .eq("id", leadId)
+      .maybeSingle();
+    if (!lead) return json({ error: "forbidden" }, 403);
+
+    // Enforce per-workspace AI quota (mirrors assistant-chat / generate-email).
+    const quota = await checkAiEmailQuota(admin, lead.workspace_id as string);
+    if (quota) return json({ error: quota.reason, blocked: true, ...quota }, 402);
+
+    const leadCtx = `Lead: ${lead.contact_name ?? ""} at ${lead.company_name ?? ""} (${lead.role ?? "—"}). Status: ${lead.status}. Pain: ${(lead.pain_points ?? []).join(", ")}.`;
 
     const sys = `You are a senior B2B sales rep crafting the BEST next reply for the user to send.
 Channel: ${channel}. Keep it concise, friendly, and action-oriented.
