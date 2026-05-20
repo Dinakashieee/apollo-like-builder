@@ -26,17 +26,9 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const { orderId, planId } = await req.json();
+    const { orderId } = await req.json();
     if (!orderId || typeof orderId !== 'string') {
       return new Response(JSON.stringify({ error: 'orderId required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    let plan;
-    try {
-      plan = getPayPalPlan(planId);
-    } catch {
-      return new Response(JSON.stringify({ error: 'Invalid plan' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -65,6 +57,26 @@ Deno.serve(async (req) => {
         error: data,
       }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // SECURITY: derive plan ONLY from the order's custom_id set at create time.
+    // Never trust a client-supplied planId here — otherwise a buyer can pay $19
+    // for starter and have a higher-tier subscription written to the DB.
+    let plan;
+    try {
+      const customRaw = data?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id
+        ?? data?.purchase_units?.[0]?.custom_id
+        ?? '{}';
+      const custom = JSON.parse(customRaw);
+      if (custom.userId && custom.userId !== u.user.id) {
+        return new Response(JSON.stringify({ error: 'Order does not belong to this user' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      plan = getPayPalPlan(custom.planId);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Could not resolve plan from order' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     const capturedAt = new Date();
