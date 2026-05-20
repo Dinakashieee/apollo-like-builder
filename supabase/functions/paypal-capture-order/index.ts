@@ -26,17 +26,9 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const { orderId, planId } = await req.json();
+    const { orderId } = await req.json();
     if (!orderId || typeof orderId !== 'string') {
       return new Response(JSON.stringify({ error: 'orderId required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    let plan;
-    try {
-      plan = getPayPalPlan(planId);
-    } catch {
-      return new Response(JSON.stringify({ error: 'Invalid plan' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
