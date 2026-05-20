@@ -86,6 +86,7 @@ Return JSON via the suggest_reply tool.`;
     }
     const j = await aiResp.json();
     const args = JSON.parse(j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ?? "{}");
+    await incrementAiEmails(admin, lead.workspace_id as string);
     return json({ suggestion: args });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
