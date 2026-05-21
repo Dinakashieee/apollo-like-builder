@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, Lightbulb, Users } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, Lightbulb, Users, Server, Swords, ExternalLink, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+interface TechItem { name: string; category: string; is_competitor_of_user: boolean; confidence: "known" | "likely" }
+interface PainTarget { pain_point: string; target_role: string; why: string; linkedin_search_url: string }
+
 interface Intelligence {
   focus_areas: string[];
+  tech_stack: TechItem[];
   likely_processes: string[];
   gaps: string[];
+  pain_point_targets: PainTarget[];
   fit_summary: string;
   contact_fit: "ideal" | "okay" | "wrong";
   contact_reasoning: string;
@@ -92,8 +97,71 @@ export function LeadIntelligencePanel({ leadId, contactName }: { leadId: string;
       </div>
 
       <Section icon={Target} title="What they focus on" items={data!.focus_areas} />
+
+      {data!.tech_stack?.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Server className="h-3.5 w-3.5" /> Systems & tools they likely use
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {data!.tech_stack.map((t, i) => (
+              <div
+                key={i}
+                className={`rounded-md border p-2.5 text-sm flex items-start justify-between gap-2 ${
+                  t.is_competitor_of_user
+                    ? "border-destructive/40 bg-destructive/5"
+                    : "border-border/60 bg-muted/30"
+                }`}
+              >
+                <div className="min-w-0">
+                  <div className="font-medium text-foreground/90 truncate flex items-center gap-1.5">
+                    {t.is_competitor_of_user && <Swords className="h-3 w-3 text-destructive shrink-0" />}
+                    {t.name}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {t.category} · {t.confidence}
+                  </div>
+                </div>
+                {t.is_competitor_of_user && (
+                  <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive shrink-0">
+                    Competitor
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Section icon={Workflow} title="How they likely operate today" items={data!.likely_processes} />
       <Section icon={AlertTriangle} title="What's likely lacking" items={data!.gaps} />
+
+      {data!.pain_point_targets?.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5" /> Who to target for each pain point
+          </p>
+          <div className="space-y-2">
+            {data!.pain_point_targets.map((p, i) => (
+              <div key={i} className="rounded-md border border-border/60 p-3 bg-muted/20">
+                <div className="text-sm font-medium text-foreground/90">{p.pain_point}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Reach out to <span className="text-foreground/90 font-medium">{p.target_role}</span> — {p.why}
+                </div>
+                <a
+                  href={p.linkedin_search_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                >
+                  <Linkedin className="h-3.5 w-3.5" /> Find {p.target_role} on LinkedIn
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-lg border border-border/60 p-4 bg-primary/5">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-primary mb-1.5">
