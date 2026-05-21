@@ -41,13 +41,16 @@ Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).joi
       ? `${baseContext}
 
 Suggest exactly ONE NEW specific real company this seller should target. It must be DIFFERENT from these already-shown companies: ${excludeList.join(", ") || "(none)"}.
-For the new target, include the real company name & website, why they are a fit, designations to pitch, focus areas, and 1-3 reference links (official site, recent news, Crunchbase, Wikipedia). Never invent URLs. Return an empty 'similar' array — only fill the 'targets' array with that single new company.`
+For the new target, include the real company name & website, whether they are an existing IFS customer (uses_ifs: boolean or null), 2-5 current_systems they publicly use, why they are a fit, designations to pitch, 2-4 real named ICP contacts with LinkedIn URLs (only real people with real /in/ URLs — omit if unknown), focus areas, and 1-3 reference links (official site, recent news, Crunchbase, Wikipedia). Never invent URLs or names. Return an empty 'similar' array — only fill the 'targets' array with that single new company.`
       : `${baseContext}
 
 Generate competitor analysis AND a list of specific real companies this seller should target. For each target company, include:
 - the real company name & website
+- USES_IFS: a best-guess boolean for whether the company is an existing IFS (Industrial and Financial Systems) ERP customer, based on public references (case studies, press releases, job postings mentioning "IFS Cloud"/"IFS Applications"). Set null if you genuinely don't know.
+- CURRENT_SYSTEMS: 2-5 ERP / CRM / middleware / business systems the company is publicly known to use (e.g. "SAP S/4HANA", "Salesforce", "Microsoft Dynamics 365", "Oracle NetSuite", "MuleSoft", "Boomi"). Only include systems with public evidence; empty array if unknown.
 - WHY they are a fit (concrete reason tied to the seller's product)
 - DESIGNATIONS / job titles to pitch to (decision makers + influencers)
+- ICP_CONTACTS: 2-4 real named individuals at this company matching those designations. For each include full_name, role (current title), and linkedin_url (must be a real https://www.linkedin.com/in/... profile URL you are highly confident is correct). If you cannot find a real named person for a slot, omit it — do NOT invent names or URLs.
 - FOCUS AREAS / departments or use-cases to pitch
 - 1-3 REFERENCE LINKS (official site, recent news, careers page, press release, funding announcement) so the user can verify the reasoning. Use only real, well-known URLs you are confident exist (homepages, /about, /careers, Wikipedia, Crunchbase). Never invent URLs.`;
 
@@ -55,7 +58,7 @@ Generate competitor analysis AND a list of specific real companies this seller s
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: "You are a B2B market analyst. Provide realistic competitive analysis AND name specific real-world target companies with verifiable reference links. Only use URLs you are highly confident exist (official homepages, Wikipedia, Crunchbase, well-known press). Never fabricate URLs or company names." },
           { role: "user", content: userPrompt },
@@ -105,12 +108,31 @@ Generate competitor analysis AND a list of specific real companies this seller s
                       website: { type: "string", description: "Official website URL" },
                       industry: { type: "string" },
                       size: { type: "string", description: "e.g. 'Mid-market (200-1000)', 'Enterprise (5000+)'" },
+                      uses_ifs: { type: ["boolean", "null"], description: "True if known IFS customer, false if known to use a competitor ERP, null if unknown." },
+                      current_systems: {
+                        type: "array",
+                        description: "2-5 ERP/CRM/middleware/business systems this company publicly uses. Empty if unknown.",
+                        items: { type: "string" },
+                      },
                       problem: { type: "string", description: "Specific pain this company likely has" },
                       why: { type: "string", description: "Why this seller is a fit — concrete reason" },
                       designations: {
                         type: "array",
                         description: "3-6 job titles/designations to pitch (e.g. 'VP of Sales', 'Head of Revenue Operations')",
                         items: { type: "string" },
+                      },
+                      icp_contacts: {
+                        type: "array",
+                        description: "2-4 real named decision makers at this company matching the designations. Each must have a real LinkedIn profile URL. Omit slots you cannot verify — never invent.",
+                        items: {
+                          type: "object",
+                          properties: {
+                            full_name: { type: "string" },
+                            role: { type: "string", description: "Current job title" },
+                            linkedin_url: { type: "string", description: "Real https://www.linkedin.com/in/... profile URL" },
+                          },
+                          required: ["full_name", "role", "linkedin_url"],
+                        },
                       },
                       focus_areas: {
                         type: "array",
@@ -131,7 +153,7 @@ Generate competitor analysis AND a list of specific real companies this seller s
                       },
                       level: { type: "string", enum: ["high", "medium", "low"] },
                     },
-                    required: ["company", "website", "industry", "size", "problem", "why", "designations", "focus_areas", "references", "level"],
+                    required: ["company", "website", "industry", "size", "uses_ifs", "current_systems", "problem", "why", "designations", "icp_contacts", "focus_areas", "references", "level"],
                   },
                 },
               },

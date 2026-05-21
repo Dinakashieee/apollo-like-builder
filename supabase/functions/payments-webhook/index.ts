@@ -24,7 +24,7 @@ async function sendWelcomeEmail(userId: string, planName: string) {
   }
 }
 
-const ADDON_PRODUCT_IDS = new Set(['addon_seat', 'addon_credits_1k', 'addon_credits_5k']);
+const ADDON_PRODUCT_IDS = new Set(['addon_seat', 'addon_credits_1k', 'addon_credits_5k', 'addon_leads_100']);
 
 async function upsertAddonSubscription(
   data: any,

@@ -5,7 +5,7 @@ import { getPaddleEnvironment } from "@/lib/paddle";
 
 export interface WorkspaceAddon {
   id: string;
-  product_id: "addon_seat" | "addon_credits_1k" | "addon_credits_5k" | string;
+  product_id: "addon_seat" | "addon_credits_1k" | "addon_credits_5k" | "addon_leads_100" | string;
   price_id: string;
   quantity: number;
   status: string;
@@ -14,7 +14,7 @@ export interface WorkspaceAddon {
   paddle_subscription_id: string;
 }
 
-/** Aggregates active add-on entitlements (extra seats, extra credits) for the current workspace. */
+/** Aggregates active add-on entitlements (extra seats, credits, leads) for the current workspace. */
 export function useWorkspaceAddons() {
   const { current } = useWorkspace();
   const [addons, setAddons] = useState<WorkspaceAddon[]>([]);
@@ -52,5 +52,9 @@ export function useWorkspaceAddons() {
     return acc;
   }, 0);
 
-  return { addons, extraSeats, extraCredits, loading, refetch };
+  const extraLeads = addons
+    .filter((a) => a.product_id === "addon_leads_100" && isActive(a))
+    .reduce((acc, a) => acc + 100 * (a.quantity || 1), 0);
+
+  return { addons, extraSeats, extraCredits, extraLeads, loading, refetch };
 }

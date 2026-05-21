@@ -5,11 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useWorkspaceAddons } from "@/hooks/useWorkspaceAddons";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { Sparkles, UserPlus, Zap, Loader2, Check } from "lucide-react";
+import { Sparkles, UserPlus, Zap, Loader2, Check, Users } from "lucide-react";
 
 interface Addon {
-  id: "addon_seat_monthly" | "addon_credits_1k_monthly" | "addon_credits_5k_monthly";
-  productId: "addon_seat" | "addon_credits_1k" | "addon_credits_5k";
+  id: "addon_seat_monthly" | "addon_credits_1k_monthly" | "addon_credits_5k_monthly" | "addon_leads_100_monthly";
+  productId: "addon_seat" | "addon_credits_1k" | "addon_credits_5k" | "addon_leads_100";
   name: string;
   unit: string;
   price: string;
@@ -19,6 +19,16 @@ interface Addon {
 }
 
 const ADDONS: Addon[] = [
+  {
+    id: "addon_leads_100_monthly",
+    productId: "addon_leads_100",
+    name: "+100 Leads",
+    unit: "/mo",
+    price: "$8",
+    description: "Top up your monthly lead allowance once you've claimed your plan's included leads.",
+    icon: Users,
+    highlight: true,
+  },
   {
     id: "addon_seat_monthly",
     productId: "addon_seat",
@@ -43,16 +53,15 @@ const ADDONS: Addon[] = [
     name: "+5,000 AI Credits",
     unit: "/mo",
     price: "$59",
-    description: "Best value. Power users running large outreach campaigns.",
+    description: "Best value for power users running large outreach campaigns.",
     icon: Sparkles,
-    highlight: true,
   },
 ];
 
 export function AddonsSection() {
   const { user } = useAuth();
   const { current } = useWorkspace();
-  const { addons, extraSeats, extraCredits, refetch } = useWorkspaceAddons();
+  const { addons, extraSeats, extraCredits, extraLeads, refetch } = useWorkspaceAddons();
   const { openCheckout } = usePaddleCheckout();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -88,10 +97,13 @@ export function AddonsSection() {
             <Sparkles className="h-5 w-5 text-primary" /> Add-ons
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Stack on top of any plan — extra seats and credits, billed monthly. Cancel anytime.
+            Stack on top of any plan — extra leads, seats and credits, billed monthly. Cancel anytime.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Badge variant="secondary" className="text-xs">
+            +{extraLeads.toLocaleString()} leads/mo
+          </Badge>
           <Badge variant="secondary" className="text-xs">
             +{extraSeats} extra seat{extraSeats === 1 ? "" : "s"}
           </Badge>
@@ -101,7 +113,7 @@ export function AddonsSection() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-3">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {ADDONS.map((addon) => {
           const Icon = addon.icon;
           const owned = purchasedQty(addon.productId);
