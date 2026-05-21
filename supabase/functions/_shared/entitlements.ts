@@ -8,16 +8,21 @@ export const FREE_LIMITS = {
 } as const;
 
 export const STARTER_LIMITS = {
-  leads: 1000,
+  leads: 100,
   ai_emails: 2500,
 } as const;
 
 export const GROWTH_LIMITS = {
-  leads: 4000,
+  leads: 200,
   ai_emails: 10000,
 } as const;
 
-export type Tier = "free" | "starter" | "growth" | "pro";
+export const SCALE_LIMITS = {
+  leads: 300,
+  ai_emails: 25000,
+} as const;
+
+export type Tier = "free" | "starter" | "growth" | "scale" | "pro";
 
 export async function getWorkspaceTier(
   admin: SupabaseClient,
@@ -78,13 +83,18 @@ export async function checkLeadQuota(
   workspaceId: string,
 ): Promise<{ blocked: true; reason: string; tier: Tier; used: number; limit: number } | null> {
   const tier = await getWorkspaceTier(admin, workspaceId);
-  const limit = tier === "free" ? FREE_LIMITS.leads : tier === "starter" ? STARTER_LIMITS.leads : Infinity;
+  const limit =
+    tier === "free" ? FREE_LIMITS.leads
+    : tier === "starter" ? STARTER_LIMITS.leads
+    : tier === "growth" ? GROWTH_LIMITS.leads
+    : tier === "scale" ? SCALE_LIMITS.leads
+    : Infinity;
   if (!isFinite(limit)) return null;
   const used = await getLeadCount(admin, workspaceId);
   if (used >= limit) {
     return {
       blocked: true,
-      reason: `${tier === "free" ? "Free" : "Starter"} plan limit reached (${limit} leads). Upgrade to add more.`,
+      reason: `${tier.charAt(0).toUpperCase() + tier.slice(1)} plan limit reached (${limit} leads). Add a +100 leads add-on or upgrade.`,
       tier,
       used,
       limit,

@@ -7,8 +7,9 @@ import { useWorkspaceAddons } from "./useWorkspaceAddons";
 
 export const PLAN_LIMITS = {
   free: { leads: 10, ai_emails: 25, seats: 1 },
-  starter: { leads: 1000, ai_emails: 2500, seats: 3 },
-  growth: { leads: 4000, ai_emails: 10000, seats: 10 },
+  starter: { leads: 100, ai_emails: 2500, seats: 3 },
+  growth: { leads: 200, ai_emails: 10000, seats: 5 },
+  scale: { leads: 300, ai_emails: 25000, seats: 10 },
   pro: { leads: Infinity, ai_emails: Infinity, seats: Infinity },
 } as const;
 
@@ -43,10 +44,12 @@ export function useEntitlements() {
     refetch();
   }, [refetch]);
 
-  const baseLimits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
-  const { extraSeats, extraCredits } = useWorkspaceAddons();
+  const baseLimits = (PLAN_LIMITS as any)[tier] ?? PLAN_LIMITS.free;
+  const { extraSeats, extraCredits, extraLeads } = useWorkspaceAddons();
 
-  const leadsLimit = baseLimits.leads;
+  const leadsLimit = isFinite(baseLimits.leads)
+    ? baseLimits.leads + extraLeads
+    : baseLimits.leads;
   const aiEmailsLimit = isFinite(baseLimits.ai_emails)
     ? baseLimits.ai_emails + extraCredits
     : baseLimits.ai_emails;
@@ -71,6 +74,7 @@ export function useEntitlements() {
     seatsLimit,
     extraSeats,
     extraCredits,
+    extraLeads,
     refetch,
   };
 }
