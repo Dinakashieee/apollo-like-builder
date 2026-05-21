@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface TechItem { name: string; category: string; is_competitor_of_user: boolean; confidence: "known" | "likely" }
 interface PainTarget { pain_point: string; target_role: string; why: string; linkedin_search_url: string }
+interface EmployeeSignal { title: string; url: string; snippet: string }
 
 interface Intelligence {
   focus_areas: string[];
@@ -19,6 +20,8 @@ interface Intelligence {
   contact_reasoning: string;
   better_contacts: string[];
   opening_angles: string[];
+  employee_signals?: EmployeeSignal[];
+  has_linkedin_url?: boolean;
 }
 
 const FIT_META: Record<string, { cls: string; icon: any; label: string }> = {
@@ -97,6 +100,47 @@ export function LeadIntelligencePanel({ leadId, contactName }: { leadId: string;
       </div>
 
       <Section icon={Target} title="What they focus on" items={data!.focus_areas} />
+
+      {data!.has_linkedin_url === false && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs flex items-start gap-2">
+          <Linkedin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <div>
+            <div className="font-medium text-foreground/90">Add the LinkedIn company URL on this lead</div>
+            <div className="text-muted-foreground mt-0.5">
+              With it, we scan public employee profiles & job descriptions to detect the actual systems they use —
+              making this brief much sharper.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {data!.employee_signals && data!.employee_signals.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Linkedin className="h-3.5 w-3.5" /> Evidence from public LinkedIn profiles
+          </p>
+          <div className="space-y-2">
+            {data!.employee_signals.map((e, i) => (
+              <a
+                key={i}
+                href={e.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-md border border-border/60 bg-muted/20 p-2.5 hover:bg-muted/40 transition"
+              >
+                <div className="text-sm font-medium text-foreground/90 truncate flex items-center gap-1.5">
+                  {e.title}
+                  <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                </div>
+                {e.snippet && (
+                  <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-3">{e.snippet}</div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {data!.tech_stack?.length > 0 && (
         <div>

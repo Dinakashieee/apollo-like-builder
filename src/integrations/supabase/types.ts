@@ -538,6 +538,7 @@ export type Database = {
           last_reply_temperature:
             | Database["public"]["Enums"]["reply_temperature"]
             | null
+          linkedin_company_url: string | null
           notes: string | null
           pain_points: string[] | null
           phone: string | null
@@ -566,6 +567,7 @@ export type Database = {
           last_reply_temperature?:
             | Database["public"]["Enums"]["reply_temperature"]
             | null
+          linkedin_company_url?: string | null
           notes?: string | null
           pain_points?: string[] | null
           phone?: string | null
@@ -594,6 +596,7 @@ export type Database = {
           last_reply_temperature?:
             | Database["public"]["Enums"]["reply_temperature"]
             | null
+          linkedin_company_url?: string | null
           notes?: string | null
           pain_points?: string[] | null
           phone?: string | null

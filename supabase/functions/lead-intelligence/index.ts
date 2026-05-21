@@ -56,8 +56,53 @@ serve(async (req) => {
       .from("company_profiles").select("*")
       .eq("workspace_id", lead.workspace_id).maybeSingle();
 
+    // --- Optional: scrape public LinkedIn employee signals via Firecrawl ---
+    type EmployeeSignal = { title: string; url: string; snippet: string };
+    let employeeSignals: EmployeeSignal[] = [];
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    if (FIRECRAWL_API_KEY && lead.company_name) {
+      try {
+        const techKeywords =
+          "(SAP OR Oracle OR Salesforce OR HubSpot OR Workday OR NetSuite OR ServiceNow OR Dynamics OR Snowflake OR Databricks OR AWS OR Azure OR Kubernetes OR Jira OR Zendesk OR Tableau OR PowerBI)";
+        const linkedinScope = lead.linkedin_company_url
+          ? `site:linkedin.com/in "${lead.company_name}"`
+          : `site:linkedin.com/in "${lead.company_name}"`;
+        const q = `${linkedinScope} ${techKeywords}`;
+        const fcResp = await fetch("https://api.firecrawl.dev/v2/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: q, limit: 8 }),
+        });
+        if (fcResp.ok) {
+          const fcJson = await fcResp.json();
+          const results: any[] = fcJson?.data?.web ?? fcJson?.data ?? fcJson?.web ?? [];
+          employeeSignals = results
+            .filter((r: any) => typeof r?.url === "string" && r.url.includes("linkedin.com/in"))
+            .slice(0, 6)
+            .map((r: any) => ({
+              title: String(r.title ?? "").slice(0, 200),
+              url: String(r.url),
+              snippet: String(r.description ?? r.snippet ?? "").slice(0, 400),
+            }));
+        } else {
+          console.warn("Firecrawl search failed:", fcResp.status, await fcResp.text());
+        }
+      } catch (e) {
+        console.warn("Firecrawl scrape error:", e);
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+
+    const employeeBlock = employeeSignals.length
+      ? `\n\nPUBLIC LINKEDIN EMPLOYEE SIGNALS (scraped from public profile snippets — use as STRONG evidence; if a system is named here, mark its tech_stack confidence as "known"):\n` +
+        employeeSignals.map((e, i) => `${i + 1}. ${e.title}\n   ${e.snippet}\n   ${e.url}`).join("\n")
+      : "";
+
 
     const systemPrompt = `You are a senior B2B sales strategist + GTM researcher. Given a target LEAD company and the USER'S company profile, produce a sharp, actionable intelligence brief.
 
@@ -81,6 +126,7 @@ Industry: ${lead.industry ?? "unknown"}
 Country: ${lead.country ?? "unknown"}
 Current contact: ${lead.contact_name ?? "unknown"}${lead.role ? ` (${lead.role})` : ""}
 Email: ${lead.email ?? "unknown"}
+LinkedIn company URL: ${lead.linkedin_company_url ?? "unknown"}
 Known systems: ${(lead.systems_in_use ?? []).join(", ") || "none recorded"}
 Known pain points: ${(lead.pain_points ?? []).join(", ") || "none recorded"}
 Notes: ${lead.notes ?? "none"}
@@ -94,7 +140,7 @@ Target systems we plug into: ${(company?.target_systems ?? []).join(", ") || "�
 Pain points we solve: ${(company?.solved_pain_points ?? []).join(", ") || "—"}
 Positioning: ${company?.positioning ?? "—"}
 
-For every linkedin_search_url, base the company keyword on "${lead.company_name}".`;
+For every linkedin_search_url, base the company keyword on "${lead.company_name}".${employeeBlock}`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -184,7 +230,7 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
 
     await incrementAiEmails(admin, lead.workspace_id);
 
-    return new Response(JSON.stringify(args), {
+    return new Response(JSON.stringify({ ...args, employee_signals: employeeSignals, has_linkedin_url: !!lead.linkedin_company_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
