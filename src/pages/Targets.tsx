@@ -331,15 +331,36 @@ export default function Targets() {
           <div>
             <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Hit <span className="font-semibold text-primary">Claim</span> on the ones you'll focus on — we'll instantly swap in a fresh prospect.
+              Hit <span className="font-semibold text-primary">Claim</span> to add them to your Leads — or <span className="font-semibold text-primary">Decline</span> to swap in a different prospect.
             </p>
           </div>
-          {claimed.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              {claimed.length} claimed
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {netNewCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-primary/10 text-primary border border-primary/30 rounded-full px-3 py-1">
+                <TrendingUp className="h-3.5 w-3.5" />
+                {netNewCount} net-new {netNewCount === 1 ? "logo" : "logos"}
+              </span>
+            )}
+            {claimed.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {claimed.length} claimed
+              </span>
+            )}
+            {isFinite(leadsLimit) && (
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1 border ${
+                  leadsAtLimit
+                    ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : leadsNearLimit
+                    ? "bg-warm/10 text-warm border-warm/30"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}
+              >
+                {leadsUsed}/{leadsLimit} leads {leadsAtLimit ? "· upgrade to claim" : ""}
+              </span>
+            )}
+          </div>
         </div>
         {!loading && targets.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
