@@ -163,6 +163,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       systems_in_use: systemsInUse,
       pain_points: painPoints,
       notes,
+      linkedin_company_url: linkedinCompanyUrl,
     });
     if (!parsed.success) {
       toast({ title: "Invalid input", description: parsed.error.errors[0].message, variant: "destructive" });
