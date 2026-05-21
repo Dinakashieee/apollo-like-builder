@@ -197,7 +197,10 @@ export function ChatWidget({ mode }: Props) {
         }
       }
     } catch (e: any) {
-      toast({ title: "Chat failed", description: e?.message ?? "Try again", variant: "destructive" });
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `⚠️ Connection issue: ${e?.message ?? "please try again"}.` },
+      ]);
     } finally {
       setBusy(false);
     }
