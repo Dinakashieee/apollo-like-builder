@@ -88,7 +88,16 @@ export default function Composer() {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-email", {
-        body: { workspace_id: current.id, lead_id: selectedLead, tone },
+        body: {
+          workspace_id: current.id,
+          lead_id: selectedLead,
+          tone,
+          meeting_attendees: meetingAttendees.trim() || undefined,
+          meeting_type: meetingType === "not_specified" ? undefined : meetingType,
+          meeting_description: meetingDescription.trim() || undefined,
+          awards: awards.trim() || undefined,
+          signature_override: signatureOverride.trim() || undefined,
+        },
       });
       if (error) throw error;
       if (data?.error) {
