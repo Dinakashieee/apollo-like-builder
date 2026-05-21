@@ -512,26 +512,44 @@ export default function Targets() {
                     </div>
                   </div>
                 )}
-                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3">
-                  <p className="text-[11px] text-muted-foreground leading-tight">
+                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-[11px] text-muted-foreground leading-tight flex-1 min-w-[140px]">
                     <Flag className="h-3 w-3 inline mr-1 -mt-0.5" />
-                    Focusing on <span className="font-semibold text-primary-deep">{title}</span>? Claim it and we'll surface a new prospect.
+                    Claiming <span className="font-semibold text-primary-deep">{title}</span> adds it to your Leads so you don't lose it.
                   </p>
-                  <Button
-                    size="sm"
-                    onClick={() => claimAndReplace(i)}
-                    disabled={isReplacing || replacingIdx !== null}
-                    className="bg-gradient-primary shadow-glow shrink-0"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                    Claim lead
-                  </Button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => declineAndReplace(i)}
+                      disabled={isBusy || replacingIdx !== null || decliningIdx !== null}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1.5" />
+                      Decline
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => claimAndReplace(i)}
+                      disabled={isBusy || replacingIdx !== null || decliningIdx !== null}
+                      className="bg-gradient-primary shadow-glow"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                      Claim lead
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </section>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="You've hit your lead limit"
+        description={`You're on the ${tier} plan (${leadsUsed}/${leadsLimit} leads). Add a +100 leads add-on for $8/mo, or upgrade your plan to keep claiming targets.`}
+      />
     </div>
   );
 }
