@@ -37,22 +37,35 @@ Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
 Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}`;
 
+    const apprtwGuidance = `PRIMARY SOURCE: Apps Run The World (https://www.appsruntheworld.com).
+Treat Apps Run The World as the authoritative source for: enterprise applications customer wins/losses, ERP/CRM/HCM/SCM vendor market share, customer install bases, top customers by vendor, and "who uses what" intelligence. Their vendor pages (e.g. https://www.appsruntheworld.com/top-10-erp-software-vendors), customer database, and Top 500 Applications Vendors rankings should drive your picks.
+RULES:
+- Prefer companies that appear in Apps Run The World customer lists / case studies for IFS competitors (SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, Sage, Unit4, IFS itself) — they are the strongest replacement / cross-sell targets.
+- For uses_ifs and current_systems, base the answer on Apps Run The World customer database entries when possible; only fall back to other public sources (press releases, job postings) if ART W has no entry.
+- Always include at least ONE reference link pointing to the specific Apps Run The World page that supports the pick. Use real URLs only — if no exact ART W page is known, link to https://www.appsruntheworld.com labeled "Apps Run The World (vendor research)".
+- Industry, size and current_systems should match what Apps Run The World publishes for that customer when available.`;
+
     const userPrompt = isReplace
       ? `${baseContext}
 
-Suggest exactly ONE NEW specific real company this seller should target. It must be DIFFERENT from these already-shown companies: ${excludeList.join(", ") || "(none)"}.
-For the new target, include the real company name & website, whether they are an existing IFS customer (uses_ifs: boolean or null), 2-5 current_systems they publicly use, why they are a fit, designations to pitch, 2-4 real named ICP contacts with LinkedIn URLs (only real people with real /in/ URLs — omit if unknown), focus areas, and 1-3 reference links (official site, recent news, Crunchbase, Wikipedia). Never invent URLs or names. Return an empty 'similar' array — only fill the 'targets' array with that single new company.`
+${apprtwGuidance}
+
+Suggest exactly ONE NEW specific real company this seller should target, sourced from Apps Run The World intelligence wherever possible. It must be DIFFERENT from these already-shown companies: ${excludeList.join(", ") || "(none)"}.
+Include the real company name & website, uses_ifs (boolean or null), 2-5 current_systems (per ART W when available), why they are a fit, designations to pitch, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unknown), focus areas, and 1-3 reference links — at least one must be an Apps Run The World URL. Never invent URLs or names. Return an empty 'similar' array — fill only 'targets' with that single new company.`
       : `${baseContext}
 
-Generate competitor analysis AND a list of specific real companies this seller should target. For each target company, include:
-- the real company name & website
-- USES_IFS: a best-guess boolean for whether the company is an existing IFS (Industrial and Financial Systems) ERP customer, based on public references (case studies, press releases, job postings mentioning "IFS Cloud"/"IFS Applications"). Set null if you genuinely don't know.
-- CURRENT_SYSTEMS: 2-5 ERP / CRM / middleware / business systems the company is publicly known to use (e.g. "SAP S/4HANA", "Salesforce", "Microsoft Dynamics 365", "Oracle NetSuite", "MuleSoft", "Boomi"). Only include systems with public evidence; empty array if unknown.
-- WHY they are a fit (concrete reason tied to the seller's product)
-- DESIGNATIONS / job titles to pitch to (decision makers + influencers)
-- ICP_CONTACTS: 2-4 real named individuals at this company matching those designations. For each include full_name, role (current title), and linkedin_url (must be a real https://www.linkedin.com/in/... profile URL you are highly confident is correct). If you cannot find a real named person for a slot, omit it — do NOT invent names or URLs.
-- FOCUS AREAS / departments or use-cases to pitch
-- 1-3 REFERENCE LINKS (official site, recent news, careers page, press release, funding announcement) so the user can verify the reasoning. Use only real, well-known URLs you are confident exist (homepages, /about, /careers, Wikipedia, Crunchbase). Never invent URLs.`;
+${apprtwGuidance}
+
+Generate competitor analysis AND specific real target companies, drawing primarily from Apps Run The World vendor + customer intelligence. For each target:
+- real company name & website
+- USES_IFS: best-guess boolean (prefer ART W customer DB evidence; fall back to public sources). null if genuinely unknown.
+- CURRENT_SYSTEMS: 2-5 ERP / CRM / HCM / SCM / middleware systems per Apps Run The World (e.g. "SAP S/4HANA", "Salesforce", "Microsoft Dynamics 365", "Oracle NetSuite", "Workday", "Infor CloudSuite"). Empty if unknown.
+- WHY they are a fit (concrete reason, ideally citing an ART W finding such as "Oracle EBS customer flagged for modernization")
+- DESIGNATIONS / job titles to pitch
+- ICP_CONTACTS: 2-4 real named individuals with full_name, role, and real https://www.linkedin.com/in/... URL. Omit unverifiable slots — never invent.
+- FOCUS AREAS / departments / use-cases
+- 1-3 REFERENCE LINKS — at least ONE must be an Apps Run The World URL. Others may be official site, recent news, Crunchbase, Wikipedia. Real URLs only.
+For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 Apps Vendors rankings to pick realistic IFS competitors, and include at least one ART W reference URL per competitor.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -60,7 +73,7 @@ Generate competitor analysis AND a list of specific real companies this seller s
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You are a B2B market analyst. Provide realistic competitive analysis AND name specific real-world target companies with verifiable reference links. Only use URLs you are highly confident exist (official homepages, Wikipedia, Crunchbase, well-known press). Never fabricate URLs or company names." },
+          { role: "system", content: "You are a B2B market analyst specializing in enterprise applications (ERP/CRM/HCM/SCM). Your PRIMARY research source is Apps Run The World (appsruntheworld.com) — their vendor pages, customer database, and Top 500 Applications Vendors rankings. Provide realistic competitive analysis AND name specific real target companies. Back every pick with at least one Apps Run The World reference URL when possible, plus other verifiable links (official homepages, Wikipedia, Crunchbase, well-known press). Never fabricate URLs, ART W slugs, or company names." },
           { role: "user", content: userPrompt },
         ],
         tools: [{
