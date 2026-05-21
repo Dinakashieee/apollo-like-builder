@@ -153,6 +153,8 @@ Generate 5-7 opportunities, each grounded in ONE of the products/services above.
       await supabase.from("opportunities").insert(inserts);
     }
 
+    await incrementAiEmails(admin, workspace_id);
+
     await supabase.from("activities").insert({
       workspace_id,
       user_id: user.id,
