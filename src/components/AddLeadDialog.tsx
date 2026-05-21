@@ -185,6 +185,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       systems_in_use: toArray(parsed.data.systems_in_use),
       pain_points: toArray(parsed.data.pain_points),
       notes: parsed.data.notes || null,
+      linkedin_company_url: parsed.data.linkedin_company_url || null,
       status: "new",
       created_by: user?.id,
     });
