@@ -195,10 +195,11 @@ export function ChatWidget({ mode }: Props) {
           }
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "please try again";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `⚠️ Connection issue: ${e?.message ?? "please try again"}.` },
+        { role: "assistant", content: `⚠️ Connection issue: ${message}.` },
       ]);
     } finally {
       setBusy(false);
