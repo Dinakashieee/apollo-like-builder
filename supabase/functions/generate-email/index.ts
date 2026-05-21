@@ -10,7 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { workspace_id, lead_id, tone } = await req.json();
+    const { workspace_id, lead_id, tone, meeting_attendees, meeting_type, meeting_description, awards, signature_override } = await req.json();
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized");
     const supabase = createClient(
