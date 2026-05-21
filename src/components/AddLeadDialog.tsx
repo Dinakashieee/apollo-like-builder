@@ -33,6 +33,15 @@ const schema = z.object({
   systems_in_use: z.string().trim().max(2000).optional(),
   pain_points: z.string().trim().max(2000).optional(),
   notes: z.string().trim().max(2000).optional(),
+  linkedin_company_url: z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .refine(
+      (v) => !v || /^https?:\/\/(www\.)?linkedin\.com\/company\//i.test(v),
+      "Must be a linkedin.com/company/... URL",
+    ),
 });
 
 export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
