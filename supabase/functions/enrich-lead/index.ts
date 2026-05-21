@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { checkAiEmailQuota, incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { company_name, industry, role, contact_name } = await req.json();
+    const { workspace_id, company_name, industry, role, contact_name } = await req.json();
     if (!company_name || typeof company_name !== "string") {
       return new Response(JSON.stringify({ error: "company_name required" }), {
         status: 400,
