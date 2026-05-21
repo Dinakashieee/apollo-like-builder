@@ -173,9 +173,9 @@ OUTPUT: Return ONLY the structured email via the tool call. Do not include any s
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
-    // Append the user's saved signature, if any.
+    // Append the user's signature: prefer explicit override from composer, fall back to saved profile signature.
     let body = args.body ?? "";
-    const signature = (profile?.email_signature ?? "").trim();
+    const signature = ((signature_override ?? profile?.email_signature) ?? "").trim();
     if (signature) {
       body = `${body.trimEnd()}\n\n${signature}`;
     }
