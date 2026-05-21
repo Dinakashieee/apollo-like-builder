@@ -191,6 +191,8 @@ Return JSON via the analyze_reply tool. Confidence is 0–1.`;
         .eq("id", thread.lead_id);
     }
 
+    await incrementAiEmails(admin, msg.workspace_id as string);
+
     return json({ ok: true, analysis: args });
   } catch (e) {
     console.error("analyze-reply error", e);
