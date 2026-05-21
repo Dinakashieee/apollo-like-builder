@@ -272,11 +272,15 @@ export default function Leads() {
           </SheetHeader>
           <div className="mt-4">
             {convLead && (
-              <Tabs defaultValue="email">
+              <Tabs defaultValue="intelligence">
                 <TabsList>
+                  <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
                   <TabsTrigger value="email">Email</TabsTrigger>
                   <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
                 </TabsList>
+                <TabsContent value="intelligence" className="mt-4">
+                  <LeadIntelligencePanel leadId={convLead.id} contactName={convLead.contact_name} />
+                </TabsContent>
                 <TabsContent value="email" className="mt-4">
                   <LeadConversation leadId={convLead.id} />
                 </TabsContent>
