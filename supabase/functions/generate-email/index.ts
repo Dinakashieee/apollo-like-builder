@@ -99,6 +99,19 @@ RECIPIENT
 TONE: ${tone ?? "warm, professional, consultative"}
 ═══════════════════════════════
 
+═══════════════════════════════
+MEETING CONTEXT (from sender — use ONLY if provided, never fabricate)
+═══════════════════════════════
+- Meeting type: ${meeting_type || "(not specified — offer a brief virtual or in-person discussion generically)"}
+- Who will join from sender side: ${meeting_attendees || "(not specified — may mention 'a senior colleague would be glad to join')"}
+- Physical meeting / booth details: ${meeting_description || "(none)"}
+
+═══════════════════════════════
+COMPANY AWARDS / CREDENTIALS TO REFERENCE (use at most ONE, naturally — never invent)
+═══════════════════════════════
+${awards || "(none provided — skip social proof unless present in sender description)"}
+
+
 WRITING RULES (follow strictly):
 
 1. **Greeting**: "Dear <FirstName>," then one warm opener line ("Good day to you and we hope you are doing well.").
