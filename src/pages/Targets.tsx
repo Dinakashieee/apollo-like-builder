@@ -324,6 +324,30 @@ export default function Targets() {
                 <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
                   {t.industry}{t.size ? ` • ${t.size}` : ""}
                 </p>
+                {(t.uses_ifs !== undefined || (t.current_systems && t.current_systems.length > 0)) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                    {t.uses_ifs === true && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-success/10 text-success border border-success/30 rounded-full px-2 py-0.5">
+                        <ShieldCheck className="h-3 w-3" /> Existing IFS user
+                      </span>
+                    )}
+                    {t.uses_ifs === false && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-warm/10 text-warm border border-warm/30 rounded-full px-2 py-0.5">
+                        <ShieldOff className="h-3 w-3" /> Not on IFS
+                      </span>
+                    )}
+                    {(t.uses_ifs === null || t.uses_ifs === undefined) && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-muted text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                        <HelpCircle className="h-3 w-3" /> IFS status unknown
+                      </span>
+                    )}
+                    {t.current_systems?.map((s, j) => (
+                      <span key={j} className="inline-flex items-center gap-1 text-[11px] bg-primary/5 text-primary-deep border border-primary/15 rounded-full px-2 py-0.5">
+                        <Layers className="h-3 w-3" /> {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="text-sm text-foreground/85 mb-3">
                   <p className="font-semibold text-primary-deep">Their problem</p>
                   <p>{t.problem}</p>
@@ -344,6 +368,35 @@ export default function Targets() {
                         </span>
                       ))}
                     </div>
+                  </div>
+                )}
+                {t.icp_contacts && t.icp_contacts.length > 0 && (
+                  <div className="border-t border-border/60 pt-3 mb-3">
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                      <Users className="h-3 w-3" /> ICP contacts (verify before outreach)
+                    </p>
+                    <ul className="space-y-1.5">
+                      {t.icp_contacts.map((c, j) => (
+                        <li key={j} className="flex items-center justify-between gap-2 text-xs bg-muted/40 rounded-md px-2 py-1.5">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-primary-deep truncate">{c.full_name}</p>
+                            <p className="text-muted-foreground truncate">{c.role}</p>
+                          </div>
+                          {c.linkedin_url && (
+                            <a
+                              href={c.linkedin_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-1 shrink-0"
+                              aria-label={`Open ${c.full_name} on LinkedIn`}
+                            >
+                              <Linkedin className="h-3 w-3" />
+                              LinkedIn
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
                 {t.focus_areas && t.focus_areas.length > 0 && (
