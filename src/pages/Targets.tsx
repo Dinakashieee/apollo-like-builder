@@ -372,13 +372,15 @@ export default function Targets() {
             const lvl = LEVEL_BADGES[t.level] ?? LEVEL_BADGES.medium;
             const title = t.company ?? t.type ?? "Target";
             const isReplacing = replacingIdx === i;
+            const isDeclining = decliningIdx === i;
+            const isBusy = isReplacing || isDeclining;
             return (
-              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isReplacing ? "opacity-60" : ""}`}>
-                {isReplacing && (
+              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isBusy ? "opacity-60" : ""}`}>
+                {isBusy && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/70 backdrop-blur-sm rounded-2xl">
                     <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      Finding a fresh target...
+                      {isDeclining ? "Finding another prospect..." : "Saving & refreshing..."}
                     </div>
                   </div>
                 )}
