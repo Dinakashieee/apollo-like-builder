@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { checkAiEmailQuota, incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +21,17 @@ serve(async (req) => {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
+
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const quota = await checkAiEmailQuota(admin, workspace_id);
+    if (quota) {
+      return new Response(JSON.stringify({ error: quota.reason, code: "quota_exceeded", ...quota }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { data: company } = await supabase
       .from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle();
@@ -186,6 +198,8 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
 
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
+
+    await incrementAiEmails(admin, workspace_id);
 
     await supabase.from("activities").insert({
       workspace_id, user_id: user.id, type: "targets_generated",

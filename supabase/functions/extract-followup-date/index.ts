@@ -1,5 +1,6 @@
 // Scans an inbound email body for a promised follow-up date and creates a reminder.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,6 +71,7 @@ Deno.serve(async (req) => {
     if (!aiResp.ok) return json({ error: "AI error" }, 500);
     const j = await aiResp.json();
     const args = JSON.parse(j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ?? "{}");
+    await incrementAiEmails(admin, msg.workspace_id as string);
     if (!args.found || !args.iso_date) return json({ ok: true, found: false });
 
     const dueAt = new Date(`${args.iso_date}T09:00:00Z`).toISOString();

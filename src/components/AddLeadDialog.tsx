@@ -91,6 +91,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     try {
       const { data, error } = await supabase.functions.invoke("enrich-lead", {
         body: {
+          workspace_id: current?.id,
           company_name: companyName.trim(),
           industry: industry.trim() || undefined,
           contact_name: contactName.trim() || undefined,

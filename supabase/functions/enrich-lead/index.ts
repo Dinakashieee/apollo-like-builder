@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { checkAiEmailQuota, incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { company_name, industry, role, contact_name } = await req.json();
+    const { workspace_id, company_name, industry, role, contact_name } = await req.json();
     if (!company_name || typeof company_name !== "string") {
       return new Response(JSON.stringify({ error: "company_name required" }), {
         status: 400,
@@ -26,6 +27,28 @@ serve(async (req) => {
     );
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
+
+    // Quota check + count this enrichment toward AI credits if a workspace was supplied.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    if (workspace_id) {
+      const { data: membership } = await admin
+        .from("workspace_members").select("user_id")
+        .eq("workspace_id", workspace_id).eq("user_id", user.id).maybeSingle();
+      if (!membership) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const quota = await checkAiEmailQuota(admin, workspace_id);
+      if (quota) {
+        return new Response(JSON.stringify({ error: quota.reason, code: "quota_exceeded", ...quota }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
@@ -104,6 +127,9 @@ Infer their likely systems in use and pain points.`;
 
     const json = await aiResp.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
+
+    if (workspace_id) await incrementAiEmails(admin, workspace_id);
+
 
     return new Response(
       JSON.stringify({
