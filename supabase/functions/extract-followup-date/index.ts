@@ -1,5 +1,6 @@
 // Scans an inbound email body for a promised follow-up date and creates a reminder.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
