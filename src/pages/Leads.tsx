@@ -10,6 +10,7 @@ import { ImportDialog } from "@/components/ImportDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { LeadConversation } from "@/components/LeadConversation";
 import { WhatsAppPanel } from "@/components/WhatsAppPanel";
+import { LeadIntelligencePanel } from "@/components/LeadIntelligencePanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
