@@ -60,6 +60,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
   const [systemsInUse, setSystemsInUse] = useState("");
   const [painPoints, setPainPoints] = useState("");
   const [notes, setNotes] = useState("");
+  const [linkedinCompanyUrl, setLinkedinCompanyUrl] = useState("");
   const [country, setCountry] = useState<string>("");
   const [countryTouched, setCountryTouched] = useState(false);
   const [enriching, setEnriching] = useState(false);
