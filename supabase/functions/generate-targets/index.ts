@@ -22,6 +22,17 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
 
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const quota = await checkAiEmailQuota(admin, workspace_id);
+    if (quota) {
+      return new Response(JSON.stringify({ error: quota.reason, code: "quota_exceeded", ...quota }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: company } = await supabase
       .from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle();
     if (!company) throw new Error("Add a company profile first");
