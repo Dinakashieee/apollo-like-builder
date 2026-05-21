@@ -11,52 +11,115 @@ import {
   LifeBuoy,
   ArrowRight,
   PlayCircle,
+  Target,
+  Brain,
+  Building2,
+  Play,
 } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const steps = [
   {
     n: 1,
+    title: "Tell us about your company",
+    desc: "Like show-and-tell! Add what you sell so our robot knows your toys.",
+    icon: Building2,
+    to: "/app/company",
+    color: "from-slate-500 to-slate-700",
+  },
+  {
+    n: 2,
+    title: "Find people to talk to",
+    desc: "Our robot looks at big lists (like Apps Run The World) and finds companies that might love your stuff.",
+    icon: Target,
+    to: "/app/targets",
+    color: "from-indigo-500 to-blue-600",
+  },
+  {
+    n: 3,
     title: "Add your leads",
-    desc: "Type or upload the people you want to talk to.",
+    desc: "Pick the people you want to chat with. Type them in or upload a list.",
     icon: Users,
     to: "/app/leads",
     color: "from-blue-500 to-cyan-500",
   },
   {
-    n: 2,
-    title: "Let AI read them",
-    desc: "Our robot brain figures out what each person likes.",
-    icon: Sparkles,
+    n: 4,
+    title: "Let the robot brain learn them",
+    desc: "AI Intelligence reads each lead and tells you what they care about — like a friend whispering tips.",
+    icon: Brain,
     to: "/app/intelligence",
     color: "from-fuchsia-500 to-purple-500",
   },
   {
-    n: 3,
+    n: 5,
     title: "Send a friendly email",
-    desc: "Pick a lead and write (or auto-write) a reply.",
+    desc: "Pick a lead and write (or auto-write) a sweet reply.",
     icon: Mail,
     to: "/app/composer",
     color: "from-amber-500 to-orange-500",
   },
   {
-    n: 4,
+    n: 6,
     title: "Chat on WhatsApp",
-    desc: "Open a lead → WhatsApp tab → suggest reply → send.",
+    desc: "Open a lead → WhatsApp tab → suggest reply → send. Easy peasy.",
     icon: MessageCircle,
     to: "/app/leads",
     color: "from-green-500 to-emerald-500",
   },
   {
-    n: 5,
+    n: 7,
     title: "Never forget a follow-up",
-    desc: "If a customer says “call me on the 25th”, we remind you.",
+    desc: 'If someone says "call me on the 25th", we tap your shoulder that day.',
     icon: Bell,
     to: "/app/reminders",
     color: "from-rose-500 to-pink-500",
   },
 ];
 
+const story = [
+  {
+    emoji: "🧸",
+    title: "Once upon a time…",
+    body: "You had cool stuff to sell, but you didn't know who would like it.",
+  },
+  {
+    emoji: "🔭",
+    title: "So our robot grabbed a telescope",
+    body: "It peeked at Targets & Competitors and made a list of companies that fit you. It even told you which competitor they use today!",
+  },
+  {
+    emoji: "📒",
+    title: "You wrote names in your notebook (Leads)",
+    body: "These are the people you want to be friends with.",
+  },
+  {
+    emoji: "🧠",
+    title: "The robot read their minds (almost)",
+    body: "AI Intelligence figured out what each lead likes, their job, and the best way to talk to them.",
+  },
+  {
+    emoji: "💌",
+    title: "You sent a nice note",
+    body: "Email or WhatsApp — the robot helped you pick the kindest words.",
+  },
+  {
+    emoji: "⏰",
+    title: "And lived happily ever after",
+    body: "Reminders make sure you never forget to follow up. The end!",
+  },
+];
+
 export default function GettingStarted() {
+  const [tourOpen, setTourOpen] = useState(false);
+
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-10">
       {/* Hero */}
@@ -66,8 +129,13 @@ export default function GettingStarted() {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold">Welcome! Here's how it works 👋</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Five tiny steps. No tech words. If you can send a text message, you can use this app.
+          Seven tiny steps. No tech words. If you can send a text message, you can use this app.
         </p>
+        <div className="flex justify-center pt-2">
+          <Button size="lg" onClick={() => setTourOpen(true)} className="gap-2">
+            <Play className="h-4 w-4" /> Take a live product tour
+          </Button>
+        </div>
       </div>
 
       {/* Diagram */}
@@ -76,7 +144,7 @@ export default function GettingStarted() {
           <PlayCircle className="h-5 w-5 text-primary" /> How it works (in pictures)
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-stretch">
           {steps.map((s, i) => (
             <div key={s.n} className="relative">
               <Link
@@ -95,8 +163,27 @@ export default function GettingStarted() {
                 <p className="text-xs text-muted-foreground mt-1">{s.desc}</p>
               </Link>
               {i < steps.length - 1 && (
-                <ArrowRight className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 z-10" />
+                <ArrowRight className="hidden xl:block absolute top-1/2 -right-3 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 z-10" />
               )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Storybook */}
+      <Card className="p-6 md:p-8">
+        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" /> The story (read it like a bedtime tale)
+        </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {story.map((s, i) => (
+            <div
+              key={i}
+              className="p-5 rounded-xl border bg-gradient-to-br from-muted/30 to-background"
+            >
+              <div className="text-3xl mb-2">{s.emoji}</div>
+              <div className="font-semibold text-sm">{s.title}</div>
+              <p className="text-sm text-muted-foreground mt-1">{s.body}</p>
             </div>
           ))}
         </div>
@@ -130,13 +217,36 @@ export default function GettingStarted() {
             <h3 className="font-semibold">Quick wins for today</h3>
           </div>
           <ol className="text-sm text-muted-foreground space-y-2 list-decimal pl-5">
-            <li>Add 1 lead in <Link to="/app/leads" className="text-primary underline">Leads</Link></li>
-            <li>Click "Suggest reply" inside the conversation</li>
-            <li>Try "Detect follow-up date" on any received email</li>
-            <li>Schedule a reply for tomorrow morning ☕</li>
+            <li>Pick 1 target in <Link to="/app/targets" className="text-primary underline">Targets</Link></li>
+            <li>Claim it → it becomes a lead</li>
+            <li>Open <Link to="/app/intelligence" className="text-primary underline">AI Intelligence</Link> to learn about them</li>
+            <li>Click "Suggest reply" and send a friendly note ☕</li>
           </ol>
         </Card>
       </div>
+
+      {/* Live product tour dialog */}
+      <Dialog open={tourOpen} onOpenChange={setTourOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5 text-primary" /> Live product tour
+            </DialogTitle>
+          </DialogHeader>
+          <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
+            <iframe
+              className="w-full h-full"
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+              title="EngageIQ product tour"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Prefer a guided click-through? <Link to="/app/help" className="text-primary underline" onClick={() => setTourOpen(false)}>Open the Help Center</Link> or <Link to="/app/support" className="text-primary underline" onClick={() => setTourOpen(false)}>chat with support</Link>.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
