@@ -128,6 +128,9 @@ Infer their likely systems in use and pain points.`;
     const json = await aiResp.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
+    if (workspace_id) await incrementAiEmails(admin, workspace_id);
+
+
     return new Response(
       JSON.stringify({
         systems_in_use: args.systems_in_use ?? [],
