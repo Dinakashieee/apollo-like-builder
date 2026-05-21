@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag } from "lucide-react";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -21,6 +21,12 @@ interface SimilarProduct {
   references?: RefLink[];
 }
 
+interface IcpContact {
+  full_name: string;
+  role: string;
+  linkedin_url: string;
+}
+
 interface TargetCompany {
   // new shape
   company?: string;
@@ -29,6 +35,9 @@ interface TargetCompany {
   designations?: string[];
   focus_areas?: string[];
   references?: RefLink[];
+  uses_ifs?: boolean | null;
+  current_systems?: string[];
+  icp_contacts?: IcpContact[];
   // legacy shape (kept for backward compat with cached data)
   type?: string;
   industry: string;
