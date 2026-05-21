@@ -415,6 +415,13 @@ export default function Targets() {
                         <HelpCircle className="h-3 w-3" /> IFS status unknown
                       </span>
                     )}
+                    {t.current_systems?.map((s, j) => (
+                      <span key={j} className="inline-flex items-center gap-1 text-[11px] bg-primary/5 text-primary-deep border border-primary/15 rounded-full px-2 py-0.5">
+                        <Layers className="h-3 w-3" /> {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-1 mb-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center">
                   <p className="text-sm font-semibold text-primary-deep flex items-center justify-center gap-1.5">
                     <Lock className="h-3.5 w-3.5" /> Claim to unlock the full brief
