@@ -39,11 +39,13 @@ Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).joi
 
     const apprtwGuidance = `PRIMARY SOURCE: Apps Run The World (https://www.appsruntheworld.com).
 Treat Apps Run The World as the authoritative source for: enterprise applications customer wins/losses, ERP/CRM/HCM/SCM vendor market share, customer install bases, top customers by vendor, and "who uses what" intelligence. Their vendor pages (e.g. https://www.appsruntheworld.com/top-10-erp-software-vendors), customer database, and Top 500 Applications Vendors rankings should drive your picks.
+SECONDARY SOURCE: Google web search results (https://www.google.com/search) — ONLY use this when Apps Run The World does not cover the company / vendor / data point. Prefer authoritative Google results: official site, Wikipedia, Crunchbase, Bloomberg, Reuters, Forbes, TechCrunch, official press releases, LinkedIn company page, job postings on careers sites.
 RULES:
+- Always TRY Apps Run The World first. Only fall back to Google when ART W has no entry for that company or data point.
 - Prefer companies that appear in Apps Run The World customer lists / case studies for IFS competitors (SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, Sage, Unit4, IFS itself) — they are the strongest replacement / cross-sell targets.
-- For uses_ifs and current_systems, base the answer on Apps Run The World customer database entries when possible; only fall back to other public sources (press releases, job postings) if ART W has no entry.
-- Always include at least ONE reference link pointing to the specific Apps Run The World page that supports the pick. Use real URLs only — if no exact ART W page is known, link to https://www.appsruntheworld.com labeled "Apps Run The World (vendor research)".
-- Industry, size and current_systems should match what Apps Run The World publishes for that customer when available.`;
+- For uses_ifs and current_systems, base the answer on Apps Run The World customer database entries when possible; only fall back to Google-sourced public evidence (press releases, job postings, case studies) if ART W has no entry.
+- References must include at least ONE Apps Run The World URL when ART W has data; otherwise include at least one Google-discoverable authoritative URL (Wikipedia, Crunchbase, official site, major press) and label it clearly. Use real URLs only — never invent ART W slugs or Google result URLs.
+- Industry, size and current_systems should match ART W when available, else the best authoritative Google source.`;
 
     const userPrompt = isReplace
       ? `${baseContext}
