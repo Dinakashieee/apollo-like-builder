@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, Lightbulb, Users } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, Lightbulb, Users, Server, Swords, ExternalLink, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+interface TechItem { name: string; category: string; is_competitor_of_user: boolean; confidence: "known" | "likely" }
+interface PainTarget { pain_point: string; target_role: string; why: string; linkedin_search_url: string }
+
 interface Intelligence {
   focus_areas: string[];
+  tech_stack: TechItem[];
   likely_processes: string[];
   gaps: string[];
+  pain_point_targets: PainTarget[];
   fit_summary: string;
   contact_fit: "ideal" | "okay" | "wrong";
   contact_reasoning: string;
