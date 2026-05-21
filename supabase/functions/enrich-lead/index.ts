@@ -28,6 +28,28 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Unauthorized");
 
+    // Quota check + count this enrichment toward AI credits if a workspace was supplied.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    if (workspace_id) {
+      const { data: membership } = await admin
+        .from("workspace_members").select("user_id")
+        .eq("workspace_id", workspace_id).eq("user_id", user.id).maybeSingle();
+      if (!membership) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const quota = await checkAiEmailQuota(admin, workspace_id);
+      if (quota) {
+        return new Response(JSON.stringify({ error: quota.reason, code: "quota_exceeded", ...quota }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
