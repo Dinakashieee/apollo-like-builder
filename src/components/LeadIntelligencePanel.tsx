@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface TechItem { name: string; category: string; is_competitor_of_user: boolean; confidence: "known" | "likely" }
 interface PainTarget { pain_point: string; target_role: string; why: string; linkedin_search_url: string }
+interface EmployeeSignal { title: string; url: string; snippet: string }
 
 interface Intelligence {
   focus_areas: string[];
@@ -19,6 +20,8 @@ interface Intelligence {
   contact_reasoning: string;
   better_contacts: string[];
   opening_angles: string[];
+  employee_signals?: EmployeeSignal[];
+  has_linkedin_url?: boolean;
 }
 
 const FIT_META: Record<string, { cls: string; icon: any; label: string }> = {
