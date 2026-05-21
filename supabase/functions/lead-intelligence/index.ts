@@ -59,19 +59,21 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
-    const systemPrompt = `You are a senior B2B sales strategist. Given a target LEAD company and the USER'S company profile, produce a sharp, actionable intelligence brief.
+    const systemPrompt = `You are a senior B2B sales strategist + GTM researcher. Given a target LEAD company and the USER'S company profile, produce a sharp, actionable intelligence brief.
 
-Always answer with concrete, specific phrasing — no fluff. Prefer short bullets.
+Always answer with concrete, specific phrasing — no fluff. Prefer short bullets. Name actual products and vendors where realistic (e.g. "Salesforce", "HubSpot", "Workday", "SAP SuccessFactors", "Zendesk", "Oracle PeopleSoft", "Banner SIS", "Moodle"). It is OK to infer from industry norms — mark inferences with confidence "likely".
 
-Sections to fill:
-1. focus_areas: products/services the LEAD company is focused on (inferred from public signals).
-2. likely_processes: how this lead likely operates today (workflows, tools, vendors).
-3. gaps: what's likely lacking or painful that the USER'S company can address.
-4. fit_summary: 2-3 sentences on how the user's offering specifically fits this lead.
-5. contact_fit: judge if the CURRENT contact is the right person to receive outreach. Values: "ideal" | "okay" | "wrong".
-6. contact_reasoning: one short sentence explaining the verdict.
-7. better_contacts: if contact_fit is "okay" or "wrong", list 2-4 better roles/titles to reach (e.g., "VP Engineering", "Head of RevOps"). Otherwise [].
-8. opening_angles: 3 sharp angles/hooks to open the conversation, tailored to this lead + user's company.`;
+Sections:
+1. focus_areas: 4-8 products/services the LEAD focuses on.
+2. tech_stack: list of systems/software the lead likely uses TODAY. Each item: { name, category (e.g. CRM, ERP, SIS, LMS, ATS, Helpdesk, Marketing, Analytics, Comms, Finance), is_competitor_of_user (true if it competes with USER's offering), confidence ("known"|"likely") }.
+3. likely_processes: 4-8 bullets on how they operate today.
+4. gaps: 3-6 bullets on what's lacking / painful.
+5. pain_point_targets: for each major gap, suggest WHO inside the lead company to target. Each item: { pain_point, target_role, why, linkedin_search_url }. The linkedin_search_url MUST be a public LinkedIn people search built like: https://www.linkedin.com/search/results/people/?keywords=<URL-encoded "role company name">  — never fabricate a profile URL, only build the search URL.
+6. fit_summary: 2-3 sentences on how USER's offering fits this lead.
+7. contact_fit: "ideal" | "okay" | "wrong" for the CURRENT contact.
+8. contact_reasoning: one sentence.
+9. better_contacts: 2-4 better roles if fit isn't ideal, otherwise [].
+10. opening_angles: 3 sharp hooks tailored to lead + user company.`;
 
     const userPrompt = `LEAD COMPANY:
 Name: ${lead.company_name}
@@ -92,7 +94,7 @@ Target systems we plug into: ${(company?.target_systems ?? []).join(", ") || "�
 Pain points we solve: ${(company?.solved_pain_points ?? []).join(", ") || "—"}
 Positioning: ${company?.positioning ?? "—"}
 
-Produce the intelligence brief.`;
+For every linkedin_search_url, base the company keyword on "${lead.company_name}".`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -111,16 +113,42 @@ Produce the intelligence brief.`;
             parameters: {
               type: "object",
               properties: {
-                focus_areas: { type: "array", items: { type: "string" }, description: "4-8 short bullets of products/services lead focuses on" },
-                likely_processes: { type: "array", items: { type: "string" }, description: "4-8 bullets on how they operate today" },
-                gaps: { type: "array", items: { type: "string" }, description: "3-6 bullets on what's lacking" },
+                focus_areas: { type: "array", items: { type: "string" } },
+                tech_stack: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      category: { type: "string" },
+                      is_competitor_of_user: { type: "boolean" },
+                      confidence: { type: "string", enum: ["known", "likely"] },
+                    },
+                    required: ["name", "category", "is_competitor_of_user", "confidence"],
+                  },
+                },
+                likely_processes: { type: "array", items: { type: "string" } },
+                gaps: { type: "array", items: { type: "string" } },
+                pain_point_targets: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      pain_point: { type: "string" },
+                      target_role: { type: "string" },
+                      why: { type: "string" },
+                      linkedin_search_url: { type: "string" },
+                    },
+                    required: ["pain_point", "target_role", "why", "linkedin_search_url"],
+                  },
+                },
                 fit_summary: { type: "string" },
                 contact_fit: { type: "string", enum: ["ideal", "okay", "wrong"] },
                 contact_reasoning: { type: "string" },
                 better_contacts: { type: "array", items: { type: "string" } },
-                opening_angles: { type: "array", items: { type: "string" }, description: "3 sharp opener hooks" },
+                opening_angles: { type: "array", items: { type: "string" } },
               },
-              required: ["focus_areas", "likely_processes", "gaps", "fit_summary", "contact_fit", "contact_reasoning", "better_contacts", "opening_angles"],
+              required: ["focus_areas", "tech_stack", "likely_processes", "gaps", "pain_point_targets", "fit_summary", "contact_fit", "contact_reasoning", "better_contacts", "opening_angles"],
             },
           },
         }],
