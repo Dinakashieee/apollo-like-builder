@@ -220,6 +220,7 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
     setSystemsInUse("");
     setPainPoints("");
     setNotes("");
+    setLinkedinCompanyUrl("");
     setCountry("");
     setCountryTouched(false);
     setEnrichSignals([]);
