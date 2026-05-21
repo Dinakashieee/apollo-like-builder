@@ -2,6 +2,7 @@
 // Triggered from the client when a new inbound message lands, or manually
 // from the conversation view via the "Re-analyze" button.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { incrementAiEmails } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
