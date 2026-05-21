@@ -35,16 +35,38 @@ serve(async (req) => {
       .select("name, description, category")
       .eq("workspace_id", workspace_id);
 
+    if (!products || products.length === 0) {
+      return new Response(JSON.stringify({ error: "Add at least one product or service under Company first — opportunities must be grounded in what you actually sell." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
-    const systemPrompt = `You are a B2B sales strategist. Generate 5-7 high-quality opportunity areas where this company can win deals. Be specific, realistic, and grounded in the company's actual offering.`;
+    const productsList = products
+      .map((p: any, i: number) => `${i + 1}. ${p.name}${p.category ? ` [${p.category}]` : ""}: ${p.description ?? "(no description)"}`)
+      .join("\n");
+
+    const systemPrompt = `You are a B2B sales strategist. Generate 5-7 high-quality opportunity areas for this seller.
+STRICT RULES:
+- Every opportunity MUST be directly solvable by ONE of the seller's listed products/services below. Do NOT invent capabilities the seller does not have.
+- The 'product_match' field MUST be the exact product/service name copied verbatim from the list.
+- The 'rationale' field MUST start with "Solved by: <exact product name>" then explain how that specific product addresses the opportunity.
+- Reject any idea that does not map to a listed product/service. Do not pad with generic opportunities.
+- Industry and problem must be realistic for the seller's actual offering — not generic SaaS clichés.`;
+
     const userPrompt = `Company: ${company.company_name}
 Description: ${company.description ?? "n/a"}
 Target industries: ${(company.industries ?? []).join(", ") || "any"}
-Products: ${products?.map((p: any) => `${p.name} (${p.category ?? "n/a"}): ${p.description ?? ""}`).join(" | ") || company.products_summary || "n/a"}
 
-Generate opportunities.`;
+PRODUCTS / SERVICES THE USER OFFERS (this is the ONLY source of truth for capabilities — ignore anything else):
+${productsList}
+
+Additional products summary (context only): ${company.products_summary ?? "n/a"}
+
+Generate 5-7 opportunities, each grounded in ONE of the products/services above.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -73,9 +95,10 @@ Generate opportunities.`;
                       industry: { type: "string" },
                       score: { type: "number", description: "0-100" },
                       level: { type: "string", enum: ["high", "medium", "low"] },
-                      rationale: { type: "string" },
+                      product_match: { type: "string", description: "Exact product/service name from the seller's list" },
+                      rationale: { type: "string", description: "Must start with 'Solved by: <product name>' then explain the fit" },
                     },
-                    required: ["title", "problem", "industry", "score", "level", "rationale"],
+                    required: ["title", "problem", "industry", "score", "level", "product_match", "rationale"],
                   },
                 },
               },
