@@ -57,12 +57,21 @@ const LEVEL_BADGES = {
 
 export default function Targets() {
   const { current } = useWorkspace();
+  const { user } = useAuth();
+  const { leadsUsed, leadsLimit, leadsAtLimit, leadsNearLimit, tier, refetch: refetchEntitlements } = useEntitlements();
   const [similar, setSimilar] = useState<SimilarProduct[]>([]);
   const [targets, setTargets] = useState<TargetCompany[]>([]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
+  const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
   const [hasCompany, setHasCompany] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const netNewCount = useMemo(
+    () => targets.filter((t) => t.uses_ifs === false).length,
+    [targets]
+  );
 
   useEffect(() => {
     if (!current) return;
