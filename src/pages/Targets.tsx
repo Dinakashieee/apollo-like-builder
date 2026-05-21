@@ -388,15 +388,7 @@ export default function Targets() {
                   <div className="min-w-0">
                     <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
                     {t.website && (
-                      <a
-                        href={t.website.startsWith("http") ? t.website : `https://${t.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        {t.website.replace(/^https?:\/\//, "")}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <p className="text-xs text-muted-foreground italic">Website revealed after claiming</p>
                     )}
                   </div>
                   <span className={`text-[10px] font-bold border px-2 py-1 rounded-md whitespace-nowrap ${lvl.color}`}>
