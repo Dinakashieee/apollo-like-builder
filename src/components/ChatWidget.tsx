@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -122,9 +123,7 @@ export function ChatWidget({ mode }: Props) {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       };
       if (mode === "assistant") {
-        const { data } = await import("@/integrations/supabase/client").then((m) =>
-          m.supabase.auth.getSession()
-        );
+        const { data } = await supabase.auth.getSession();
         if (data.session?.access_token) {
           headers.Authorization = `Bearer ${data.session.access_token}`;
         }
@@ -196,10 +195,11 @@ export function ChatWidget({ mode }: Props) {
           }
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "please try again";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `⚠️ Connection issue: ${e?.message ?? "please try again"}.` },
+        { role: "assistant", content: `⚠️ Connection issue: ${message}.` },
       ]);
     } finally {
       setBusy(false);
