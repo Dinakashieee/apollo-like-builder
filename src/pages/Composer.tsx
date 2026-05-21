@@ -36,6 +36,11 @@ export default function Composer() {
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
+  const [meetingAttendees, setMeetingAttendees] = useState("");
+  const [meetingType, setMeetingType] = useState("not_specified");
+  const [meetingDescription, setMeetingDescription] = useState("");
+  const [awards, setAwards] = useState("");
+  const [signatureOverride, setSignatureOverride] = useState("");
 
   useEffect(() => {
     if (!current) return;
