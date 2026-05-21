@@ -334,6 +334,22 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
                   </div>
                 )}
               </div>
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-primary">
+                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor"><path d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM8 19H5V8h3v11zM6.5 6.73a1.75 1.75 0 110-3.5 1.75 1.75 0 010 3.5zM20 19h-3v-5.6c0-3.37-4-3.11-4 0V19h-3V8h3v1.76c1.4-2.59 7-2.78 7 2.48V19z"/></svg>
+                  LinkedIn company URL <span className="text-[10px] font-normal text-muted-foreground">(highly recommended)</span>
+                </Label>
+                <Input
+                  type="url"
+                  value={linkedinCompanyUrl}
+                  onChange={(e) => setLinkedinCompanyUrl(e.target.value)}
+                  placeholder="https://www.linkedin.com/company/acme/"
+                />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Adding this lets us scan public employee profiles to detect the systems they actually use
+                  (from job titles & descriptions) — making your AI intelligence brief far sharper.
+                </p>
+              </div>
               <div>
                 <Label>Notes</Label>
                 <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
