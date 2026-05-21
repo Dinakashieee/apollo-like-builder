@@ -96,13 +96,29 @@ export function TeamSection() {
       role: "member",
       invited_by: user.id,
     });
-    setSending(false);
     if (error) {
+      setSending(false);
       toast({ title: "Could not invite", description: error.message, variant: "destructive" });
       return;
     }
+    // Fire-and-forget invite email
+    supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "workspace-invite",
+        recipientEmail: email,
+        idempotencyKey: `workspace-invite-${current.id}-${email}`,
+        templateData: {
+          workspaceName: current.name,
+          inviterName: user.user_metadata?.full_name || user.email,
+          inviterEmail: user.email,
+          role: "member",
+          inviteEmail: email,
+        },
+      },
+    }).catch(() => {});
+    setSending(false);
     setInviteEmail("");
-    toast({ title: "Invite sent", description: `${email} can now join when they sign up.` });
+    toast({ title: "Invite sent", description: `We emailed ${email} an invitation to join.` });
     refresh();
   };
 
