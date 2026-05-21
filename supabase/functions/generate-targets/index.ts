@@ -199,6 +199,8 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
+    await incrementAiEmails(admin, workspace_id);
+
     await supabase.from("activities").insert({
       workspace_id, user_id: user.id, type: "targets_generated",
       description: `AI generated ${args.targets?.length ?? 0} targets and ${args.similar?.length ?? 0} competitor profiles`,
