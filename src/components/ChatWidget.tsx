@@ -141,21 +141,20 @@ export function ChatWidget({ mode }: Props) {
       const resp = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
 
       if (!resp.ok) {
-        let errMsg = `Error ${resp.status}`;
+        let errMsg = `Something went wrong (${resp.status}). Please try again in a moment.`;
         try {
           const j = await resp.json();
-          errMsg = j.error ?? errMsg;
+          if (j?.error) errMsg = j.error;
         } catch {
           /* ignore */
         }
-        if (resp.status === 402) {
-          toast({
-            title: "AI quota reached",
-            description: errMsg + " Upgrade in Settings → Billing.",
-            variant: "destructive",
-          });
-        } else {
-          toast({ title: "Chat error", description: errMsg, variant: "destructive" });
+        if (resp.status === 429) {
+          errMsg = "You're sending messages a bit fast — please wait a few seconds and try again.";
+        } else if (resp.status === 402) {
+          errMsg =
+            mode === "assistant"
+              ? "You've reached your monthly AI limit. Upgrade in Settings → Billing to keep chatting."
+              : "Our chat is briefly unavailable. Please email support@engageiqlk.com and we'll get back to you.";
         }
         setMessages((prev) => [...prev, { role: "assistant", content: `⚠️ ${errMsg}` }]);
         return;
@@ -198,7 +197,10 @@ export function ChatWidget({ mode }: Props) {
         }
       }
     } catch (e: any) {
-      toast({ title: "Chat failed", description: e?.message ?? "Try again", variant: "destructive" });
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `⚠️ Connection issue: ${e?.message ?? "please try again"}.` },
+      ]);
     } finally {
       setBusy(false);
     }

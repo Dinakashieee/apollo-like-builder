@@ -20,11 +20,11 @@ About EngageIQ:
 
 Tone: concise, friendly, no fluff. If you don't know something, say so and suggest contacting support. Never invent features. Never claim integrations not listed. Encourage users to start with the Free plan or book a demo.`;
 
-// Per-IP token bucket: 20 requests per 10 minutes per IP. In-memory is fine
+// Per-IP token bucket: 60 requests per 10 minutes per IP. In-memory is fine
 // here because abuse traffic from a single IP would hit the same warm
 // instance; this is a coarse first line of defense, not a hard guarantee.
 const RATE_WINDOW_MS = 10 * 60 * 1000;
-const RATE_MAX = 20;
+const RATE_MAX = 60;
 const ipHits: Map<string, number[]> = new Map();
 function rateLimited(ip: string): boolean {
   const now = Date.now();
@@ -49,7 +49,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, visitor } = await req.json();
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 30) {
       return new Response(JSON.stringify({ error: "messages array required (max 30)" }), {
         status: 400,
@@ -65,6 +65,15 @@ serve(async (req) => {
       }
     }
 
+    let systemPrompt = SYSTEM_PROMPT;
+    if (visitor && typeof visitor === "object") {
+      const name = String(visitor.name ?? "").slice(0, 100);
+      const business = String(visitor.business ?? "").slice(0, 150);
+      if (name || business) {
+        systemPrompt += `\n\nVISITOR CONTEXT: You are chatting with ${name || "a visitor"}${business ? ` from ${business}` : ""}. Address them by first name occasionally and tailor advice to their business when relevant.`;
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
@@ -73,7 +82,7 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages.slice(-12)],
+        messages: [{ role: "system", content: systemPrompt }, ...messages.slice(-12)],
         stream: true,
       }),
     });
