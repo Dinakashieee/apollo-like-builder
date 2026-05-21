@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp } from "lucide-react";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -388,15 +388,7 @@ export default function Targets() {
                   <div className="min-w-0">
                     <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
                     {t.website && (
-                      <a
-                        href={t.website.startsWith("http") ? t.website : `https://${t.website}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        {t.website.replace(/^https?:\/\//, "")}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      <p className="text-xs text-muted-foreground italic">Website revealed after claiming</p>
                     )}
                   </div>
                   <span className={`text-[10px] font-bold border px-2 py-1 rounded-md whitespace-nowrap ${lvl.color}`}>
@@ -430,88 +422,20 @@ export default function Targets() {
                     ))}
                   </div>
                 )}
-                <div className="text-sm text-foreground/85 mb-3">
-                  <p className="font-semibold text-primary-deep">Their problem</p>
-                  <p>{t.problem}</p>
+                <div className="mt-1 mb-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center">
+                  <p className="text-sm font-semibold text-primary-deep flex items-center justify-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5" /> Claim to unlock the full brief
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Website, pain points, why-you-fit, decision-maker LinkedIn profiles, designations & verifiable references all appear in your Leads once you claim.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Crosshair className="h-3 w-3" /> Their problem</span>
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Users className="h-3 w-3" /> {t.icp_contacts?.length ?? 0} ICP contacts</span>
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn URLs</span>
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><ExternalLink className="h-3 w-3" /> {t.references?.length ?? 0} references</span>
+                  </div>
                 </div>
-                <div className="border-t border-border/60 pt-3 text-xs text-foreground/85 mb-3">
-                  <p className="font-semibold text-primary-deep mb-1">Why you can sell</p>
-                  <p>{t.why}</p>
-                </div>
-                {t.designations && t.designations.length > 0 && (
-                  <div className="border-t border-border/60 pt-3 mb-3">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
-                      <Users className="h-3 w-3" /> Designations to pitch
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {t.designations.map((d, j) => (
-                        <span key={j} className="text-[11px] bg-secondary text-secondary-foreground rounded px-2 py-0.5">
-                          {d}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {t.icp_contacts && t.icp_contacts.length > 0 && (
-                  <div className="border-t border-border/60 pt-3 mb-3">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-2 flex items-center gap-1">
-                      <Users className="h-3 w-3" /> ICP contacts (verify before outreach)
-                    </p>
-                    <ul className="space-y-1.5">
-                      {t.icp_contacts.map((c, j) => (
-                        <li key={j} className="flex items-center justify-between gap-2 text-xs bg-muted/40 rounded-md px-2 py-1.5">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-primary-deep truncate">{c.full_name}</p>
-                            <p className="text-muted-foreground truncate">{c.role}</p>
-                          </div>
-                          {c.linkedin_url && (
-                            <a
-                              href={c.linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-1 shrink-0"
-                              aria-label={`Open ${c.full_name} on LinkedIn`}
-                            >
-                              <Linkedin className="h-3 w-3" />
-                              LinkedIn
-                            </a>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {t.focus_areas && t.focus_areas.length > 0 && (
-                  <div className="border-t border-border/60 pt-3 mb-3">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
-                      <Crosshair className="h-3 w-3" /> Areas to pitch
-                    </p>
-                    <ul className="space-y-1 text-xs text-foreground/85">
-                      {t.focus_areas.map((f, j) => (
-                        <li key={j}>• {f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {t.references && t.references.length > 0 && (
-                  <div className="border-t border-border/60 pt-3">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5">References (verify)</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {t.references.map((r, j) => (
-                        <a
-                          key={j}
-                          href={r.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5"
-                        >
-                          {r.label}
-                          <ExternalLink className="h-2.5 w-2.5" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3 flex-wrap">
                   <p className="text-[11px] text-muted-foreground leading-tight flex-1 min-w-[140px]">
                     <Flag className="h-3 w-3 inline mr-1 -mt-0.5" />
