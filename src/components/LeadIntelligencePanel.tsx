@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, AlertOctangle, Lightbulb, Users } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, AlertTriangle, XCircle, Target, Workflow, Lightbulb, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
