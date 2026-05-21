@@ -136,43 +136,90 @@ export default function Targets() {
     setLoading(false);
   };
 
+  const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
+    const exclude = Array.from(
+      new Set([
+        ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
+        ...claimed,
+        ...extraExclude,
+      ])
+    );
+    const { data, error } = await supabase.functions.invoke("generate-targets", {
+      body: { workspace_id: current!.id, mode: "replace", exclude },
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    const replacement: TargetCompany | undefined = data.targets?.[0];
+    let nextTargets = [...targets];
+    if (replacement) nextTargets[idx] = replacement;
+    else nextTargets.splice(idx, 1);
+    setTargets(nextTargets);
+    persist(similar, nextTargets);
+    return replacement;
+  };
+
   const claimAndReplace = async (idx: number) => {
     if (!current) return;
     const original = targets[idx];
     const name = original?.company ?? original?.type ?? "Target";
+
+    // Push for subscription: claiming consumes a lead slot.
+    if (leadsAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
+
     setReplacingIdx(idx);
     try {
-      const exclude = Array.from(
-        new Set([
-          ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
-          ...claimed,
-        ])
-      );
-      const { data, error } = await supabase.functions.invoke("generate-targets", {
-        body: { workspace_id: current.id, mode: "replace", exclude },
+      // Save as a real lead so the user can't just copy the name & search elsewhere.
+      const primaryContact = original?.icp_contacts?.[0];
+      const { error: insertErr } = await supabase.from("leads").insert({
+        workspace_id: current.id,
+        created_by: user?.id ?? null,
+        company_name: name,
+        contact_name: primaryContact?.full_name ?? null,
+        role: primaryContact?.role ?? null,
+        industry: original?.industry ?? null,
+        systems_in_use: original?.current_systems ?? [],
+        notes: [
+          original?.problem ? `Problem: ${original.problem}` : null,
+          original?.why ? `Why fit: ${original.why}` : null,
+          original?.website ? `Website: ${original.website}` : null,
+          primaryContact?.linkedin_url ? `LinkedIn: ${primaryContact.linkedin_url}` : null,
+        ].filter(Boolean).join("\n") || null,
+        source: "ai_targets",
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const replacement: TargetCompany | undefined = data.targets?.[0];
+      if (insertErr) throw insertErr;
+
       const nextClaimed = Array.from(new Set([...claimed, name]));
       persistClaimed(nextClaimed);
+      await refetchEntitlements();
 
-      let nextTargets = [...targets];
-      if (replacement) {
-        nextTargets[idx] = replacement;
-      } else {
-        nextTargets.splice(idx, 1);
-      }
-      setTargets(nextTargets);
-      persist(similar, nextTargets);
+      const replacement = await fetchReplacement(idx);
       toast({
         title: `Claimed ${name}`,
-        description: replacement ? "A fresh target has been added in its place." : "Removed from your focus list.",
+        description: replacement
+          ? "Added to your Leads. A fresh target is in its place."
+          : "Added to your Leads.",
       });
+    } catch (e: any) {
+      toast({ title: "Couldn't claim", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setReplacingIdx(null);
+  };
+
+  const declineAndReplace = async (idx: number) => {
+    if (!current) return;
+    const original = targets[idx];
+    const name = original?.company ?? original?.type ?? "Target";
+    setDecliningIdx(idx);
+    try {
+      await fetchReplacement(idx, [name]);
+      toast({ title: `Skipped ${name}`, description: "Swapped in a fresh prospect." });
     } catch (e: any) {
       toast({ title: "Couldn't refresh", description: e?.message ?? "Try again", variant: "destructive" });
     }
-    setReplacingIdx(null);
+    setDecliningIdx(null);
   };
 
   return (
