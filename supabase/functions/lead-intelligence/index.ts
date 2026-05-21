@@ -126,6 +126,7 @@ Industry: ${lead.industry ?? "unknown"}
 Country: ${lead.country ?? "unknown"}
 Current contact: ${lead.contact_name ?? "unknown"}${lead.role ? ` (${lead.role})` : ""}
 Email: ${lead.email ?? "unknown"}
+LinkedIn company URL: ${lead.linkedin_company_url ?? "unknown"}
 Known systems: ${(lead.systems_in_use ?? []).join(", ") || "none recorded"}
 Known pain points: ${(lead.pain_points ?? []).join(", ") || "none recorded"}
 Notes: ${lead.notes ?? "none"}
