@@ -36,6 +36,11 @@ export default function Composer() {
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
+  const [meetingAttendees, setMeetingAttendees] = useState("");
+  const [meetingType, setMeetingType] = useState("not_specified");
+  const [meetingDescription, setMeetingDescription] = useState("");
+  const [awards, setAwards] = useState("");
+  const [signatureOverride, setSignatureOverride] = useState("");
 
   useEffect(() => {
     if (!current) return;
@@ -83,7 +88,16 @@ export default function Composer() {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-email", {
-        body: { workspace_id: current.id, lead_id: selectedLead, tone },
+        body: {
+          workspace_id: current.id,
+          lead_id: selectedLead,
+          tone,
+          meeting_attendees: meetingAttendees.trim() || undefined,
+          meeting_type: meetingType === "not_specified" ? undefined : meetingType,
+          meeting_description: meetingDescription.trim() || undefined,
+          awards: awards.trim() || undefined,
+          signature_override: signatureOverride.trim() || undefined,
+        },
       });
       if (error) throw error;
       if (data?.error) {
@@ -202,6 +216,71 @@ export default function Composer() {
               </Select>
             </div>
           </div>
+
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-4 space-y-3">
+            <p className="text-xs font-semibold text-primary-deep uppercase tracking-wide">
+              Add context before generating (optional)
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Meeting type</Label>
+                <Select value={meetingType} onValueChange={setMeetingType}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_specified">Not specified</SelectItem>
+                    <SelectItem value="online virtual call (Zoom / Teams / Google Meet)">Online / virtual call</SelectItem>
+                    <SelectItem value="in-person meeting at the prospect's office">In-person at prospect's office</SelectItem>
+                    <SelectItem value="in-person meeting at our office">In-person at our office</SelectItem>
+                    <SelectItem value="booth / exhibition / trade show meet-up">Booth / exhibition / trade show</SelectItem>
+                    <SelectItem value="coffee / lunch meeting">Coffee / lunch</SelectItem>
+                    <SelectItem value="conference or industry event">Conference / industry event</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Who will join (from our side)</Label>
+                <Input
+                  value={meetingAttendees}
+                  onChange={(e) => setMeetingAttendees(e.target.value)}
+                  placeholder="e.g. our Director of Sales & a Solutions Engineer"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Physical meeting / booth details</Label>
+              <Textarea
+                value={meetingDescription}
+                onChange={(e) => setMeetingDescription(e.target.value)}
+                rows={2}
+                placeholder="e.g. Booth #42 at GITEX 2026, Dubai World Trade Centre, 14–17 Oct"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Company awards / credentials to reference</Label>
+              <Textarea
+                value={awards}
+                onChange={(e) => setAwards(e.target.value)}
+                rows={2}
+                placeholder="e.g. SAP Gold Partner 2025, Deloitte Tech Fast 50 winner, ISO 27001 certified"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email signature (paste text or HTML — overrides saved signature)</Label>
+              <Textarea
+                value={signatureOverride}
+                onChange={(e) => setSignatureOverride(e.target.value)}
+                rows={4}
+                placeholder={"e.g.\nJohn Perera\nDirector of Sales · Acme Pvt Ltd\n+94 77 123 4567 · john@acme.com"}
+                className="mt-1 font-mono text-xs"
+              />
+            </div>
+          </div>
+
 
           <div>
             <Label>Subject</Label>

@@ -10,7 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { workspace_id, lead_id, tone } = await req.json();
+    const { workspace_id, lead_id, tone, meeting_attendees, meeting_type, meeting_description, awards, signature_override } = await req.json();
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized");
     const supabase = createClient(
@@ -99,6 +99,19 @@ RECIPIENT
 TONE: ${tone ?? "warm, professional, consultative"}
 ═══════════════════════════════
 
+═══════════════════════════════
+MEETING CONTEXT (from sender — use ONLY if provided, never fabricate)
+═══════════════════════════════
+- Meeting type: ${meeting_type || "(not specified — offer a brief virtual or in-person discussion generically)"}
+- Who will join from sender side: ${meeting_attendees || "(not specified — may mention 'a senior colleague would be glad to join')"}
+- Physical meeting / booth details: ${meeting_description || "(none)"}
+
+═══════════════════════════════
+COMPANY AWARDS / CREDENTIALS TO REFERENCE (use at most ONE, naturally — never invent)
+═══════════════════════════════
+${awards || "(none provided — skip social proof unless present in sender description)"}
+
+
 WRITING RULES (follow strictly):
 
 1. **Greeting**: "Dear <FirstName>," then one warm opener line ("Good day to you and we hope you are doing well.").
@@ -160,9 +173,9 @@ OUTPUT: Return ONLY the structured email via the tool call. Do not include any s
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
-    // Append the user's saved signature, if any.
+    // Append the user's signature: prefer explicit override from composer, fall back to saved profile signature.
     let body = args.body ?? "";
-    const signature = (profile?.email_signature ?? "").trim();
+    const signature = ((signature_override ?? profile?.email_signature) ?? "").trim();
     if (signature) {
       body = `${body.trimEnd()}\n\n${signature}`;
     }
