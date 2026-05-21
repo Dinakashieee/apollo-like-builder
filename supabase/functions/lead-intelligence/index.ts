@@ -95,6 +95,15 @@ serve(async (req) => {
       }
     }
 
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+
+    const employeeBlock = employeeSignals.length
+      ? `\n\nPUBLIC LINKEDIN EMPLOYEE SIGNALS (scraped from public profile snippets — use as STRONG evidence; if a system is named here, mark its tech_stack confidence as "known"):\n` +
+        employeeSignals.map((e, i) => `${i + 1}. ${e.title}\n   ${e.snippet}\n   ${e.url}`).join("\n")
+      : "";
+
+
     const systemPrompt = `You are a senior B2B sales strategist + GTM researcher. Given a target LEAD company and the USER'S company profile, produce a sharp, actionable intelligence brief.
 
 Always answer with concrete, specific phrasing — no fluff. Prefer short bullets. Name actual products and vendors where realistic (e.g. "Salesforce", "HubSpot", "Workday", "SAP SuccessFactors", "Zendesk", "Oracle PeopleSoft", "Banner SIS", "Moodle"). It is OK to infer from industry norms — mark inferences with confidence "likely".
