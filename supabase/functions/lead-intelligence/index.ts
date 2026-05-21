@@ -229,7 +229,7 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
 
     await incrementAiEmails(admin, lead.workspace_id);
 
-    return new Response(JSON.stringify(args), {
+    return new Response(JSON.stringify({ ...args, employee_signals: employeeSignals, has_linkedin_url: !!lead.linkedin_company_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
