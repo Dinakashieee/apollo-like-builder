@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAuth } from "@/hooks/useAuth";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -54,12 +57,21 @@ const LEVEL_BADGES = {
 
 export default function Targets() {
   const { current } = useWorkspace();
+  const { user } = useAuth();
+  const { leadsUsed, leadsLimit, leadsAtLimit, leadsNearLimit, tier, refetch: refetchEntitlements } = useEntitlements();
   const [similar, setSimilar] = useState<SimilarProduct[]>([]);
   const [targets, setTargets] = useState<TargetCompany[]>([]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
+  const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
   const [hasCompany, setHasCompany] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  const netNewCount = useMemo(
+    () => targets.filter((t) => t.uses_ifs === false).length,
+    [targets]
+  );
 
   useEffect(() => {
     if (!current) return;
@@ -124,43 +136,90 @@ export default function Targets() {
     setLoading(false);
   };
 
+  const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
+    const exclude = Array.from(
+      new Set([
+        ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
+        ...claimed,
+        ...extraExclude,
+      ])
+    );
+    const { data, error } = await supabase.functions.invoke("generate-targets", {
+      body: { workspace_id: current!.id, mode: "replace", exclude },
+    });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    const replacement: TargetCompany | undefined = data.targets?.[0];
+    let nextTargets = [...targets];
+    if (replacement) nextTargets[idx] = replacement;
+    else nextTargets.splice(idx, 1);
+    setTargets(nextTargets);
+    persist(similar, nextTargets);
+    return replacement;
+  };
+
   const claimAndReplace = async (idx: number) => {
     if (!current) return;
     const original = targets[idx];
     const name = original?.company ?? original?.type ?? "Target";
+
+    // Push for subscription: claiming consumes a lead slot.
+    if (leadsAtLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
+
     setReplacingIdx(idx);
     try {
-      const exclude = Array.from(
-        new Set([
-          ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
-          ...claimed,
-        ])
-      );
-      const { data, error } = await supabase.functions.invoke("generate-targets", {
-        body: { workspace_id: current.id, mode: "replace", exclude },
+      // Save as a real lead so the user can't just copy the name & search elsewhere.
+      const primaryContact = original?.icp_contacts?.[0];
+      const { error: insertErr } = await supabase.from("leads").insert({
+        workspace_id: current.id,
+        created_by: user?.id ?? null,
+        company_name: name,
+        contact_name: primaryContact?.full_name ?? null,
+        role: primaryContact?.role ?? null,
+        industry: original?.industry ?? null,
+        systems_in_use: original?.current_systems ?? [],
+        notes: [
+          original?.problem ? `Problem: ${original.problem}` : null,
+          original?.why ? `Why fit: ${original.why}` : null,
+          original?.website ? `Website: ${original.website}` : null,
+          primaryContact?.linkedin_url ? `LinkedIn: ${primaryContact.linkedin_url}` : null,
+        ].filter(Boolean).join("\n") || null,
+        source: "ai_targets",
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      const replacement: TargetCompany | undefined = data.targets?.[0];
+      if (insertErr) throw insertErr;
+
       const nextClaimed = Array.from(new Set([...claimed, name]));
       persistClaimed(nextClaimed);
+      await refetchEntitlements();
 
-      let nextTargets = [...targets];
-      if (replacement) {
-        nextTargets[idx] = replacement;
-      } else {
-        nextTargets.splice(idx, 1);
-      }
-      setTargets(nextTargets);
-      persist(similar, nextTargets);
+      const replacement = await fetchReplacement(idx);
       toast({
         title: `Claimed ${name}`,
-        description: replacement ? "A fresh target has been added in its place." : "Removed from your focus list.",
+        description: replacement
+          ? "Added to your Leads. A fresh target is in its place."
+          : "Added to your Leads.",
       });
+    } catch (e: any) {
+      toast({ title: "Couldn't claim", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setReplacingIdx(null);
+  };
+
+  const declineAndReplace = async (idx: number) => {
+    if (!current) return;
+    const original = targets[idx];
+    const name = original?.company ?? original?.type ?? "Target";
+    setDecliningIdx(idx);
+    try {
+      await fetchReplacement(idx, [name]);
+      toast({ title: `Skipped ${name}`, description: "Swapped in a fresh prospect." });
     } catch (e: any) {
       toast({ title: "Couldn't refresh", description: e?.message ?? "Try again", variant: "destructive" });
     }
-    setReplacingIdx(null);
+    setDecliningIdx(null);
   };
 
   return (
@@ -272,15 +331,36 @@ export default function Targets() {
           <div>
             <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Hit <span className="font-semibold text-primary">Claim</span> on the ones you'll focus on — we'll instantly swap in a fresh prospect.
+              Hit <span className="font-semibold text-primary">Claim</span> to add them to your Leads — or <span className="font-semibold text-primary">Decline</span> to swap in a different prospect.
             </p>
           </div>
-          {claimed.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              {claimed.length} claimed
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {netNewCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-primary/10 text-primary border border-primary/30 rounded-full px-3 py-1">
+                <TrendingUp className="h-3.5 w-3.5" />
+                {netNewCount} net-new {netNewCount === 1 ? "logo" : "logos"}
+              </span>
+            )}
+            {claimed.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {claimed.length} claimed
+              </span>
+            )}
+            {isFinite(leadsLimit) && (
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1 border ${
+                  leadsAtLimit
+                    ? "bg-destructive/10 text-destructive border-destructive/30"
+                    : leadsNearLimit
+                    ? "bg-warm/10 text-warm border-warm/30"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}
+              >
+                {leadsUsed}/{leadsLimit} leads {leadsAtLimit ? "· upgrade to claim" : ""}
+              </span>
+            )}
+          </div>
         </div>
         {!loading && targets.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
@@ -292,13 +372,15 @@ export default function Targets() {
             const lvl = LEVEL_BADGES[t.level] ?? LEVEL_BADGES.medium;
             const title = t.company ?? t.type ?? "Target";
             const isReplacing = replacingIdx === i;
+            const isDeclining = decliningIdx === i;
+            const isBusy = isReplacing || isDeclining;
             return (
-              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isReplacing ? "opacity-60" : ""}`}>
-                {isReplacing && (
+              <div key={i} className={`card-elevated p-6 relative transition-opacity ${isBusy ? "opacity-60" : ""}`}>
+                {isBusy && (
                   <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/70 backdrop-blur-sm rounded-2xl">
                     <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      Finding a fresh target...
+                      {isDeclining ? "Finding another prospect..." : "Saving & refreshing..."}
                     </div>
                   </div>
                 )}
@@ -430,26 +512,44 @@ export default function Targets() {
                     </div>
                   </div>
                 )}
-                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3">
-                  <p className="text-[11px] text-muted-foreground leading-tight">
+                <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-[11px] text-muted-foreground leading-tight flex-1 min-w-[140px]">
                     <Flag className="h-3 w-3 inline mr-1 -mt-0.5" />
-                    Focusing on <span className="font-semibold text-primary-deep">{title}</span>? Claim it and we'll surface a new prospect.
+                    Claiming <span className="font-semibold text-primary-deep">{title}</span> adds it to your Leads so you don't lose it.
                   </p>
-                  <Button
-                    size="sm"
-                    onClick={() => claimAndReplace(i)}
-                    disabled={isReplacing || replacingIdx !== null}
-                    className="bg-gradient-primary shadow-glow shrink-0"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                    Claim lead
-                  </Button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => declineAndReplace(i)}
+                      disabled={isBusy || replacingIdx !== null || decliningIdx !== null}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1.5" />
+                      Decline
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => claimAndReplace(i)}
+                      disabled={isBusy || replacingIdx !== null || decliningIdx !== null}
+                      className="bg-gradient-primary shadow-glow"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                      Claim lead
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </section>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        title="You've hit your lead limit"
+        description={`You're on the ${tier} plan (${leadsUsed}/${leadsLimit} leads). Add a +100 leads add-on for $8/mo, or upgrade your plan to keep claiming targets.`}
+      />
     </div>
   );
 }
