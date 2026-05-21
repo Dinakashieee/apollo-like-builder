@@ -175,6 +175,13 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
     const json = await aiResp.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
+    if (Array.isArray(args.pain_point_targets)) {
+      args.pain_point_targets = args.pain_point_targets.map((t: any) => ({
+        ...t,
+        linkedin_search_url: `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${t.target_role ?? ""} ${lead.company_name}`.trim())}`,
+      }));
+    }
+
     await incrementAiEmails(admin, lead.workspace_id);
 
     return new Response(JSON.stringify(args), {
