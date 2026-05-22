@@ -10,7 +10,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { workspace_id } = await req.json();
+    const { workspace_id, mode } = await req.json();
     if (!workspace_id) throw new Error("workspace_id required");
 
     const authHeader = req.headers.get("Authorization");
@@ -61,30 +61,47 @@ serve(async (req) => {
       .map((p: any, i: number) => `${i + 1}. ${p.name}${p.category ? ` [${p.category}]` : ""}: ${p.description ?? "(no description)"}`)
       .join("\n");
 
-    const systemPrompt = `You are a B2B sales strategist. Generate 5-7 high-quality opportunity areas for this seller.
+    const today = new Date();
+    const quarter = `Q${Math.floor(today.getMonth() / 3) + 1} ${today.getFullYear()}`;
+
+    const systemPrompt = `You are a senior B2B market strategist and sales advisor. The seller below has uploaded their company profile and product catalog. Produce a SHARP, SPECIFIC market brief — never generic SaaS clichés.
+
+Return four sections:
+
+1. market_pain_points (5-8): Concrete pain points buyers in the seller's target industries are dealing with RIGHT NOW (${quarter}). Each item: { pain_point, who_feels_it (specific role/department), severity ("critical"|"high"|"medium"), evidence (one-sentence why this hurts) }.
+
+2. focus_recommendations (4-6): Where the seller should focus their GTM energy this quarter. Each item: { focus, why, expected_impact ("high"|"medium"|"low"), product_to_lead_with (EXACT name from product list) }.
+
+3. market_trends (4-6): Macro + industry trends shaping demand in the next 3-6 months for the seller's space. Each item: { trend, direction ("rising"|"shifting"|"declining"), implication_for_seller, time_horizon (e.g. "next 3 months", "by EOY ${today.getFullYear()}") }. Treat the current quarter as ${quarter}.
+
+4. opportunities (5-7): Specific deal opportunities. Each item: { title, problem, industry, score (0-100), level ("high"|"medium"|"low"), product_match (EXACT name from list), rationale (start with "Solved by: <exact product name>") }.
+
 STRICT RULES:
-- Every opportunity MUST be directly solvable by ONE of the seller's listed products/services below. Do NOT invent capabilities the seller does not have.
-- The 'product_match' field MUST be the exact product/service name copied verbatim from the list.
-- The 'rationale' field MUST start with "Solved by: <exact product name>" then explain how that specific product addresses the opportunity.
-- Reject any idea that does not map to a listed product/service. Do not pad with generic opportunities.
-- Industry and problem must be realistic for the seller's actual offering — not generic SaaS clichés.`;
+- Every product_match / product_to_lead_with MUST be copied verbatim from the product list.
+- Do NOT invent capabilities the seller doesn't have.
+- Pain points and trends must be tied to the seller's industries and product space — not generic "AI is hot" filler.
+- Be concrete: name actual buyer roles, regulations, vendor categories.`;
 
-    const userPrompt = `Company: ${company.company_name}
+    const userPrompt = `CURRENT QUARTER: ${quarter} (today is ${today.toISOString().slice(0, 10)})
+
+SELLER COMPANY:
+Name: ${company.company_name}
 Description: ${company.description ?? "n/a"}
+Positioning: ${(company as any).positioning ?? "n/a"}
 Target industries: ${(company.industries ?? []).join(", ") || "any"}
+Pain points they solve: ${((company as any).solved_pain_points ?? []).join(", ") || "n/a"}
+Target systems they integrate with: ${((company as any).target_systems ?? []).join(", ") || "n/a"}
 
-PRODUCTS / SERVICES THE USER OFFERS (this is the ONLY source of truth for capabilities — ignore anything else):
+PRODUCTS / SERVICES (sole source of truth for capabilities):
 ${productsList}
 
-Additional products summary (context only): ${company.products_summary ?? "n/a"}
-
-Generate 5-7 opportunities, each grounded in ONE of the products/services above.`;
+Additional summary: ${company.products_summary ?? "n/a"}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -92,33 +109,72 @@ Generate 5-7 opportunities, each grounded in ONE of the products/services above.
         tools: [{
           type: "function",
           function: {
-            name: "save_opportunities",
-            description: "Save opportunity areas",
+            name: "save_market_brief",
+            description: "Save the full market intelligence brief.",
             parameters: {
               type: "object",
               properties: {
+                market_pain_points: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      pain_point: { type: "string" },
+                      who_feels_it: { type: "string" },
+                      severity: { type: "string", enum: ["critical", "high", "medium"] },
+                      evidence: { type: "string" },
+                    },
+                    required: ["pain_point", "who_feels_it", "severity", "evidence"],
+                  },
+                },
+                focus_recommendations: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      focus: { type: "string" },
+                      why: { type: "string" },
+                      expected_impact: { type: "string", enum: ["high", "medium", "low"] },
+                      product_to_lead_with: { type: "string" },
+                    },
+                    required: ["focus", "why", "expected_impact", "product_to_lead_with"],
+                  },
+                },
+                market_trends: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      trend: { type: "string" },
+                      direction: { type: "string", enum: ["rising", "shifting", "declining"] },
+                      implication_for_seller: { type: "string" },
+                      time_horizon: { type: "string" },
+                    },
+                    required: ["trend", "direction", "implication_for_seller", "time_horizon"],
+                  },
+                },
                 opportunities: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
                       title: { type: "string" },
-                      problem: { type: "string", description: "The problem this addresses" },
+                      problem: { type: "string" },
                       industry: { type: "string" },
-                      score: { type: "number", description: "0-100" },
+                      score: { type: "number" },
                       level: { type: "string", enum: ["high", "medium", "low"] },
-                      product_match: { type: "string", description: "Exact product/service name from the seller's list" },
-                      rationale: { type: "string", description: "Must start with 'Solved by: <product name>' then explain the fit" },
+                      product_match: { type: "string" },
+                      rationale: { type: "string" },
                     },
                     required: ["title", "problem", "industry", "score", "level", "product_match", "rationale"],
                   },
                 },
               },
-              required: ["opportunities"],
+              required: ["market_pain_points", "focus_recommendations", "market_trends", "opportunities"],
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "save_opportunities" } },
+        tool_choice: { type: "function", function: { name: "save_market_brief" } },
       }),
     });
 
@@ -138,7 +194,7 @@ Generate 5-7 opportunities, each grounded in ONE of the products/services above.
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
     const ops = args.opportunities ?? [];
 
-    // Replace existing
+    // Replace existing opportunities
     await supabase.from("opportunities").delete().eq("workspace_id", workspace_id);
     const inserts = ops.map((o: any) => ({
       workspace_id,
@@ -153,23 +209,39 @@ Generate 5-7 opportunities, each grounded in ONE of the products/services above.
       await supabase.from("opportunities").insert(inserts);
     }
 
+    // Upsert market intelligence (trends refreshed each generation)
+    await admin.from("market_intelligence").upsert({
+      workspace_id,
+      market_pain_points: args.market_pain_points ?? [],
+      focus_recommendations: args.focus_recommendations ?? [],
+      market_trends: args.market_trends ?? [],
+      trends_refreshed_at: new Date().toISOString(),
+      refreshed_at: new Date().toISOString(),
+    }, { onConflict: "workspace_id" });
+
     await incrementAiEmails(admin, workspace_id);
 
     await supabase.from("activities").insert({
       workspace_id,
       user_id: user.id,
       type: "opportunity_generated",
-      description: `Generated ${inserts.length} opportunities with AI`,
+      description: `Generated market brief + ${inserts.length} opportunities (auto-refresh: ${mode === "auto" ? "yes" : "manual"})`,
     });
     await supabase.from("notifications").insert({
       workspace_id,
       user_id: user.id,
-      title: "AI opportunities ready",
-      body: `${inserts.length} new opportunities for ${company.company_name}`,
+      title: "AI market brief ready",
+      body: `Pain points, focus areas, trends and ${inserts.length} opportunities updated for ${company.company_name}`,
       link: "/app/intelligence",
     });
 
-    return new Response(JSON.stringify({ count: inserts.length, opportunities: inserts }), {
+    return new Response(JSON.stringify({
+      count: inserts.length,
+      opportunities: inserts,
+      market_pain_points: args.market_pain_points ?? [],
+      focus_recommendations: args.focus_recommendations ?? [],
+      market_trends: args.market_trends ?? [],
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
