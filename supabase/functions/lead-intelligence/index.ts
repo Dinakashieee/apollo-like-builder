@@ -228,10 +228,20 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
     if (Array.isArray(args.pain_point_targets)) {
-      args.pain_point_targets = args.pain_point_targets.map((t: any) => ({
-        ...t,
-        linkedin_search_url: `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${t.target_role ?? ""} ${lead.company_name}`.trim())}`,
-      }));
+      const validUrls = new Set(employeeSignals.map((e) => e.url));
+      args.pain_point_targets = args.pain_point_targets.map((t: any) => {
+        // Only trust person_linkedin_url if it came from real scraped signals
+        const personUrl = typeof t.person_linkedin_url === "string" && validUrls.has(t.person_linkedin_url)
+          ? t.person_linkedin_url
+          : "";
+        return {
+          ...t,
+          person_name: personUrl ? (t.person_name ?? "") : "",
+          person_title: personUrl ? (t.person_title ?? "") : "",
+          person_linkedin_url: personUrl,
+          linkedin_search_url: `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${t.target_role ?? ""} ${lead.company_name}`.trim())}`,
+        };
+      });
     }
 
     await incrementAiEmails(admin, lead.workspace_id);
