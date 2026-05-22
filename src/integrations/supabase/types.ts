@@ -621,6 +621,44 @@ export type Database = {
           },
         ]
       }
+      market_intelligence: {
+        Row: {
+          created_at: string
+          focus_recommendations: Json
+          market_pain_points: Json
+          market_trends: Json
+          refreshed_at: string
+          trends_refreshed_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          focus_recommendations?: Json
+          market_pain_points?: Json
+          market_trends?: Json
+          refreshed_at?: string
+          trends_refreshed_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          focus_recommendations?: Json
+          market_pain_points?: Json
+          market_trends?: Json
+          refreshed_at?: string
+          trends_refreshed_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_intelligence_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
