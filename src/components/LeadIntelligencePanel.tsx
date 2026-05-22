@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 interface TechItem { name: string; category: string; is_competitor_of_user: boolean; confidence: "known" | "likely" }
-interface PainTarget { pain_point: string; target_role: string; why: string; linkedin_search_url: string }
+interface PainTarget { pain_point: string; target_role: string; why: string; person_name?: string; person_title?: string; person_linkedin_url?: string; linkedin_search_url: string }
 interface EmployeeSignal { title: string; url: string; snippet: string }
 
 interface Intelligence {
@@ -192,15 +192,29 @@ export function LeadIntelligencePanel({ leadId, contactName }: { leadId: string;
                 <div className="mt-1 text-xs text-muted-foreground">
                   Reach out to <span className="text-foreground/90 font-medium">{p.target_role}</span> — {p.why}
                 </div>
-                <a
-                  href={p.linkedin_search_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-                >
-                  <Linkedin className="h-3.5 w-3.5" /> Find {p.target_role} on LinkedIn
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                {p.person_linkedin_url && p.person_name ? (
+                  <a
+                    href={p.person_linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" />
+                    <span className="font-medium">{p.person_name}</span>
+                    {p.person_title && <span className="text-muted-foreground">· {p.person_title}</span>}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <a
+                    href={p.linkedin_search_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" /> Search {p.target_role} at this company on LinkedIn
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             ))}
           </div>

@@ -113,7 +113,10 @@ Sections:
 2. tech_stack: list of systems/software the lead likely uses TODAY. Each item: { name, category (e.g. CRM, ERP, SIS, LMS, ATS, Helpdesk, Marketing, Analytics, Comms, Finance), is_competitor_of_user (true if it competes with USER's offering), confidence ("known"|"likely") }.
 3. likely_processes: 4-8 bullets on how they operate today.
 4. gaps: 3-6 bullets on what's lacking / painful.
-5. pain_point_targets: for each major gap, suggest WHO inside the lead company to target. Each item: { pain_point, target_role, why, linkedin_search_url }. The linkedin_search_url MUST be a public LinkedIn people search built like: https://www.linkedin.com/search/results/people/?keywords=<URL-encoded "role company name">  — never fabricate a profile URL, only build the search URL.
+5. pain_point_targets: for each major gap, suggest WHO inside the lead company to target. Each item: { pain_point, target_role, why, person_name, person_title, person_linkedin_url, linkedin_search_url }.
+   - CRITICAL: Targets MUST be ACTUAL people who work AT "${lead.company_name}" — never people from other companies. If PUBLIC LINKEDIN EMPLOYEE SIGNALS contains a relevant person at this company, USE THEM: set person_name, person_title, and person_linkedin_url to their exact url from the signals. Only use signals where the snippet clearly indicates they work at "${lead.company_name}".
+   - If no matching real person is found in the signals for a given pain point, leave person_name, person_title, person_linkedin_url as empty strings — do NOT invent profiles.
+   - linkedin_search_url MUST be a public LinkedIn people search built like: https://www.linkedin.com/search/results/people/?keywords=<URL-encoded "role company name"> — used as a fallback when no real person is found.
 6. fit_summary: 2-3 sentences on how USER's offering fits this lead.
 7. contact_fit: "ideal" | "okay" | "wrong" for the CURRENT contact.
 8. contact_reasoning: one sentence.
@@ -183,9 +186,12 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
                       pain_point: { type: "string" },
                       target_role: { type: "string" },
                       why: { type: "string" },
+                      person_name: { type: "string" },
+                      person_title: { type: "string" },
+                      person_linkedin_url: { type: "string" },
                       linkedin_search_url: { type: "string" },
                     },
-                    required: ["pain_point", "target_role", "why", "linkedin_search_url"],
+                    required: ["pain_point", "target_role", "why", "person_name", "person_title", "person_linkedin_url", "linkedin_search_url"],
                   },
                 },
                 fit_summary: { type: "string" },
@@ -222,10 +228,20 @@ For every linkedin_search_url, base the company keyword on "${lead.company_name}
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
     if (Array.isArray(args.pain_point_targets)) {
-      args.pain_point_targets = args.pain_point_targets.map((t: any) => ({
-        ...t,
-        linkedin_search_url: `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${t.target_role ?? ""} ${lead.company_name}`.trim())}`,
-      }));
+      const validUrls = new Set(employeeSignals.map((e) => e.url));
+      args.pain_point_targets = args.pain_point_targets.map((t: any) => {
+        // Only trust person_linkedin_url if it came from real scraped signals
+        const personUrl = typeof t.person_linkedin_url === "string" && validUrls.has(t.person_linkedin_url)
+          ? t.person_linkedin_url
+          : "";
+        return {
+          ...t,
+          person_name: personUrl ? (t.person_name ?? "") : "",
+          person_title: personUrl ? (t.person_title ?? "") : "",
+          person_linkedin_url: personUrl,
+          linkedin_search_url: `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${t.target_role ?? ""} ${lead.company_name}`.trim())}`,
+        };
+      });
     }
 
     await incrementAiEmails(admin, lead.workspace_id);
