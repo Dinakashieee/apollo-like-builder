@@ -192,15 +192,29 @@ export function LeadIntelligencePanel({ leadId, contactName }: { leadId: string;
                 <div className="mt-1 text-xs text-muted-foreground">
                   Reach out to <span className="text-foreground/90 font-medium">{p.target_role}</span> — {p.why}
                 </div>
-                <a
-                  href={p.linkedin_search_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-                >
-                  <Linkedin className="h-3.5 w-3.5" /> Find {p.target_role} on LinkedIn
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                {p.person_linkedin_url && p.person_name ? (
+                  <a
+                    href={p.person_linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" />
+                    <span className="font-medium">{p.person_name}</span>
+                    {p.person_title && <span className="text-muted-foreground">· {p.person_title}</span>}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <a
+                    href={p.linkedin_search_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" /> Search {p.target_role} at this company on LinkedIn
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             ))}
           </div>
