@@ -36,10 +36,12 @@ function loadSdk(clientId: string, currency: string): Promise<void> {
 interface Props {
   currency?: string;
   planId: string;
+  workspaceId?: string;
+  quantity?: number;
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Props) {
+export function PayPalSmartButtons({ planId, currency = "USD", workspaceId, quantity, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
