@@ -140,16 +140,10 @@ export function AddonsSection() {
               <Button
                 size="sm"
                 className="w-full bg-gradient-primary"
-                disabled={!isOwner || busy === addon.id}
-                onClick={() => buy(addon.id)}
+                disabled={!isOwner}
+                onClick={() => setSelected(addon)}
               >
-                {busy === addon.id ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : owned > 0 ? (
-                  "Add another"
-                ) : (
-                  "Add to plan"
-                )}
+                {owned > 0 ? "Add another" : "Add to plan"}
               </Button>
             </div>
           );
@@ -162,8 +156,32 @@ export function AddonsSection() {
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        Add-ons are billed as separate monthly subscriptions and can be canceled anytime from your billing portal.
+        Add-ons are billed monthly via PayPal (or card via PayPal). You can cancel anytime from billing.
       </p>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add {selected?.name}</DialogTitle>
+            <DialogDescription>
+              {selected?.price}{selected?.unit} — {selected?.description}
+            </DialogDescription>
+          </DialogHeader>
+          {selected && current && user && (
+            <div className="pt-2">
+              <PayPalSmartButtons
+                planId={selected.id}
+                workspaceId={current.id}
+                quantity={1}
+                onSuccess={() => {
+                  setSelected(null);
+                  setTimeout(refetch, 1500);
+                }}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
