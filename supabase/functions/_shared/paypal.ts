@@ -9,7 +9,11 @@ export type PayPalPlanId =
   | 'growth_monthly'
   | 'growth_yearly'
   | 'scale_monthly'
-  | 'scale_yearly';
+  | 'scale_yearly'
+  | 'addon_seat_monthly'
+  | 'addon_credits_1k_monthly'
+  | 'addon_credits_5k_monthly'
+  | 'addon_leads_100_monthly';
 
 const PAYPAL_PLANS: Record<PayPalPlanId, {
   amount: string;
@@ -18,6 +22,7 @@ const PAYPAL_PLANS: Record<PayPalPlanId, {
   productId: string;
   priceId: string;
   intervalMonths: number;
+  isAddon?: boolean;
 }> = {
   starter_monthly: { amount: '19.00', currency: 'USD', description: 'EngageIQ Starter Plan - monthly', productId: 'starter_plan', priceId: 'starter_monthly', intervalMonths: 1 },
   starter_yearly: { amount: '182.40', currency: 'USD', description: 'EngageIQ Starter Plan - yearly', productId: 'starter_plan', priceId: 'starter_yearly', intervalMonths: 12 },
@@ -25,6 +30,10 @@ const PAYPAL_PLANS: Record<PayPalPlanId, {
   growth_yearly: { amount: '374.40', currency: 'USD', description: 'EngageIQ Growth Plan - yearly', productId: 'growth_plan', priceId: 'growth_yearly', intervalMonths: 12 },
   scale_monthly: { amount: '79.00', currency: 'USD', description: 'EngageIQ Scale Plan - monthly', productId: 'scale_plan', priceId: 'scale_monthly', intervalMonths: 1 },
   scale_yearly: { amount: '758.40', currency: 'USD', description: 'EngageIQ Scale Plan - yearly', productId: 'scale_plan', priceId: 'scale_yearly', intervalMonths: 12 },
+  addon_leads_100_monthly: { amount: '8.00', currency: 'USD', description: 'EngageIQ Add-on: +100 Leads / month', productId: 'addon_leads_100', priceId: 'addon_leads_100_monthly', intervalMonths: 1, isAddon: true },
+  addon_seat_monthly: { amount: '8.00', currency: 'USD', description: 'EngageIQ Add-on: Extra User Seat / month', productId: 'addon_seat', priceId: 'addon_seat_monthly', intervalMonths: 1, isAddon: true },
+  addon_credits_1k_monthly: { amount: '15.00', currency: 'USD', description: 'EngageIQ Add-on: +1,000 AI Credits / month', productId: 'addon_credits_1k', priceId: 'addon_credits_1k_monthly', intervalMonths: 1, isAddon: true },
+  addon_credits_5k_monthly: { amount: '59.00', currency: 'USD', description: 'EngageIQ Add-on: +5,000 AI Credits / month', productId: 'addon_credits_5k', priceId: 'addon_credits_5k_monthly', intervalMonths: 1, isAddon: true },
 };
 
 export function getPayPalPlan(planId: unknown) {
