@@ -138,8 +138,8 @@ Always answer with concrete, specific phrasing — no fluff. Prefer short bullet
 Sections:
 1. focus_areas: 4-8 products/services the LEAD focuses on.
 2. tech_stack: list of systems/software the lead likely uses TODAY. Each item: { name, category (e.g. CRM, ERP, SIS, LMS, ATS, Helpdesk, Marketing, Analytics, Comms, Finance), is_competitor_of_user (true if it competes with USER's offering), confidence ("known"|"likely") }.
-3. likely_processes: 4-8 bullets on how they operate today.
-4. gaps: 3-6 bullets on what's lacking / painful.
+3. likely_processes: 4-8 bullets on how THIS specific company operates today (reference their actual products/services from the snapshot, not generic industry phrases).
+4. gaps: 3-6 bullets on what's lacking / painful FOR THIS SPECIFIC COMPANY. Each gap MUST be tied to something concrete from the company snapshot or the lead's industry+products (e.g. for a printing company: "color consistency across short-run digital + offset jobs", "prepress file handoff between designers and press operators", "ink/substrate waste tracking on variable-data jobs"). NEVER use generic IT phrases like "legacy system integration", "data silos", "cybersecurity threats", or "regulatory compliance" unless the snapshot explicitly evidences them for THIS company.
 5. pain_point_targets: for each major gap, suggest WHO inside the lead company to target. Each item: { pain_point, target_role, why, person_name, person_title, person_linkedin_url, linkedin_search_url }.
    - CRITICAL: Targets MUST be ACTUAL people who work AT "${lead.company_name}" — never people from other companies. If PUBLIC LINKEDIN EMPLOYEE SIGNALS contains a relevant person at this company, USE THEM: set person_name, person_title, and person_linkedin_url to their exact url from the signals. Only use signals where the snippet clearly indicates they work at "${lead.company_name}".
    - If no matching real person is found in the signals for a given pain point, leave person_name, person_title, person_linkedin_url as empty strings — do NOT invent profiles.
