@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useWorkspaceAddons } from "@/hooks/useWorkspaceAddons";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { Sparkles, UserPlus, Zap, Loader2, Check, Users } from "lucide-react";
+import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
+import { Sparkles, UserPlus, Zap, Check, Users } from "lucide-react";
 
 interface Addon {
   id: "addon_seat_monthly" | "addon_credits_1k_monthly" | "addon_credits_5k_monthly" | "addon_leads_100_monthly";
