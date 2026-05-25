@@ -128,7 +128,7 @@ export function PayPalSmartButtons({ planId, currency = "USD", workspaceId, quan
     return () => {
       cancelled = true;
     };
-  }, [currency, planId, onSuccess]);
+  }, [currency, planId, workspaceId, quantity, onSuccess]);
 
   return (
     <div className="space-y-2">
