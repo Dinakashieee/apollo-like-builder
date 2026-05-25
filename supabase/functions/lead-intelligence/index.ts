@@ -170,7 +170,7 @@ Target systems we plug into: ${(company?.target_systems ?? []).join(", ") || "�
 Pain points we solve: ${(company?.solved_pain_points ?? []).join(", ") || "—"}
 Positioning: ${company?.positioning ?? "—"}
 
-For every linkedin_search_url, base the company keyword on "${lead.company_name}".${employeeBlock}`;
+For every linkedin_search_url, base the company keyword on "${lead.company_name}".${snapshotBlock}${employeeBlock}`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
