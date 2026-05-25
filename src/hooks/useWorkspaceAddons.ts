@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "./useWorkspace";
-import { getPaddleEnvironment } from "@/lib/paddle";
+
 
 export interface WorkspaceAddon {
   id: string;
