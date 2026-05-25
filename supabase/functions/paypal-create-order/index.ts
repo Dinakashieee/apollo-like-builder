@@ -36,6 +36,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    const quantity = plan.isAddon
+      ? Math.max(1, Math.min(99, parseInt(String(body.quantity ?? 1), 10) || 1))
+      : 1;
+    const workspaceId = plan.isAddon && typeof body.workspaceId === 'string' ? body.workspaceId : undefined;
+    if (plan.isAddon && !workspaceId) {
+      return new Response(JSON.stringify({ error: 'workspaceId required for add-on purchase' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const totalAmount = (parseFloat(plan.amount) * quantity).toFixed(2);
+
     const token = await getPayPalAccessToken();
     const r = await fetch(`${getPayPalBase()}/v2/checkout/orders`, {
       method: 'POST',
@@ -51,9 +63,9 @@ Deno.serve(async (req) => {
           user_action: 'PAY_NOW',
         },
         purchase_units: [{
-          amount: { currency_code: plan.currency, value: plan.amount },
-          description: plan.description,
-          custom_id: JSON.stringify({ userId: u.user.id, planId: plan.priceId }),
+          amount: { currency_code: plan.currency, value: totalAmount },
+          description: plan.description + (quantity > 1 ? ` x${quantity}` : ''),
+          custom_id: JSON.stringify({ userId: u.user.id, planId: plan.priceId, workspaceId, quantity }),
         }],
       }),
     });
