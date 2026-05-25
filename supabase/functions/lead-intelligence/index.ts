@@ -56,24 +56,46 @@ serve(async (req) => {
       .from("company_profiles").select("*")
       .eq("workspace_id", lead.workspace_id).maybeSingle();
 
-    // --- Optional: scrape public LinkedIn employee signals via Firecrawl ---
+    // --- Optional: scrape public signals via Firecrawl ---
     type EmployeeSignal = { title: string; url: string; snippet: string };
     let employeeSignals: EmployeeSignal[] = [];
+    let companySnapshot = "";
     const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
     if (FIRECRAWL_API_KEY && lead.company_name) {
+      // 1) Company snapshot so gaps are SPECIFIC to this company, not generic
+      try {
+        const snapQ = `${lead.company_name} ${lead.industry ?? ""} ${lead.country ?? ""} about products services`;
+        const snapResp = await fetch("https://api.firecrawl.dev/v2/search", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ query: snapQ, limit: 5, scrapeOptions: { formats: ["markdown"] } }),
+        });
+        if (snapResp.ok) {
+          const sj = await snapResp.json();
+          const results: any[] = sj?.data?.web ?? sj?.data ?? sj?.web ?? [];
+          companySnapshot = results
+            .slice(0, 4)
+            .map((r: any, i: number) => {
+              const md = String(r.markdown ?? r.description ?? r.snippet ?? "").slice(0, 1200);
+              return `[${i + 1}] ${r.title ?? ""} — ${r.url ?? ""}\n${md}`;
+            })
+            .join("\n\n")
+            .slice(0, 6000);
+        } else {
+          console.warn("Firecrawl snapshot failed:", snapResp.status);
+        }
+      } catch (e) {
+        console.warn("Firecrawl snapshot error:", e);
+      }
+
+      // 2) LinkedIn employee signals for real target people
       try {
         const techKeywords =
           "(SAP OR Oracle OR Salesforce OR HubSpot OR Workday OR NetSuite OR ServiceNow OR Dynamics OR Snowflake OR Databricks OR AWS OR Azure OR Kubernetes OR Jira OR Zendesk OR Tableau OR PowerBI)";
-        const linkedinScope = lead.linkedin_company_url
-          ? `site:linkedin.com/in "${lead.company_name}"`
-          : `site:linkedin.com/in "${lead.company_name}"`;
-        const q = `${linkedinScope} ${techKeywords}`;
+        const q = `site:linkedin.com/in "${lead.company_name}" ${techKeywords}`;
         const fcResp = await fetch("https://api.firecrawl.dev/v2/search", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${FIRECRAWL_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({ query: q, limit: 8 }),
         });
         if (fcResp.ok) {
@@ -102,6 +124,11 @@ serve(async (req) => {
       ? `\n\nPUBLIC LINKEDIN EMPLOYEE SIGNALS (scraped from public profile snippets — use as STRONG evidence; if a system is named here, mark its tech_stack confidence as "known"):\n` +
         employeeSignals.map((e, i) => `${i + 1}. ${e.title}\n   ${e.snippet}\n   ${e.url}`).join("\n")
       : "";
+
+    const snapshotBlock = companySnapshot
+      ? `\n\nPUBLIC COMPANY SNAPSHOT for "${lead.company_name}" (scraped from their website and public sources — GROUND TRUTH about what THIS specific company does. Base focus_areas, likely_processes, gaps, and tech_stack on THIS, not on generic industry assumptions):\n${companySnapshot}`
+      : "";
+
 
 
     const systemPrompt = `You are a senior B2B sales strategist + GTM researcher. Given a target LEAD company and the USER'S company profile, produce a sharp, actionable intelligence brief.
