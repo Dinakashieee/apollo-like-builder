@@ -69,8 +69,7 @@ export function AddonsSection() {
   const { user } = useAuth();
   const { current } = useWorkspace();
   const { addons, extraSeats, extraCredits, extraLeads, refetch } = useWorkspaceAddons();
-  const { openCheckout } = usePaddleCheckout();
-  const [busy, setBusy] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Addon | null>(null);
 
   const isOwner = current?.role === "owner";
 
@@ -79,22 +78,6 @@ export function AddonsSection() {
       .filter((a) => a.product_id === productId)
       .reduce((acc, a) => acc + (a.quantity || 1), 0);
 
-  const buy = async (priceId: Addon["id"]) => {
-    if (!user) return;
-    setBusy(priceId);
-    try {
-      await openCheckout({
-        priceId,
-        customerEmail: user.email ?? undefined,
-        userId: user.id,
-        successUrl: `${window.location.origin}/app/settings?addon=success`,
-      });
-      // Refetch shortly after — webhook usually lands within a few seconds
-      setTimeout(refetch, 4000);
-    } finally {
-      setBusy(null);
-    }
-  };
 
   return (
     <section className="bg-card border border-border/60 rounded-xl p-6 space-y-5">
