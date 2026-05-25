@@ -36,10 +36,12 @@ function loadSdk(clientId: string, currency: string): Promise<void> {
 interface Props {
   currency?: string;
   planId: string;
+  workspaceId?: string;
+  quantity?: number;
   onSuccess?: (details: any) => void;
 }
 
-export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Props) {
+export function PayPalSmartButtons({ planId, currency = "USD", workspaceId, quantity, onSuccess }: Props) {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const renderedRef = useRef(false);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Prop
         const createOrder = async () => {
           const { data: order, error: err } = await supabase.functions.invoke(
             "paypal-create-order",
-            { body: { planId } },
+            { body: { planId, workspaceId, quantity } },
           );
           if (err || !order?.id) {
             const message = err?.message?.includes("401")
@@ -78,7 +80,7 @@ export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Prop
         const onApprove = async (data: any, actions: any) => {
           const { data: result, error: err } = await supabase.functions.invoke(
             "paypal-capture-order",
-            { body: { orderId: data.orderID, planId } },
+            { body: { orderId: data.orderID } },
           );
           if (err) {
             toast.error("Payment could not be completed.");
@@ -89,12 +91,17 @@ export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Prop
             if (result.recoverable && actions?.restart) return actions.restart();
             return;
           }
-          toast.success("Payment successful! Your plan is active.");
+          toast.success("Payment successful!");
           onSuccess?.(result);
-          const successUrl = new URL("/app/settings", window.location.origin);
-          successUrl.searchParams.set("checkout", "success");
-          window.location.assign(successUrl.toString());
+          // Add-on purchases stay on the page so the user can buy more; only
+          // main plan checkouts redirect to settings.
+          if (!result?.addon) {
+            const successUrl = new URL("/app/settings", window.location.origin);
+            successUrl.searchParams.set("checkout", "success");
+            window.location.assign(successUrl.toString());
+          }
         };
+
 
         if (buttonsRef.current) {
           paypal
@@ -121,7 +128,7 @@ export function PayPalSmartButtons({ planId, currency = "USD", onSuccess }: Prop
     return () => {
       cancelled = true;
     };
-  }, [currency, planId, onSuccess]);
+  }, [currency, planId, workspaceId, quantity, onSuccess]);
 
   return (
     <div className="space-y-2">

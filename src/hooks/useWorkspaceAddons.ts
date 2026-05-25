@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "./useWorkspace";
-import { getPaddleEnvironment } from "@/lib/paddle";
+
 
 export interface WorkspaceAddon {
   id: string;
@@ -22,13 +22,14 @@ export function useWorkspaceAddons() {
 
   const refetch = useCallback(async () => {
     if (!current) return;
+    // Note: don't filter by environment — add-ons may be created via PayPal
+    // (live) even when the Paddle preview client token is sandbox.
     const { data } = await supabase
       .from("workspace_addons")
       .select(
         "id, product_id, price_id, quantity, status, current_period_end, cancel_at_period_end, paddle_subscription_id"
       )
-      .eq("workspace_id", current.id)
-      .eq("environment", getPaddleEnvironment());
+      .eq("workspace_id", current.id);
     setAddons((data ?? []) as WorkspaceAddon[]);
     setLoading(false);
   }, [current]);
