@@ -60,14 +60,13 @@ Deno.serve(async (req) => {
       });
     }
     // SECURITY: derive plan ONLY from the order's custom_id set at create time.
-    // Never trust a client-supplied planId here — otherwise a buyer can pay $19
-    // for starter and have a higher-tier subscription written to the DB.
     let plan;
+    let custom: { userId?: string; planId?: string; workspaceId?: string; quantity?: number } = {};
     try {
       const customRaw = data?.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id
         ?? data?.purchase_units?.[0]?.custom_id
         ?? '{}';
-      const custom = JSON.parse(customRaw);
+      custom = JSON.parse(customRaw);
       if (custom.userId && custom.userId !== u.user.id) {
         return new Response(JSON.stringify({ error: 'Order does not belong to this user' }), {
           status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -83,6 +82,47 @@ Deno.serve(async (req) => {
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const payerId = data?.payer?.payer_id ?? 'paypal';
     const payerEmail = data?.payer?.email_address ?? u.user.email ?? 'paypal-buyer';
+
+    if (plan.isAddon) {
+      const workspaceId = custom.workspaceId;
+      if (!workspaceId) {
+        return new Response(JSON.stringify({ error: 'workspaceId missing in order' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      // Verify caller owns the workspace
+      const { data: ws } = await admin
+        .from('workspaces')
+        .select('id, owner_id')
+        .eq('id', workspaceId)
+        .maybeSingle();
+      if (!ws || ws.owner_id !== u.user.id) {
+        return new Response(JSON.stringify({ error: 'Not authorized for this workspace' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const qty = Math.max(1, Math.min(99, Number(custom.quantity ?? 1) || 1));
+      const { error: addonErr } = await admin.from('workspace_addons').upsert({
+        workspace_id: workspaceId,
+        user_id: u.user.id,
+        paddle_subscription_id: `paypal:${orderId}`,
+        paddle_customer_id: `paypal:${payerId}:${payerEmail}`,
+        product_id: plan.productId,
+        price_id: plan.priceId,
+        quantity: qty,
+        status: 'active',
+        current_period_start: capturedAt.toISOString(),
+        current_period_end: addMonths(capturedAt, plan.intervalMonths).toISOString(),
+        environment: getPayPalEnv(),
+        updated_at: capturedAt.toISOString(),
+      }, { onConflict: 'paddle_subscription_id' });
+      if (addonErr) throw addonErr;
+
+      return new Response(JSON.stringify({ ok: true, planId: plan.priceId, addon: true, ...data }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { error: dbError } = await admin.from('subscriptions').upsert({
       user_id: u.user.id,
       paddle_subscription_id: `paypal:${orderId}`,
