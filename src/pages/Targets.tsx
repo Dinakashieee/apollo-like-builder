@@ -268,6 +268,30 @@ export default function Targets() {
     setDecliningIdx(null);
   };
 
+  const loadFreshTarget = async () => {
+    if (!current) return;
+    setAddingNew(true);
+    try {
+      const replacement = await fetchReplacementTarget();
+      if (!replacement) {
+        toast({ title: "No new targets right now", description: "Try again in a moment." });
+        return;
+      }
+      const replacementName = replacement.company ?? replacement.type ?? "";
+      if (replacementName && targets.some((t) => (t.company ?? t.type ?? "") === replacementName)) {
+        toast({ title: "Already on the list", description: "Try again for a different prospect." });
+        return;
+      }
+      const nextTargets = [...targets, replacement];
+      setTargets(nextTargets);
+      persist(similar, nextTargets);
+      toast({ title: "Fresh target added" });
+    } catch (e: unknown) {
+      toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+    }
+    setAddingNew(false);
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
       <div className="flex items-end justify-between gap-4 flex-wrap">
