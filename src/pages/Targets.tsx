@@ -412,10 +412,15 @@ export default function Targets() {
               </span>
             )}
             {claimed.length > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+              <Link
+                to="/app/leads"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1 hover:bg-success/20 transition-colors"
+                title="View claimed leads"
+              >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {claimed.length} claimed
-              </span>
+                {claimed.length} claimed · View leads
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             )}
             {isFinite(leadsLimit) && (
               <span
@@ -430,6 +435,19 @@ export default function Targets() {
                 {leadsUsed}/{leadsLimit} leads {leadsAtLimit ? "· upgrade to claim" : ""}
               </span>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={loadFreshTarget}
+              disabled={addingNew || loading || !hasCompany}
+            >
+              {addingNew ? (
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              {addingNew ? "Loading..." : "Load fresh target"}
+            </Button>
           </div>
         </div>
         {!loading && targets.length === 0 && hasCompany && (
