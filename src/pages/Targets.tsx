@@ -150,7 +150,7 @@ export default function Targets() {
     setLoading(false);
   };
 
-  const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
+  const fetchReplacementTarget = async (extraExclude: string[] = []) => {
     const exclude = Array.from(
       new Set([
         ...targets.map((t) => t.company ?? t.type ?? "").filter(Boolean),
@@ -166,7 +166,11 @@ export default function Targets() {
     );
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
-    const replacement: TargetCompany | undefined = data.targets?.[0];
+    return data.targets?.[0] as TargetCompany | undefined;
+  };
+
+  const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
+    const replacement = await fetchReplacementTarget(extraExclude);
     let nextTargets = [...targets];
     if (replacement) nextTargets[idx] = replacement;
     else nextTargets.splice(idx, 1);
@@ -225,8 +229,19 @@ export default function Targets() {
 
     // Try to fetch a replacement target in the background. Failures must never block claiming.
     try {
-      const replacement = await fetchReplacement(idx);
-      if (replacement) toast({ title: "Fresh target loaded" });
+      const replacement = await fetchReplacementTarget([name]);
+      if (!replacement) return;
+      setTargets((currentTargets) => {
+        const replacementName = replacement.company ?? replacement.type ?? "";
+        if (replacementName && currentTargets.some((target) => (target.company ?? target.type ?? "") === replacementName)) {
+          return currentTargets;
+        }
+        const nextTargets = [...currentTargets];
+        nextTargets.splice(Math.min(idx, nextTargets.length), 0, replacement);
+        persist(similar, nextTargets);
+        return nextTargets;
+      });
+      toast({ title: "Fresh target loaded" });
     } catch {}
   };
 
