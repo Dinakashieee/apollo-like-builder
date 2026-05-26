@@ -55,6 +55,20 @@ const LEVEL_BADGES = {
   low: { label: "❄️ Low", color: "bg-cold/15 text-cold border-cold/30" },
 };
 
+const REPLACEMENT_TIMEOUT_MS = 12000;
+
+const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), REPLACEMENT_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 export default function Targets() {
   const { current } = useWorkspace();
   const { user } = useAuth();
@@ -144,9 +158,12 @@ export default function Targets() {
         ...extraExclude,
       ])
     );
-    const { data, error } = await supabase.functions.invoke("generate-targets", {
-      body: { workspace_id: current!.id, mode: "replace", exclude },
-    });
+    const { data, error } = await withTimeout(
+      supabase.functions.invoke("generate-targets", {
+        body: { workspace_id: current!.id, mode: "replace", exclude },
+      }),
+      "Replacement target took too long to load."
+    );
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
     const replacement: TargetCompany | undefined = data.targets?.[0];
@@ -196,30 +213,21 @@ export default function Targets() {
       return;
     }
 
-    // Lead saved — record + refetch usage. Don't let these mask the success.
+    // Lead saved — finish the claim immediately. Replacement generation is best-effort only.
     const nextClaimed = Array.from(new Set([...claimed, name]));
     persistClaimed(nextClaimed);
     refetchEntitlements().catch(() => {});
+    const withoutClaimedTarget = targets.filter((_, i) => i !== idx);
+    setTargets(withoutClaimedTarget);
+    persist(similar, withoutClaimedTarget);
+    toast({ title: `Claimed ${name}`, description: "Added to your Leads." });
+    setReplacingIdx(null);
 
-    // Try to fetch a replacement target. Failures here must NOT report the claim as failed.
+    // Try to fetch a replacement target in the background. Failures must never block claiming.
     try {
       const replacement = await fetchReplacement(idx);
-      toast({
-        title: `Claimed ${name}`,
-        description: replacement
-          ? "Added to your Leads. A fresh target is in its place."
-          : "Added to your Leads.",
-      });
-    } catch {
-      const nextTargets = targets.filter((_, i) => i !== idx);
-      setTargets(nextTargets);
-      persist(similar, nextTargets);
-      toast({
-        title: `Claimed ${name}`,
-        description: "Added to your Leads. (Couldn't fetch a replacement target — hit Refresh to load more.)",
-      });
-    }
-    setReplacingIdx(null);
+      if (replacement) toast({ title: "Fresh target loaded" });
+    } catch {}
   };
 
   const declineAndReplace = async (idx: number) => {
