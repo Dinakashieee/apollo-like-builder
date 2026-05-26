@@ -69,6 +69,9 @@ const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T>
   }
 };
 
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Try again";
+
 export default function Targets() {
   const { current } = useWorkspace();
   const { user } = useAuth();
@@ -101,11 +104,13 @@ export default function Targets() {
         const j = JSON.parse(cached);
         setSimilar(j.similar ?? []);
         setTargets(j.targets ?? []);
-      } catch {}
+      } catch {
+        localStorage.removeItem(`targets-${current.id}`);
+      }
     }
     const claimedRaw = localStorage.getItem(`targets-claimed-${current.id}`);
     if (claimedRaw) {
-      try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch {}
+      try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch { localStorage.removeItem(`targets-claimed-${current.id}`); }
     }
   }, [current]);
 
@@ -144,8 +149,8 @@ export default function Targets() {
       setTargets(data.targets ?? []);
       persist(data.similar ?? [], data.targets ?? []);
       toast({ title: "Insights generated" });
-    } catch (e: any) {
-      toast({ title: "Failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "Failed", description: getErrorMessage(e), variant: "destructive" });
     }
     setLoading(false);
   };
@@ -171,7 +176,7 @@ export default function Targets() {
 
   const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
     const replacement = await fetchReplacementTarget(extraExclude);
-    let nextTargets = [...targets];
+    const nextTargets = [...targets];
     if (replacement) nextTargets[idx] = replacement;
     else nextTargets.splice(idx, 1);
     setTargets(nextTargets);
@@ -211,8 +216,8 @@ export default function Targets() {
         source: "ai_targets",
       });
       if (insertErr) throw insertErr;
-    } catch (e: any) {
-      toast({ title: "Couldn't claim", description: e?.message ?? "Try again", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "Couldn't claim", description: getErrorMessage(e), variant: "destructive" });
       setReplacingIdx(null);
       return;
     }
@@ -220,7 +225,7 @@ export default function Targets() {
     // Lead saved — finish the claim immediately. Replacement generation is best-effort only.
     const nextClaimed = Array.from(new Set([...claimed, name]));
     persistClaimed(nextClaimed);
-    refetchEntitlements().catch(() => {});
+    refetchEntitlements().catch(() => undefined);
     const withoutClaimedTarget = targets.filter((_, i) => i !== idx);
     setTargets(withoutClaimedTarget);
     persist(similar, withoutClaimedTarget);
@@ -242,7 +247,9 @@ export default function Targets() {
         return nextTargets;
       });
       toast({ title: "Fresh target loaded" });
-    } catch {}
+    } catch {
+      // Replacement is best-effort; the lead has already been claimed successfully.
+    }
   };
 
   const declineAndReplace = async (idx: number) => {
@@ -253,8 +260,8 @@ export default function Targets() {
     try {
       await fetchReplacement(idx, [name]);
       toast({ title: `Skipped ${name}`, description: "Swapped in a fresh prospect." });
-    } catch (e: any) {
-      toast({ title: "Couldn't refresh", description: e?.message ?? "Try again", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "Couldn't refresh", description: getErrorMessage(e), variant: "destructive" });
     }
     setDecliningIdx(null);
   };
