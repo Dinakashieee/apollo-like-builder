@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -82,6 +83,7 @@ export default function Targets() {
   const [loading, setLoading] = useState(false);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
+  const [addingNew, setAddingNew] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -266,6 +268,30 @@ export default function Targets() {
     setDecliningIdx(null);
   };
 
+  const loadFreshTarget = async () => {
+    if (!current) return;
+    setAddingNew(true);
+    try {
+      const replacement = await fetchReplacementTarget();
+      if (!replacement) {
+        toast({ title: "No new targets right now", description: "Try again in a moment." });
+        return;
+      }
+      const replacementName = replacement.company ?? replacement.type ?? "";
+      if (replacementName && targets.some((t) => (t.company ?? t.type ?? "") === replacementName)) {
+        toast({ title: "Already on the list", description: "Try again for a different prospect." });
+        return;
+      }
+      const nextTargets = [...targets, replacement];
+      setTargets(nextTargets);
+      persist(similar, nextTargets);
+      toast({ title: "Fresh target added" });
+    } catch (e: unknown) {
+      toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+    }
+    setAddingNew(false);
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -386,10 +412,15 @@ export default function Targets() {
               </span>
             )}
             {claimed.length > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1">
+              <Link
+                to="/app/leads"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-success/10 text-success border border-success/30 rounded-full px-3 py-1 hover:bg-success/20 transition-colors"
+                title="View claimed leads"
+              >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {claimed.length} claimed
-              </span>
+                {claimed.length} claimed · View leads
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             )}
             {isFinite(leadsLimit) && (
               <span
@@ -404,6 +435,19 @@ export default function Targets() {
                 {leadsUsed}/{leadsLimit} leads {leadsAtLimit ? "· upgrade to claim" : ""}
               </span>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={loadFreshTarget}
+              disabled={addingNew || loading || !hasCompany}
+            >
+              {addingNew ? (
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              {addingNew ? "Loading..." : "Load fresh target"}
+            </Button>
           </div>
         </div>
         {!loading && targets.length === 0 && hasCompany && (
