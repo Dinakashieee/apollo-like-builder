@@ -190,11 +190,19 @@ export default function Targets() {
         source: "ai_targets",
       });
       if (insertErr) throw insertErr;
+    } catch (e: any) {
+      toast({ title: "Couldn't claim", description: e?.message ?? "Try again", variant: "destructive" });
+      setReplacingIdx(null);
+      return;
+    }
 
-      const nextClaimed = Array.from(new Set([...claimed, name]));
-      persistClaimed(nextClaimed);
-      await refetchEntitlements();
+    // Lead saved — record + refetch usage. Don't let these mask the success.
+    const nextClaimed = Array.from(new Set([...claimed, name]));
+    persistClaimed(nextClaimed);
+    refetchEntitlements().catch(() => {});
 
+    // Try to fetch a replacement target. Failures here must NOT report the claim as failed.
+    try {
       const replacement = await fetchReplacement(idx);
       toast({
         title: `Claimed ${name}`,
@@ -202,8 +210,14 @@ export default function Targets() {
           ? "Added to your Leads. A fresh target is in its place."
           : "Added to your Leads.",
       });
-    } catch (e: any) {
-      toast({ title: "Couldn't claim", description: e?.message ?? "Try again", variant: "destructive" });
+    } catch {
+      const nextTargets = targets.filter((_, i) => i !== idx);
+      setTargets(nextTargets);
+      persist(similar, nextTargets);
+      toast({
+        title: `Claimed ${name}`,
+        description: "Added to your Leads. (Couldn't fetch a replacement target — hit Refresh to load more.)",
+      });
     }
     setReplacingIdx(null);
   };
