@@ -83,6 +83,7 @@ export default function Targets() {
   const [loading, setLoading] = useState(false);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
+  const [addingNew, setAddingNew] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
