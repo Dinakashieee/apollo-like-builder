@@ -9,6 +9,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface RefLink {
   label: string;
