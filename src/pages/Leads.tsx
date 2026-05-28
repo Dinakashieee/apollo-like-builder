@@ -53,16 +53,26 @@ export default function Leads() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [convLead, setConvLead] = useState<any | null>(null);
+  const [sheetTab, setSheetTab] = useState<string>("profile");
+  const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
 
   const refresh = async () => {
     if (!current) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("leads")
-      .select("*")
-      .eq("workspace_id", current.id)
-      .order("created_at", { ascending: false });
+    const [{ data }, { data: cp }] = await Promise.all([
+      supabase
+        .from("leads")
+        .select("*")
+        .eq("workspace_id", current.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("company_profiles")
+        .select("products_summary, target_systems")
+        .eq("workspace_id", current.id)
+        .maybeSingle(),
+    ]);
     setLeads(data ?? []);
+    setOwnedProducts(extractOwnedProducts(cp?.products_summary, cp?.target_systems));
     setLoading(false);
   };
 
@@ -70,6 +80,11 @@ export default function Leads() {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id]);
+
+  const convLeadMatches = useMemo(
+    () => (convLead ? matchOwnedProducts(convLead, ownedProducts) : []),
+    [convLead, ownedProducts],
+  );
 
   const filtered = leads.filter((l) => {
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
