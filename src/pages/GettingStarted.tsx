@@ -36,7 +36,7 @@ const steps = [
   {
     n: 2,
     title: "Build your target list",
-    desc: "Pull companies from market databases (e.g. Apps Run The World) filtered by industry, size, and the systems they use today.",
+    desc: "Pull AI-curated target companies filtered by your industries, size, and the systems they use today.",
     icon: Target,
     to: "/app/targets",
     color: "from-indigo-500 to-blue-600",
