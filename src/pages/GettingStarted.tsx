@@ -76,7 +76,7 @@ const steps = [
   {
     n: 7,
     title: "Track follow-ups",
-    desc: "Reminders fire on the date the lead asked to be contacted, so nothing slips through the cracks.",
+    desc: "Every claimed lead, email sent, WhatsApp thread, reply, and reminder is logged on the lead timeline — and surfaced in the dashboard so you always see what's open, what's waiting, and what's next.",
     icon: Bell,
     to: "/app/reminders",
     color: "from-rose-500 to-pink-500",
