@@ -428,28 +428,48 @@ export default function Targets() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
-            <Target className="h-3.5 w-3.5" /> Market intelligence
-          </p>
-          <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">
-            Targets & Competitors
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            See similar products, your advantage, and the best companies to sell to.
-          </p>
+    <div className="p-6 lg:p-8 space-y-8 animate-fade-in">
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/8 via-card to-card p-6 lg:p-8 shadow-glow">
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-hot/10 blur-3xl pointer-events-none" />
+        <div className="relative flex items-end justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <p className="text-xs text-primary font-semibold mb-2 flex items-center gap-1.5 uppercase tracking-wider">
+              <span className="inline-flex h-2 w-2 rounded-full bg-hot animate-pulse shadow-[0_0_8px_hsl(var(--hot))]" />
+              <Target className="h-3.5 w-3.5" /> Live market intelligence
+            </p>
+            <h1 className="text-3xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
+              Targets &amp; Competitors
+            </h1>
+            <p className="text-sm lg:text-base text-muted-foreground mt-2 max-w-2xl">
+              Real end-customer accounts with verified decision-makers, recent triggers, and public sources — never IT-services or vendor noise.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1">
+                <Building2 className="h-3 w-3 text-primary" /> {targets.length} live targets
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1">
+                <Users className="h-3 w-3 text-primary" /> {similar.length} competitors mapped
+              </span>
+              {netNewCount > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-hot/10 text-hot border border-hot/30 rounded-full px-3 py-1">
+                  <TrendingUp className="h-3 w-3" /> {netNewCount} net-new {netNewCount === 1 ? "logo" : "logos"}
+                </span>
+              )}
+            </div>
+          </div>
+          <Button onClick={generate} disabled={loading} size="lg" className="bg-gradient-primary shadow-glow hover:scale-[1.02] transition-transform">
+            {loading ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            {loading ? "Analyzing market..." : "Generate with AI"}
+          </Button>
         </div>
-        <Button onClick={generate} disabled={loading} className="bg-gradient-primary shadow-glow">
-          {loading ? (
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4 mr-2" />
-          )}
-          {loading ? "Analyzing..." : "Generate with AI"}
-        </Button>
       </div>
+
 
       {!hasCompany && (
         <div className="card-elevated p-6 border-warm/40 bg-warm/5">
