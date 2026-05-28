@@ -113,6 +113,12 @@ const ENTERPRISE_VENDOR_TERMS = [
   "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"
 ];
 
+const SERVICE_NAME_SUFFIXES = [
+  "technologies", "technology", "solutions", "systems", "services", "consulting", "consultancy",
+  "labs", "digital", "infotech", "softlabs", "soft", "informatics", "softech", "tech",
+  "softwares", "software"
+];
+
 const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext | null, similar: SimilarProduct[] = []) => {
   const targetName = normalizeMarketText(target.company ?? target.type);
   if (!targetName || !context) return false;
@@ -120,6 +126,11 @@ const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext 
   const sellerName = normalizeMarketText(context.companyName);
   if (sellerName && (targetName.includes(sellerName) || sellerName.includes(targetName))) return true;
   if (similar.some((item) => normalizeMarketText(item.name) === targetName)) return true;
+
+  // Reject names that end in a services-firm suffix word (e.g. "Acme Technologies", "Foo Solutions")
+  const nameTokens = targetName.split(" ").filter(Boolean);
+  const lastToken = nameTokens[nameTokens.length - 1] ?? "";
+  if (SERVICE_NAME_SUFFIXES.includes(lastToken)) return true;
 
   const sellerText = normalizeMarketText([
     context.companyName,
@@ -144,6 +155,7 @@ const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext 
     ...(target.current_systems ?? []),
     ...(target.focus_areas ?? []),
     ...(target.designations ?? []),
+    ...((target.icp_contacts ?? []).flatMap((c) => [c?.role, c?.full_name])),
   ].filter(Boolean).join(" "));
 
   if (sellerVendors.some((vendor) => targetName.includes(normalizeMarketText(vendor)))) return true;
@@ -416,28 +428,48 @@ export default function Targets() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div>
-          <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
-            <Target className="h-3.5 w-3.5" /> Market intelligence
-          </p>
-          <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">
-            Targets & Competitors
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            See similar products, your advantage, and the best companies to sell to.
-          </p>
+    <div className="p-6 lg:p-8 space-y-8 animate-fade-in">
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/8 via-card to-card p-6 lg:p-8 shadow-glow">
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-10 w-72 h-72 rounded-full bg-hot/10 blur-3xl pointer-events-none" />
+        <div className="relative flex items-end justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <p className="text-xs text-primary font-semibold mb-2 flex items-center gap-1.5 uppercase tracking-wider">
+              <span className="inline-flex h-2 w-2 rounded-full bg-hot animate-pulse shadow-[0_0_8px_hsl(var(--hot))]" />
+              <Target className="h-3.5 w-3.5" /> Live market intelligence
+            </p>
+            <h1 className="text-3xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
+              Targets &amp; Competitors
+            </h1>
+            <p className="text-sm lg:text-base text-muted-foreground mt-2 max-w-2xl">
+              Real end-customer accounts with verified decision-makers, recent triggers, and public sources — never IT-services or vendor noise.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1">
+                <Building2 className="h-3 w-3 text-primary" /> {targets.length} live targets
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1">
+                <Users className="h-3 w-3 text-primary" /> {similar.length} competitors mapped
+              </span>
+              {netNewCount > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-hot/10 text-hot border border-hot/30 rounded-full px-3 py-1">
+                  <TrendingUp className="h-3 w-3" /> {netNewCount} net-new {netNewCount === 1 ? "logo" : "logos"}
+                </span>
+              )}
+            </div>
+          </div>
+          <Button onClick={generate} disabled={loading} size="lg" className="bg-gradient-primary shadow-glow hover:scale-[1.02] transition-transform">
+            {loading ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            {loading ? "Analyzing market..." : "Generate with AI"}
+          </Button>
         </div>
-        <Button onClick={generate} disabled={loading} className="bg-gradient-primary shadow-glow">
-          {loading ? (
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4 mr-2" />
-          )}
-          {loading ? "Analyzing..." : "Generate with AI"}
-        </Button>
       </div>
+
 
       {!hasCompany && (
         <div className="card-elevated p-6 border-warm/40 bg-warm/5">
@@ -455,7 +487,13 @@ export default function Targets() {
 
       {/* Similar products */}
       <section>
-        <h2 className="text-xl font-display font-bold text-primary-deep mb-3">Products like yours</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-primary/30" />
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-primary/70">Competitive landscape</p>
+            <h2 className="text-xl lg:text-2xl font-display font-bold text-primary-deep">Products like yours</h2>
+          </div>
+        </div>
         {loading && <Skeleton className="h-40 rounded-2xl" />}
         {!loading && similar.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
@@ -512,11 +550,15 @@ export default function Targets() {
       {/* Best companies */}
       <section>
         <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
-          <div>
-            <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Hit <span className="font-semibold text-primary">Claim</span> to add them to your Leads — or <span className="font-semibold text-primary">Decline</span> to swap in a different prospect.
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1 rounded-full bg-gradient-to-b from-hot to-hot/30" />
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-hot/80">AI-curated pipeline</p>
+              <h2 className="text-xl lg:text-2xl font-display font-bold text-primary-deep">Best companies to target</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Hit <span className="font-semibold text-primary">Claim</span> to add to Leads — or <span className="font-semibold text-primary">Decline</span> to swap.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {netNewCount > 0 && (
