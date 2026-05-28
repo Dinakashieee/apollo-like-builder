@@ -164,10 +164,13 @@ export default function Leads() {
               <TabsTrigger value="mine">My leads · {mineCount}</TabsTrigger>
               <TabsTrigger value="targets" className="relative pl-6">
                 <span className="absolute left-2 top-1/2 -translate-y-1/2 flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-hot opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-hot" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-hot opacity-75 [animation:ping_0.8s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-hot opacity-60 [animation:ping_0.8s_cubic-bezier(0,0,0.2,1)_infinite] [animation-delay:0.4s]" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-hot [animation:pulse_0.6s_ease-in-out_infinite] shadow-[0_0_8px_hsl(var(--hot))]" />
                 </span>
-                AI hot picks · {targetsCount}
+                <span className="[animation:pulse_0.9s_ease-in-out_infinite] font-semibold">
+                  AI hot picks · {targetsCount}
+                </span>
               </TabsTrigger>
               <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
             </TabsList>
