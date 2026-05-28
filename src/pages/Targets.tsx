@@ -113,6 +113,12 @@ const ENTERPRISE_VENDOR_TERMS = [
   "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"
 ];
 
+const SERVICE_NAME_SUFFIXES = [
+  "technologies", "technology", "solutions", "systems", "services", "consulting", "consultancy",
+  "labs", "digital", "infotech", "softlabs", "soft", "informatics", "softech", "tech",
+  "softwares", "software"
+];
+
 const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext | null, similar: SimilarProduct[] = []) => {
   const targetName = normalizeMarketText(target.company ?? target.type);
   if (!targetName || !context) return false;
