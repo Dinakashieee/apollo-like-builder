@@ -315,6 +315,7 @@ export default function Intelligence() {
                 </div>
                 <p className="text-sm text-foreground/85 mb-2 leading-relaxed">{t.implication_for_seller}</p>
                 <p className="text-xs text-muted-foreground">Horizon: {t.time_horizon}</p>
+                <Sources items={t.sources} />
               </div>
             ))}
           </div>
