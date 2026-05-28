@@ -233,6 +233,7 @@ export default function Targets() {
     setTargets(withoutClaimedTarget);
     persist(similar, withoutClaimedTarget);
     toast({ title: `Claimed ${name}`, description: "Added to your Leads." });
+    setRevealed(original);
     setReplacingIdx(null);
 
     // Try to fetch a replacement target in the background. Failures must never block claiming.
