@@ -550,11 +550,15 @@ export default function Targets() {
       {/* Best companies */}
       <section>
         <div className="flex items-end justify-between gap-3 mb-3 flex-wrap">
-          <div>
-            <h2 className="text-xl font-display font-bold text-primary-deep">Best companies to target</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Hit <span className="font-semibold text-primary">Claim</span> to add them to your Leads — or <span className="font-semibold text-primary">Decline</span> to swap in a different prospect.
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1 rounded-full bg-gradient-to-b from-hot to-hot/30" />
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-hot/80">AI-curated pipeline</p>
+              <h2 className="text-xl lg:text-2xl font-display font-bold text-primary-deep">Best companies to target</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Hit <span className="font-semibold text-primary">Claim</span> to add to Leads — or <span className="font-semibold text-primary">Decline</span> to swap.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {netNewCount > 0 && (
