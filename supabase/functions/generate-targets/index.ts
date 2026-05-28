@@ -123,9 +123,10 @@ Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).joi
     const sellerOffering = [...sellerProducts, ...((company as any).target_systems ?? [])].filter(Boolean);
     const exclusionRule = `CRITICAL EXCLUSION RULE: This seller offers/implements: ${sellerOffering.join(", ") || company.company_name}. Therefore the TARGETS list MUST NOT include:
 - Vendors of the same product/category (e.g. if seller does IFS ERP, exclude IFS itself and other ERP vendors like SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, NetSuite, Sage, Odoo, etc.)
-- Resellers, implementation partners, system integrators, or consultancies that sell/implement the same product
-- Direct competitors of the seller
-Those belong in the 'similar' (competitors) list ONLY — never in 'targets'. Targets must be END-CUSTOMERS who would BUY/USE the seller's product, not sell it.`;
+- Companies that sell, implement, consult on, integrate, resell, support, or compete with similar products/services
+- Resellers, implementation partners, system integrators, IT consultancies, software vendors, VARs/MSPs, or solution providers for the seller's category
+- Direct competitors of the seller, including smaller regional providers/partners, not only big vendors
+Those belong in the 'similar' (competitors) list ONLY — never in 'targets'. Targets must be END-CUSTOMERS who would BUY/USE the seller's product, not sell, implement, or advise on it. If a company is primarily IT services, software, consulting, systems integration, or a solution provider, exclude it from targets unless there is clear evidence it is only an internal end-user.`;
     const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent. Mix in LinkedIn company pages, public PDFs (annual reports, analyst reports), and Wikipedia/Crunchbase/official sites.
 
 ${exclusionRule}`;
@@ -267,22 +268,45 @@ Generate competitor analysis AND 5-8 real specific target companies. For each ta
     (args.similar ?? []).forEach((s: any) => { s.references = fixRefs(s.references); });
     (args.targets ?? []).forEach((t: any) => { t.references = fixRefs(t.references); });
 
-    // Filter out competitor/vendor companies that slipped into targets
+    // Filter out competitor/vendor/implementation-partner companies that slipped into targets
+    const normalize = (value: unknown) => (value ?? "").toString().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const competitorNames = new Set<string>(
-      (args.similar ?? []).map((s: any) => (s.company ?? "").toLowerCase().trim()).filter(Boolean)
+      (args.similar ?? [])
+        .map((s: any) => normalize(s.name ?? s.company))
+        .filter(Boolean)
     );
-    const offeringTokens = sellerOffering
-      .flatMap((s: string) => s.toLowerCase().split(/[\s\-_/,]+/))
-      .filter((t) => t.length > 2);
-    const vendorBlocklist = ["sap", "oracle", "microsoft dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "ifs", "salesforce", "servicenow"];
+    const offeringText = normalize([
+      ...sellerOffering,
+      company.products_summary,
+      company.description,
+      ...(products ?? []).flatMap((p: any) => [p.category, p.description]),
+    ].filter(Boolean).join(" "));
+    const enterpriseVendors = ["ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"];
+    const providerSignals = ["implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator", "integrator", "consultancy", "consulting", "it services", "software development", "software vendor", "solution provider", "solutions provider", "managed service", "msp", "var", "partner", "digital transformation", "erp consultant", "crm consultant"];
+    const sellerVendorSignals = enterpriseVendors.filter((vendor) => offeringText.includes(normalize(vendor)));
     const isCompetitor = (t: any): boolean => {
-      const name = (t.company ?? "").toLowerCase().trim();
+      const name = normalize(t.company ?? t.type);
       if (!name) return false;
       if (competitorNames.has(name)) return true;
-      if (vendorBlocklist.some((v) => offeringTokens.includes(v) && name.includes(v))) return true;
-      const sellerName = (company.company_name ?? "").toLowerCase().trim();
-      if (sellerName && name.includes(sellerName)) return true;
-      return false;
+      const sellerName = normalize(company.company_name);
+      if (sellerName && (name.includes(sellerName) || sellerName.includes(name))) return true;
+
+      const targetText = normalize([
+        t.company,
+        t.type,
+        t.website,
+        t.industry,
+        t.problem,
+        t.why,
+        ...(t.current_systems ?? []),
+        ...(t.focus_areas ?? []),
+        ...(t.designations ?? []),
+      ].filter(Boolean).join(" "));
+
+      if (sellerVendorSignals.some((vendor) => name.includes(normalize(vendor)))) return true;
+      const isProvider = providerSignals.some((signal) => targetText.includes(normalize(signal)));
+      const mentionsSellerCategory = sellerVendorSignals.some((vendor) => targetText.includes(normalize(vendor))) || /\berp\b|\bcrm\b|enterprise application|business software|cloud software/.test(targetText);
+      return isProvider && mentionsSellerCategory;
     };
     if (Array.isArray(args.targets)) {
       args.targets = args.targets.filter((t: any) => !isCompetitor(t));

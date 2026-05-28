@@ -83,6 +83,13 @@ interface TargetCompany {
   level: "high" | "medium" | "low";
 }
 
+interface MarketFilterContext {
+  companyName?: string | null;
+  description?: string | null;
+  productsSummary?: string | null;
+  targetSystems?: string[] | null;
+}
+
 const LEVEL_BADGES = {
   high: { label: "🔥 High", color: "bg-hot/15 text-hot border-hot/30" },
   medium: { label: "⚠️ Medium", color: "bg-warm/15 text-warm border-warm/30" },
@@ -90,6 +97,63 @@ const LEVEL_BADGES = {
 };
 
 const REPLACEMENT_TIMEOUT_MS = 60000;
+
+const normalizeMarketText = (value: unknown) =>
+  (value ?? "").toString().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const PROVIDER_SIGNALS = [
+  "implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator",
+  "integrator", "consultancy", "consulting", "it services", "software development", "software vendor",
+  "solution provider", "solutions provider", "managed service", "msp", "var", "digital transformation",
+  "erp consultant", "crm consultant", "partner"
+];
+
+const ENTERPRISE_VENDOR_TERMS = [
+  "ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite",
+  "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"
+];
+
+const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext | null, similar: SimilarProduct[] = []) => {
+  const targetName = normalizeMarketText(target.company ?? target.type);
+  if (!targetName || !context) return false;
+
+  const sellerName = normalizeMarketText(context.companyName);
+  if (sellerName && (targetName.includes(sellerName) || sellerName.includes(targetName))) return true;
+  if (similar.some((item) => normalizeMarketText(item.name) === targetName)) return true;
+
+  const sellerText = normalizeMarketText([
+    context.companyName,
+    context.description,
+    context.productsSummary,
+    ...(context.targetSystems ?? []),
+  ].filter(Boolean).join(" "));
+  const sellerVendors = ENTERPRISE_VENDOR_TERMS.filter((term) => sellerText.includes(normalizeMarketText(term)));
+  const sellerTerms = Array.from(new Set([
+    ...sellerVendors,
+    ...(context.targetSystems ?? []).flatMap((term) => normalizeMarketText(term).split(" ")),
+    ...sellerText.split(" "),
+  ].filter((term) => term.length > 3 && !["your", "company", "services", "solutions", "business", "with", "from", "that", "this", "their"].includes(term))));
+
+  const targetText = normalizeMarketText([
+    target.company,
+    target.type,
+    target.website,
+    target.industry,
+    target.problem,
+    target.why,
+    ...(target.current_systems ?? []),
+    ...(target.focus_areas ?? []),
+    ...(target.designations ?? []),
+  ].filter(Boolean).join(" "));
+
+  if (sellerVendors.some((vendor) => targetName.includes(normalizeMarketText(vendor)))) return true;
+  const isProvider = PROVIDER_SIGNALS.some((signal) => targetText.includes(normalizeMarketText(signal)));
+  const overlapsSellerOffer = sellerTerms.some((term) => targetText.includes(term)) || /\berp\b|\bcrm\b|enterprise application|business software|cloud software/.test(targetText);
+  return isProvider && overlapsSellerOffer;
+};
+
+const filterTargetCompanies = (nextTargets: TargetCompany[], context: MarketFilterContext | null, similar: SimilarProduct[] = []) =>
+  nextTargets.filter((target) => !isCompetitorTarget(target, context, similar));
 
 const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -120,6 +184,7 @@ export default function Targets() {
   const [hasCompany, setHasCompany] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [revealed, setRevealed] = useState<TargetCompany | null>(null);
+  const [marketContext, setMarketContext] = useState<MarketFilterContext | null>(null);
 
   const netNewCount = useMemo(
     () => targets.filter((t) => t.uses_ifs === false).length,
@@ -128,22 +193,42 @@ export default function Targets() {
 
   useEffect(() => {
     if (!current) return;
-    supabase
-      .from("company_profiles")
-      .select("id")
-      .eq("workspace_id", current.id)
-      .maybeSingle()
-      .then(({ data }) => setHasCompany(!!data));
+    let cachedTargets: TargetCompany[] = [];
+    let cachedSimilar: SimilarProduct[] = [];
     const cached = localStorage.getItem(`targets-${current.id}`);
     if (cached) {
       try {
         const j = JSON.parse(cached);
-        setSimilar(j.similar ?? []);
-        setTargets(j.targets ?? []);
+        cachedSimilar = j.similar ?? [];
+        cachedTargets = j.targets ?? [];
+        setSimilar(cachedSimilar);
+        setTargets(cachedTargets);
       } catch {
         localStorage.removeItem(`targets-${current.id}`);
       }
     }
+    supabase
+      .from("company_profiles")
+      .select("id, company_name, description, products_summary, target_systems")
+      .eq("workspace_id", current.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setHasCompany(!!data);
+        const context = data
+          ? {
+              companyName: data.company_name,
+              description: data.description,
+              productsSummary: data.products_summary,
+              targetSystems: data.target_systems,
+            }
+          : null;
+        setMarketContext(context);
+        if (context && cachedTargets.length > 0) {
+          const filteredTargets = filterTargetCompanies(cachedTargets, context, cachedSimilar);
+          setTargets(filteredTargets);
+          if (filteredTargets.length !== cachedTargets.length) persist(cachedSimilar, filteredTargets);
+        }
+      });
     const claimedRaw = localStorage.getItem(`targets-claimed-${current.id}`);
     if (claimedRaw) {
       try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch { localStorage.removeItem(`targets-claimed-${current.id}`); }
@@ -181,9 +266,11 @@ export default function Targets() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      const safeSimilar = data.similar ?? [];
+      const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, safeSimilar);
       setSimilar(data.similar ?? []);
-      setTargets(data.targets ?? []);
-      persist(data.similar ?? [], data.targets ?? []);
+      setTargets(safeTargets);
+      persist(safeSimilar, safeTargets);
       toast({ title: "Insights generated" });
     } catch (e: unknown) {
       toast({ title: "Failed", description: getErrorMessage(e), variant: "destructive" });
@@ -207,7 +294,8 @@ export default function Targets() {
     );
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
-    return data.targets?.[0] as TargetCompany | undefined;
+    const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, similar);
+    return safeTargets[0] as TargetCompany | undefined;
   };
 
   const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
