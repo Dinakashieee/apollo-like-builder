@@ -199,6 +199,40 @@ export default function Company() {
         <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" /> Company profile
         </h2>
+
+        <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-primary-deep flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Auto-fill from your deck
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Upload a company deck or profile (PPTX, PDF, DOCX, image, or text). We'll OCR & auto-fill the fields below — you can still edit anything.
+            </p>
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pptx,.pdf,.docx,.txt,.md,image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFileUpload(f);
+            }}
+          />
+          <Button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={extracting}
+            className="bg-gradient-primary"
+          >
+            {extracting ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Extracting…</>
+            ) : (
+              <><Upload className="h-4 w-4 mr-2" /> Upload deck</>
+            )}
+          </Button>
+        </div>
+
         <div>
           <Label>Company name</Label>
           <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="mt-1" />
