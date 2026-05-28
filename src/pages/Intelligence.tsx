@@ -16,11 +16,17 @@ interface Opportunity {
   rationale: string | null;
 }
 
+interface SourceRef {
+  title: string;
+  url: string;
+  type: "pdf" | "linkedin" | "web";
+}
 interface PainPoint {
   pain_point: string;
   who_feels_it: string;
   severity: "critical" | "high" | "medium";
   evidence: string;
+  sources?: SourceRef[];
 }
 interface FocusRec {
   focus: string;
