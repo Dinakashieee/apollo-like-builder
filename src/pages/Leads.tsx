@@ -162,7 +162,13 @@ export default function Leads() {
           <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as any)}>
             <TabsList>
               <TabsTrigger value="mine">My leads · {mineCount}</TabsTrigger>
-              <TabsTrigger value="targets">Targeted accounts · {targetsCount}</TabsTrigger>
+              <TabsTrigger value="targets" className="relative pl-6">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-hot opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-hot" />
+                </span>
+                AI hot picks · {targetsCount}
+              </TabsTrigger>
               <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
             </TabsList>
           </Tabs>
