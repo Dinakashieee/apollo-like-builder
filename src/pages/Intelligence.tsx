@@ -158,6 +158,35 @@ export default function Intelligence() {
       })()
     : null;
 
+  const Sources = ({ items }: { items?: SourceRef[] }) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div className="mt-3 pt-3 border-t border-border/60">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+          Sources
+        </p>
+        <ul className="space-y-1">
+          {items.slice(0, 4).map((s, i) => {
+            const Icon = s.type === "pdf" ? FileText : s.type === "linkedin" ? Linkedin : ExternalLink;
+            return (
+              <li key={i}>
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-start gap-1.5 leading-snug"
+                >
+                  <Icon className="h-3 w-3 mt-0.5 shrink-0" />
+                  <span className="truncate">{s.title || s.url}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
       <div className="flex items-end justify-between gap-4 flex-wrap">
