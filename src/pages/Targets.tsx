@@ -184,6 +184,7 @@ export default function Targets() {
   const [hasCompany, setHasCompany] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [revealed, setRevealed] = useState<TargetCompany | null>(null);
+  const [marketContext, setMarketContext] = useState<MarketFilterContext | null>(null);
 
   const netNewCount = useMemo(
     () => targets.filter((t) => t.uses_ifs === false).length,
@@ -192,22 +193,42 @@ export default function Targets() {
 
   useEffect(() => {
     if (!current) return;
-    supabase
-      .from("company_profiles")
-      .select("id")
-      .eq("workspace_id", current.id)
-      .maybeSingle()
-      .then(({ data }) => setHasCompany(!!data));
+    let cachedTargets: TargetCompany[] = [];
+    let cachedSimilar: SimilarProduct[] = [];
     const cached = localStorage.getItem(`targets-${current.id}`);
     if (cached) {
       try {
         const j = JSON.parse(cached);
-        setSimilar(j.similar ?? []);
-        setTargets(j.targets ?? []);
+        cachedSimilar = j.similar ?? [];
+        cachedTargets = j.targets ?? [];
+        setSimilar(cachedSimilar);
+        setTargets(cachedTargets);
       } catch {
         localStorage.removeItem(`targets-${current.id}`);
       }
     }
+    supabase
+      .from("company_profiles")
+      .select("id, company_name, description, products_summary, target_systems")
+      .eq("workspace_id", current.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setHasCompany(!!data);
+        const context = data
+          ? {
+              companyName: data.company_name,
+              description: data.description,
+              productsSummary: data.products_summary,
+              targetSystems: data.target_systems,
+            }
+          : null;
+        setMarketContext(context);
+        if (context && cachedTargets.length > 0) {
+          const filteredTargets = filterTargetCompanies(cachedTargets, context, cachedSimilar);
+          setTargets(filteredTargets);
+          if (filteredTargets.length !== cachedTargets.length) persist(cachedSimilar, filteredTargets);
+        }
+      });
     const claimedRaw = localStorage.getItem(`targets-claimed-${current.id}`);
     if (claimedRaw) {
       try { setClaimed(JSON.parse(claimedRaw) ?? []); } catch { localStorage.removeItem(`targets-claimed-${current.id}`); }
