@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Search, Filter, Download, Flame, Sun, Snowflake, Minus, MessageSquare } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Download, Flame, Sun, Snowflake, Minus, MessageSquare, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { LeadConversation } from "@/components/LeadConversation";
 import { WhatsAppPanel } from "@/components/WhatsAppPanel";
 import { LeadIntelligencePanel } from "@/components/LeadIntelligencePanel";
+import { LeadProfilePanel } from "@/components/LeadProfilePanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -19,9 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { useAuth } from "@/hooks/useAuth";
+import { extractOwnedProducts, matchOwnedProducts } from "@/lib/productMatch";
 
 const TEMP_BADGE: Record<string, { cls: string; icon: typeof Flame; label: string }> = {
   hot: { cls: "bg-hot/15 text-hot", icon: Flame, label: "Hot" },
@@ -49,16 +53,26 @@ export default function Leads() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [convLead, setConvLead] = useState<any | null>(null);
+  const [sheetTab, setSheetTab] = useState<string>("profile");
+  const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
 
   const refresh = async () => {
     if (!current) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("leads")
-      .select("*")
-      .eq("workspace_id", current.id)
-      .order("created_at", { ascending: false });
+    const [{ data }, { data: cp }] = await Promise.all([
+      supabase
+        .from("leads")
+        .select("*")
+        .eq("workspace_id", current.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("company_profiles")
+        .select("products_summary, target_systems")
+        .eq("workspace_id", current.id)
+        .maybeSingle(),
+    ]);
     setLeads(data ?? []);
+    setOwnedProducts(extractOwnedProducts(cp?.products_summary, cp?.target_systems));
     setLoading(false);
   };
 
@@ -66,6 +80,11 @@ export default function Leads() {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.id]);
+
+  const convLeadMatches = useMemo(
+    () => (convLead ? matchOwnedProducts(convLead, ownedProducts) : []),
+    [convLead, ownedProducts],
+  );
 
   const filtered = leads.filter((l) => {
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
@@ -191,6 +210,7 @@ export default function Leads() {
                   ? TEMP_BADGE[lead.last_reply_temperature]
                   : null;
                 const TempIcon = tempMeta?.icon;
+                const matches = matchOwnedProducts(lead, ownedProducts);
                 return (
                   <tr key={lead.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-4">
@@ -198,10 +218,25 @@ export default function Leads() {
                         <div className="h-9 w-9 rounded-md bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">
                           {lead.company_name?.slice(0, 2).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
                           {lead.industry && (
                             <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
+                          )}
+                          {matches.length > 0 && (
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge className="mt-1 bg-success/15 text-success border border-success/30 hover:bg-success/15 text-[10px] h-5 gap-1 cursor-default">
+                                    <CheckCircle2 className="h-2.5 w-2.5" />
+                                    Existing user · {matches.length}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Already using: {matches.join(", ")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                       </div>
@@ -249,9 +284,9 @@ export default function Leads() {
                       </Select>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button size="sm" variant="ghost" onClick={() => setConvLead(lead)}>
+                      <Button size="sm" variant="ghost" onClick={() => { setSheetTab("profile"); setConvLead(lead); }}>
                         <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                        Conversation
+                        View
                       </Button>
                     </td>
                   </tr>
@@ -272,12 +307,20 @@ export default function Leads() {
           </SheetHeader>
           <div className="mt-4">
             {convLead && (
-              <Tabs defaultValue="intelligence">
+              <Tabs value={sheetTab} onValueChange={setSheetTab}>
                 <TabsList>
+                  <TabsTrigger value="profile">Profile</TabsTrigger>
                   <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
                   <TabsTrigger value="email">Email</TabsTrigger>
                   <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
                 </TabsList>
+                <TabsContent value="profile" className="mt-4">
+                  <LeadProfilePanel
+                    lead={convLead}
+                    ownedMatches={convLeadMatches}
+                    onOpenIntelligence={() => setSheetTab("intelligence")}
+                  />
+                </TabsContent>
                 <TabsContent value="intelligence" className="mt-4">
                   <LeadIntelligencePanel leadId={convLead.id} contactName={convLead.contact_name} />
                 </TabsContent>
