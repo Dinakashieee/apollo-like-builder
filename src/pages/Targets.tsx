@@ -266,9 +266,11 @@ export default function Targets() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      const safeSimilar = data.similar ?? [];
+      const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, safeSimilar);
       setSimilar(data.similar ?? []);
-      setTargets(data.targets ?? []);
-      persist(data.similar ?? [], data.targets ?? []);
+      setTargets(safeTargets);
+      persist(safeSimilar, safeTargets);
       toast({ title: "Insights generated" });
     } catch (e: unknown) {
       toast({ title: "Failed", description: getErrorMessage(e), variant: "destructive" });
@@ -292,7 +294,8 @@ export default function Targets() {
     );
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
-    return data.targets?.[0] as TargetCompany | undefined;
+    const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, similar);
+    return safeTargets[0] as TargetCompany | undefined;
   };
 
   const fetchReplacement = async (idx: number, extraExclude: string[] = []) => {
