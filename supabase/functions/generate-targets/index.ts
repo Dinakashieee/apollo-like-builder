@@ -292,6 +292,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
     ].filter(Boolean).join(" "));
     const enterpriseVendors = ["ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"];
     const providerSignals = ["implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator", "integrator", "consultancy", "consulting", "it services", "software development", "software vendor", "solution provider", "solutions provider", "managed service", "msp", "var", "partner", "digital transformation", "erp consultant", "crm consultant"];
+    const serviceNameSuffixes = ["technologies", "technology", "solutions", "systems", "services", "consulting", "consultancy", "labs", "digital", "infotech", "softlabs", "soft", "informatics", "softech", "tech", "global services", "softwares", "software"];
     const sellerVendorSignals = enterpriseVendors.filter((vendor) => offeringText.includes(normalize(vendor)));
     const isCompetitor = (t: any): boolean => {
       const name = normalize(t.company ?? t.type);
@@ -310,9 +311,14 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
         ...(t.current_systems ?? []),
         ...(t.focus_areas ?? []),
         ...(t.designations ?? []),
+        ...((t.icp_contacts ?? []).flatMap((c: any) => [c?.role, c?.full_name])),
       ].filter(Boolean).join(" "));
 
       if (sellerVendorSignals.some((vendor) => name.includes(normalize(vendor)))) return true;
+      // Name ends with a services-firm suffix word
+      const nameTokens = name.split(" ").filter(Boolean);
+      const lastToken = nameTokens[nameTokens.length - 1] ?? "";
+      if (serviceNameSuffixes.includes(lastToken)) return true;
       const isProvider = providerSignals.some((signal) => targetText.includes(normalize(signal)));
       const mentionsSellerCategory = sellerVendorSignals.some((vendor) => targetText.includes(normalize(vendor))) || /\berp\b|\bcrm\b|enterprise application|business software|cloud software/.test(targetText);
       return isProvider && mentionsSellerCategory;
