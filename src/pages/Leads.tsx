@@ -52,6 +52,7 @@ export default function Leads() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<"mine" | "targets" | "all">("mine");
   const [convLead, setConvLead] = useState<any | null>(null);
   const [sheetTab, setSheetTab] = useState<string>("profile");
   const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
