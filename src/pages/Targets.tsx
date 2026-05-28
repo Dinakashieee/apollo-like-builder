@@ -89,7 +89,7 @@ const LEVEL_BADGES = {
   low: { label: "❄️ Low", color: "bg-cold/15 text-cold border-cold/30" },
 };
 
-const REPLACEMENT_TIMEOUT_MS = 12000;
+const REPLACEMENT_TIMEOUT_MS = 60000;
 
 const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
