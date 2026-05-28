@@ -146,6 +146,46 @@ export default function Company() {
     load();
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 15 MB.", variant: "destructive" });
+      return;
+    }
+    setExtracting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      // chunked base64 encode to avoid call-stack issues on big files
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const fileBase64 = btoa(binary);
+      const { data, error } = await supabase.functions.invoke("parse-company-doc", {
+        body: { fileBase64, mimeType: file.type || "application/octet-stream", fileName: file.name },
+      });
+      if (error) throw error;
+      const p = (data as any)?.profile;
+      if (!p) throw new Error("No profile returned");
+      if (p.company_name) setCompanyName(p.company_name);
+      if (p.description) setDescription(p.description);
+      if (Array.isArray(p.industries) && p.industries.length) setIndustries(p.industries.join(", "));
+      if (p.products_summary) setProductsSummary(p.products_summary);
+      if (Array.isArray(p.target_systems) && p.target_systems.length) setTargetSystems(p.target_systems.join(", "));
+      if (Array.isArray(p.solved_pain_points) && p.solved_pain_points.length)
+        setSolvedPainPoints(p.solved_pain_points.join("\n"));
+      if (p.positioning) setPositioning(p.positioning);
+      toast({ title: "Profile extracted", description: "Review and edit, then click Save." });
+    } catch (e: any) {
+      toast({ title: "Extraction failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setExtracting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   const isOwner = current?.role === "owner";
 
   return (
