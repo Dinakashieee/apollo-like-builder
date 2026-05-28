@@ -411,16 +411,7 @@ export default function Targets() {
                   <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5">References</p>
                   <div className="flex flex-wrap gap-1.5">
                     {p.references.map((r, j) => (
-                      <a
-                        key={j}
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5"
-                      >
-                        {r.label}
-                        <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
+                      <RefChip key={j} r={r} />
                     ))}
                   </div>
                 </div>
