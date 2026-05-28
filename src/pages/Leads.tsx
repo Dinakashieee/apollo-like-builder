@@ -158,6 +158,22 @@ export default function Leads() {
       </div>
 
       <div className="card-elevated overflow-hidden">
+        <div className="px-4 pt-4">
+          <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as any)}>
+            <TabsList>
+              <TabsTrigger value="mine">My leads · {mineCount}</TabsTrigger>
+              <TabsTrigger value="targets">Targeted accounts · {targetsCount}</TabsTrigger>
+              <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <p className="text-xs text-muted-foreground mt-2">
+            {sourceFilter === "targets"
+              ? "Companies you claimed from the AI Targets page."
+              : sourceFilter === "mine"
+              ? "Leads you added or imported yourself."
+              : "All leads in this workspace."}
+          </p>
+        </div>
         <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border/60">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
