@@ -52,6 +52,7 @@ export default function Leads() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<"mine" | "targets" | "all">("mine");
   const [convLead, setConvLead] = useState<any | null>(null);
   const [sheetTab, setSheetTab] = useState<string>("profile");
   const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
@@ -86,7 +87,13 @@ export default function Leads() {
     [convLead, ownedProducts],
   );
 
+  const isTargetLead = (l: any) => l.source === "ai_targets";
+  const targetsCount = leads.filter(isTargetLead).length;
+  const mineCount = leads.length - targetsCount;
+
   const filtered = leads.filter((l) => {
+    if (sourceFilter === "mine" && isTargetLead(l)) return false;
+    if (sourceFilter === "targets" && !isTargetLead(l)) return false;
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (!query) return true;
     const q = query.toLowerCase();
@@ -151,6 +158,22 @@ export default function Leads() {
       </div>
 
       <div className="card-elevated overflow-hidden">
+        <div className="px-4 pt-4">
+          <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as any)}>
+            <TabsList>
+              <TabsTrigger value="mine">My leads · {mineCount}</TabsTrigger>
+              <TabsTrigger value="targets">Targeted accounts · {targetsCount}</TabsTrigger>
+              <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <p className="text-xs text-muted-foreground mt-2">
+            {sourceFilter === "targets"
+              ? "Companies you claimed from the AI Targets page."
+              : sourceFilter === "mine"
+              ? "Leads you added or imported yourself."
+              : "All leads in this workspace."}
+          </p>
+        </div>
         <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border/60">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -219,7 +242,14 @@ export default function Leads() {
                           {lead.company_name?.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
+                            {isTargetLead(lead) && (
+                              <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/10 text-[10px] h-5">
+                                Targeted
+                              </Badge>
+                            )}
+                          </div>
                           {lead.industry && (
                             <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
                           )}
