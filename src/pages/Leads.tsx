@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Search, Filter, Download, Flame, Sun, Snowflake, Minus, MessageSquare } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Download, Flame, Sun, Snowflake, Minus, MessageSquare, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { LeadConversation } from "@/components/LeadConversation";
 import { WhatsAppPanel } from "@/components/WhatsAppPanel";
 import { LeadIntelligencePanel } from "@/components/LeadIntelligencePanel";
+import { LeadProfilePanel } from "@/components/LeadProfilePanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -19,9 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { useAuth } from "@/hooks/useAuth";
+import { extractOwnedProducts, matchOwnedProducts } from "@/lib/productMatch";
 
 const TEMP_BADGE: Record<string, { cls: string; icon: typeof Flame; label: string }> = {
   hot: { cls: "bg-hot/15 text-hot", icon: Flame, label: "Hot" },
