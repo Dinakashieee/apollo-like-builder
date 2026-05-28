@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
-import { Mail, UserPlus, Trash2, Building2 } from "lucide-react";
+import { Mail, UserPlus, Trash2, Building2, Upload, Loader2, Sparkles } from "lucide-react";
 import { z } from "zod";
 
 const companySchema = z.object({
