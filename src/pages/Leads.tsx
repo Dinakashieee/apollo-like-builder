@@ -242,7 +242,14 @@ export default function Leads() {
                           {lead.company_name?.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
+                            {isTargetLead(lead) && (
+                              <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/10 text-[10px] h-5">
+                                Targeted
+                              </Badge>
+                            )}
+                          </div>
                           {lead.industry && (
                             <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
                           )}
