@@ -284,9 +284,9 @@ export default function Leads() {
                       </Select>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button size="sm" variant="ghost" onClick={() => setConvLead(lead)}>
+                      <Button size="sm" variant="ghost" onClick={() => { setSheetTab("profile"); setConvLead(lead); }}>
                         <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                        Conversation
+                        View
                       </Button>
                     </td>
                   </tr>
@@ -307,12 +307,20 @@ export default function Leads() {
           </SheetHeader>
           <div className="mt-4">
             {convLead && (
-              <Tabs defaultValue="intelligence">
+              <Tabs value={sheetTab} onValueChange={setSheetTab}>
                 <TabsList>
+                  <TabsTrigger value="profile">Profile</TabsTrigger>
                   <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
                   <TabsTrigger value="email">Email</TabsTrigger>
                   <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
                 </TabsList>
+                <TabsContent value="profile" className="mt-4">
+                  <LeadProfilePanel
+                    lead={convLead}
+                    ownedMatches={convLeadMatches}
+                    onOpenIntelligence={() => setSheetTab("intelligence")}
+                  />
+                </TabsContent>
                 <TabsContent value="intelligence" className="mt-4">
                   <LeadIntelligencePanel leadId={convLead.id} contactName={convLead.contact_name} />
                 </TabsContent>
