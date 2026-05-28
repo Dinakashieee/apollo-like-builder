@@ -75,7 +75,7 @@ const steps = [
   },
   {
     n: 7,
-    title: "Track follow-ups",
+    title: "Track everything",
     desc: "Every claimed lead, email sent, WhatsApp thread, reply, and reminder is logged on the lead timeline — and surfaced in the dashboard so you always see what's open, what's waiting, and what's next.",
     icon: Bell,
     to: "/app/reminders",
