@@ -259,6 +259,7 @@ export default function Intelligence() {
                   Felt by: {p.who_feels_it}
                 </p>
                 <p className="text-sm text-foreground/85 leading-relaxed">{p.evidence}</p>
+                <Sources items={p.sources} />
               </div>
             ))}
           </div>
