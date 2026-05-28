@@ -684,9 +684,7 @@ export default function Targets() {
                 <Section title="References" icon={ExternalLink}>
                   <div className="flex flex-wrap gap-1.5">
                     {revealed.references.map((r, i) => (
-                      <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5">
-                        {r.label} <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
+                      <RefChip key={i} r={r} />
                     ))}
                   </div>
                 </Section>
