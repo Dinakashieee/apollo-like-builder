@@ -87,7 +87,13 @@ export default function Leads() {
     [convLead, ownedProducts],
   );
 
+  const isTargetLead = (l: any) => l.source === "ai_targets";
+  const targetsCount = leads.filter(isTargetLead).length;
+  const mineCount = leads.length - targetsCount;
+
   const filtered = leads.filter((l) => {
+    if (sourceFilter === "mine" && isTargetLead(l)) return false;
+    if (sourceFilter === "targets" && !isTargetLead(l)) return false;
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (!query) return true;
     const q = query.toLowerCase();
