@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, RefreshCw, Target, Building2, AlertTriangle, TrendingUp, Compass, Clock } from "lucide-react";
+import { Sparkles, RefreshCw, Target, Building2, AlertTriangle, TrendingUp, Compass, Clock, FileText, Linkedin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
