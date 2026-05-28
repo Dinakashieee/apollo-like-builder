@@ -125,9 +125,18 @@ Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).joi
 - Vendors of the same product/category (e.g. if seller does IFS ERP, exclude IFS itself and other ERP vendors like SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, NetSuite, Sage, Odoo, etc.)
 - Companies that sell, implement, consult on, integrate, resell, support, or compete with similar products/services
 - Resellers, implementation partners, system integrators, IT consultancies, software vendors, VARs/MSPs, or solution providers for the seller's category
-- Direct competitors of the seller, including smaller regional providers/partners, not only big vendors
-Those belong in the 'similar' (competitors) list ONLY — never in 'targets'. Targets must be END-CUSTOMERS who would BUY/USE the seller's product, not sell, implement, or advise on it. If a company is primarily IT services, software, consulting, systems integration, or a solution provider, exclude it from targets unless there is clear evidence it is only an internal end-user.`;
-    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent. Mix in LinkedIn company pages, public PDFs (annual reports, analyst reports), and Wikipedia/Crunchbase/official sites.
+- Any IT-services firm or boutique whose name suggests services/consulting (e.g. ending in "Technologies", "Solutions", "Systems", "Services", "Consulting", "Labs", "Digital", "Infotech", "Softlabs")
+- Direct competitors of the seller, including smaller regional providers/partners
+Those belong in the 'similar' (competitors) list ONLY — never in 'targets'.
+
+TARGETS MUST BE END-CUSTOMERS — real operating companies that would BUY/USE the seller's product (e.g. manufacturers, utilities, hospitals, airlines, retailers, banks, energy producers, telecoms, logistics operators, construction, defense, F&B). Their primary business must be making goods, operating infrastructure, or serving end consumers — NOT selling software, consulting, or implementation. If you cannot confidently say "this company is the BUYER, not a SELLER", drop it.
+
+QUALITY BAR — each target must include:
+- Real, verifiable company name + correct primary website
+- A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — NOT a generic "needs ERP modernization"
+- Real named ICP contacts with real /in/ LinkedIn URLs — if you cannot verify, return FEWER contacts rather than fabricate
+- 1-3 references that are real, working URLs (LinkedIn company page, recent LinkedIn post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.`;
+    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.
 
 ${exclusionRule}`;
 
@@ -139,8 +148,8 @@ ${sourcingGuidance}
 LIVE SOURCES:
 ${sourcesBlock}
 
-Suggest exactly ONE NEW real specific company this seller should target. It must be DIFFERENT from: ${excludeList.join(", ") || "(none)"}.
-Include real name, website, uses_ifs guess, 2-5 current_systems, why-fit, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
+Suggest exactly ONE NEW real specific END-CUSTOMER company this seller should target. It must be DIFFERENT from: ${excludeList.join(", ") || "(none)"}.
+Include real name, website, uses_ifs guess, 2-5 current_systems, a SPECIFIC problem tied to a recent public event, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 real verifiable references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
       : `${baseContext}
 
 ${sourcingGuidance}
@@ -148,7 +157,7 @@ ${sourcingGuidance}
 LIVE SOURCES:
 ${sourcesBlock}
 
-Generate competitor analysis AND 5-8 real specific target companies. For each target: real name & website, uses_ifs (bool or null), 2-5 current_systems, problem, why-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 references (mix LinkedIn company/post, PDF report, official site, Crunchbase, Wikipedia). For similar/competitors: 3-5 with strengths/weaknesses/your_advantage and 1-2 references each.`;
+Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies (no IT services / consultancies / vendors). For each target: real name & website, uses_ifs (bool or null), 2-5 current_systems they actually run, a SPECIFIC problem grounded in a recent public event (funding, hiring, M&A, expansion, regulation), why-you-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references. For similar/competitors: 3-5 with strengths/weaknesses/your_advantage and 1-2 references each.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
