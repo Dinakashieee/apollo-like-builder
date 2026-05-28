@@ -127,6 +127,11 @@ const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext 
   if (sellerName && (targetName.includes(sellerName) || sellerName.includes(targetName))) return true;
   if (similar.some((item) => normalizeMarketText(item.name) === targetName)) return true;
 
+  // Reject names that end in a services-firm suffix word (e.g. "Acme Technologies", "Foo Solutions")
+  const nameTokens = targetName.split(" ").filter(Boolean);
+  const lastToken = nameTokens[nameTokens.length - 1] ?? "";
+  if (SERVICE_NAME_SUFFIXES.includes(lastToken)) return true;
+
   const sellerText = normalizeMarketText([
     context.companyName,
     context.description,
@@ -150,6 +155,7 @@ const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext 
     ...(target.current_systems ?? []),
     ...(target.focus_areas ?? []),
     ...(target.designations ?? []),
+    ...((target.icp_contacts ?? []).flatMap((c) => [c?.role, c?.full_name])),
   ].filter(Boolean).join(" "));
 
   if (sellerVendors.some((vendor) => targetName.includes(normalizeMarketText(vendor)))) return true;
