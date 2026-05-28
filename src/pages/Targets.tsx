@@ -565,6 +565,142 @@ export default function Targets() {
         title="You've hit your lead limit"
         description={`You're on the ${tier} plan (${leadsUsed}/${leadsLimit} leads). Add a +100 leads add-on for $8/mo, or upgrade your plan to keep claiming targets.`}
       />
+
+      <Dialog open={!!revealed} onOpenChange={(o) => !o && setRevealed(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              {revealed?.company ?? revealed?.type ?? "Target"} — full brief unlocked
+            </DialogTitle>
+            <DialogDescription>
+              Saved to your Leads. Here's everything we know about this account.
+            </DialogDescription>
+          </DialogHeader>
+
+          {revealed && (
+            <div className="space-y-4 mt-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {revealed.website && (
+                  <Field label="Website">
+                    <a href={revealed.website.startsWith("http") ? revealed.website : `https://${revealed.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                      {revealed.website} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </Field>
+                )}
+                {revealed.industry && <Field label="Industry">{revealed.industry}</Field>}
+                {revealed.size && <Field label="Company size">{revealed.size}</Field>}
+                <Field label="IFS status">
+                  {revealed.uses_ifs === true ? "Existing IFS user" : revealed.uses_ifs === false ? "Not on IFS" : "Unknown"}
+                </Field>
+              </div>
+
+              {revealed.problem && (
+                <Section title="Their problem" icon={Crosshair}>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{revealed.problem}</p>
+                </Section>
+              )}
+
+              {revealed.why && (
+                <Section title="Why you fit" icon={Sparkles}>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{revealed.why}</p>
+                </Section>
+              )}
+
+              {revealed.current_systems && revealed.current_systems.length > 0 && (
+                <Section title="Systems they use today" icon={Layers}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {revealed.current_systems.map((s, i) => (
+                      <span key={i} className="text-[11px] bg-primary/5 text-primary-deep border border-primary/15 rounded-full px-2 py-0.5">{s}</span>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {revealed.designations && revealed.designations.length > 0 && (
+                <Section title="Decision-maker designations" icon={Users}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {revealed.designations.map((d, i) => (
+                      <span key={i} className="text-[11px] bg-secondary text-secondary-foreground rounded-full px-2 py-0.5">{d}</span>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {revealed.icp_contacts && revealed.icp_contacts.length > 0 && (
+                <Section title="ICP contacts" icon={Users}>
+                  <div className="space-y-2">
+                    {revealed.icp_contacts.map((c, i) => (
+                      <div key={i} className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border/60 bg-muted/20">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-primary-deep">{c.full_name}</p>
+                          <p className="text-xs text-muted-foreground">{c.role}</p>
+                        </div>
+                        {c.linkedin_url && (
+                          <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 shrink-0">
+                            <Linkedin className="h-3 w-3" /> LinkedIn
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {revealed.focus_areas && revealed.focus_areas.length > 0 && (
+                <Section title="Focus areas" icon={Target}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {revealed.focus_areas.map((f, i) => (
+                      <span key={i} className="text-[11px] bg-card border border-border rounded-full px-2 py-0.5">{f}</span>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {revealed.references && revealed.references.length > 0 && (
+                <Section title="References" icon={ExternalLink}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {revealed.references.map((r, i) => (
+                      <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5">
+                        {r.label} <ExternalLink className="h-2.5 w-2.5" />
+                      </a>
+                    ))}
+                  </div>
+                </Section>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setRevealed(null)}>Close</Button>
+            <Link to="/app/leads">
+              <Button className="bg-gradient-primary shadow-glow">
+                Open in Leads <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+              </Button>
+            </Link>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-0.5">{label}</p>
+      <div className="text-sm text-foreground/90">{children}</div>
+    </div>
+  );
+}
+
+function Section({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" /> {title}
+      </p>
+      {children}
     </div>
   );
 }
