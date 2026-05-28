@@ -487,7 +487,13 @@ export default function Targets() {
 
       {/* Similar products */}
       <section>
-        <h2 className="text-xl font-display font-bold text-primary-deep mb-3">Products like yours</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-primary/30" />
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.18em] font-semibold text-primary/70">Competitive landscape</p>
+            <h2 className="text-xl lg:text-2xl font-display font-bold text-primary-deep">Products like yours</h2>
+          </div>
+        </div>
         {loading && <Skeleton className="h-40 rounded-2xl" />}
         {!loading && similar.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
