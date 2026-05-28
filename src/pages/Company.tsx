@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
-import { Mail, UserPlus, Trash2, Building2 } from "lucide-react";
+import { Mail, UserPlus, Trash2, Building2, Upload, Loader2, Sparkles } from "lucide-react";
 import { z } from "zod";
 
 const companySchema = z.object({
@@ -34,6 +34,8 @@ export default function Company() {
   const [members, setMembers] = useState<any[]>([]);
   const [invites, setInvites] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     if (!current) return;
@@ -144,6 +146,46 @@ export default function Company() {
     load();
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 15 MB.", variant: "destructive" });
+      return;
+    }
+    setExtracting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      // chunked base64 encode to avoid call-stack issues on big files
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const fileBase64 = btoa(binary);
+      const { data, error } = await supabase.functions.invoke("parse-company-doc", {
+        body: { fileBase64, mimeType: file.type || "application/octet-stream", fileName: file.name },
+      });
+      if (error) throw error;
+      const p = (data as any)?.profile;
+      if (!p) throw new Error("No profile returned");
+      if (p.company_name) setCompanyName(p.company_name);
+      if (p.description) setDescription(p.description);
+      if (Array.isArray(p.industries) && p.industries.length) setIndustries(p.industries.join(", "));
+      if (p.products_summary) setProductsSummary(p.products_summary);
+      if (Array.isArray(p.target_systems) && p.target_systems.length) setTargetSystems(p.target_systems.join(", "));
+      if (Array.isArray(p.solved_pain_points) && p.solved_pain_points.length)
+        setSolvedPainPoints(p.solved_pain_points.join("\n"));
+      if (p.positioning) setPositioning(p.positioning);
+      toast({ title: "Profile extracted", description: "Review and edit, then click Save." });
+    } catch (e: any) {
+      toast({ title: "Extraction failed", description: e?.message ?? String(e), variant: "destructive" });
+    } finally {
+      setExtracting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   const isOwner = current?.role === "owner";
 
   return (
@@ -157,6 +199,40 @@ export default function Company() {
         <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" /> Company profile
         </h2>
+
+        <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-primary-deep flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Auto-fill from your deck
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Upload a company deck or profile (PPTX, PDF, DOCX, image, or text). We'll OCR & auto-fill the fields below — you can still edit anything.
+            </p>
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pptx,.pdf,.docx,.txt,.md,image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFileUpload(f);
+            }}
+          />
+          <Button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={extracting}
+            className="bg-gradient-primary"
+          >
+            {extracting ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Extracting…</>
+            ) : (
+              <><Upload className="h-4 w-4 mr-2" /> Upload deck</>
+            )}
+          </Button>
+        </div>
+
         <div>
           <Label>Company name</Label>
           <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="mt-1" />
