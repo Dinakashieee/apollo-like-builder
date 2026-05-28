@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock, Plus } from "lucide-react";
+import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock, Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -11,9 +11,41 @@ import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
+type RefType = "pdf" | "linkedin" | "web";
 interface RefLink {
   label: string;
   url: string;
+  type?: RefType;
+}
+
+function refType(r: RefLink): RefType {
+  if (r.type) return r.type;
+  const l = (r.url ?? "").toLowerCase();
+  if (l.endsWith(".pdf") || l.includes(".pdf?")) return "pdf";
+  if (l.includes("linkedin.com")) return "linkedin";
+  return "web";
+}
+
+function RefChip({ r }: { r: RefLink }) {
+  const t = refType(r);
+  const Icon = t === "pdf" ? FileText : t === "linkedin" ? Linkedin : ExternalLink;
+  const tone =
+    t === "pdf"
+      ? "bg-warm/10 text-warm border-warm/30"
+      : t === "linkedin"
+      ? "bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/30"
+      : "bg-primary/5 text-primary border-primary/15";
+  return (
+    <a
+      href={r.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1 text-[11px] hover:underline border rounded px-2 py-0.5 ${tone}`}
+    >
+      <Icon className="h-3 w-3" />
+      <span className="truncate max-w-[200px]">{r.label || (t === "linkedin" ? "LinkedIn" : t === "pdf" ? "PDF" : "Link")}</span>
+    </a>
+  );
 }
 
 interface SimilarProduct {
@@ -379,16 +411,7 @@ export default function Targets() {
                   <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-1.5">References</p>
                   <div className="flex flex-wrap gap-1.5">
                     {p.references.map((r, j) => (
-                      <a
-                        key={j}
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5"
-                      >
-                        {r.label}
-                        <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
+                      <RefChip key={j} r={r} />
                     ))}
                   </div>
                 </div>
@@ -661,9 +684,7 @@ export default function Targets() {
                 <Section title="References" icon={ExternalLink}>
                   <div className="flex flex-wrap gap-1.5">
                     {revealed.references.map((r, i) => (
-                      <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline bg-primary/5 border border-primary/15 rounded px-2 py-0.5">
-                        {r.label} <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
+                      <RefChip key={i} r={r} />
                     ))}
                   </div>
                 </Section>

@@ -7,6 +7,48 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ResearchSource {
+  title: string;
+  url: string;
+  snippet: string;
+  type: "pdf" | "linkedin" | "web";
+}
+
+async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource[]> {
+  const key = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!key) return [];
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query, limit, tbs: "qdr:y" }),
+    });
+    if (!r.ok) return [];
+    const data = await r.json();
+    const results = data?.data?.web ?? data?.data ?? data?.web ?? [];
+    return (Array.isArray(results) ? results : [])
+      .map((x: any) => {
+        const url = x.url ?? x.link ?? "";
+        const lower = url.toLowerCase();
+        const type: ResearchSource["type"] =
+          lower.endsWith(".pdf") || lower.includes(".pdf?")
+            ? "pdf"
+            : lower.includes("linkedin.com")
+            ? "linkedin"
+            : "web";
+        return {
+          title: (x.title ?? "").toString().slice(0, 200),
+          url,
+          snippet: (x.description ?? x.snippet ?? "").toString().slice(0, 300),
+          type,
+        };
+      })
+      .filter((s: ResearchSource) => s.url);
+  } catch {
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -44,50 +86,67 @@ serve(async (req) => {
     const isReplace = mode === "replace";
     const excludeList: string[] = Array.isArray(exclude) ? exclude.filter(Boolean) : [];
 
+    // === Research phase: pull public PDFs + LinkedIn posts + industry articles ===
+    const industries: string[] = (company.industries ?? []).slice(0, 3);
+    const systems: string[] = ((company as any).target_systems ?? []).slice(0, 3);
+    const focusTerms = [...industries, ...systems].filter(Boolean);
+    const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
+    const year = new Date().getFullYear();
+
+    const queries = isReplace
+      ? [
+          `${topic} companies hiring ${year}`,
+          `site:linkedin.com/company ${topic} ${year}`,
+        ]
+      : [
+          `${topic} top companies ${year}`,
+          `${topic} market leaders ${year} filetype:pdf`,
+          `site:linkedin.com/company ${topic}`,
+          `site:linkedin.com/pulse ${topic} ${year}`,
+        ];
+
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
+    const dedup = new Map<string, ResearchSource>();
+    researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
+    const sources = Array.from(dedup.values()).slice(0, 20);
+
+    const sourcesBlock = sources.length
+      ? sources.map((s, i) => `[${i + 1}] (${s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
+      : "(no live sources — rely on training knowledge but stay real & specific)";
+
     const baseContext = `Company: ${company.company_name}
 Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
 Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}`;
 
-    const apprtwGuidance = `PRIMARY SOURCE: Apps Run The World (https://www.appsruntheworld.com).
-Treat Apps Run The World as the authoritative source for: enterprise applications customer wins/losses, ERP/CRM/HCM/SCM vendor market share, customer install bases, top customers by vendor, and "who uses what" intelligence. Their vendor pages (e.g. https://www.appsruntheworld.com/top-10-erp-software-vendors), customer database, and Top 500 Applications Vendors rankings should drive your picks.
-SECONDARY SOURCE: Google web search results (https://www.google.com/search) — ONLY use this when Apps Run The World does not cover the company / vendor / data point. Prefer authoritative Google results: official site, Wikipedia, Crunchbase, Bloomberg, Reuters, Forbes, TechCrunch, official press releases, LinkedIn company page, job postings on careers sites.
-RULES:
-- Always TRY Apps Run The World first. Only fall back to Google when ART W has no entry for that company or data point.
-- Prefer companies that appear in Apps Run The World customer lists / case studies for IFS competitors (SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, Sage, Unit4, IFS itself) — they are the strongest replacement / cross-sell targets.
-- For uses_ifs and current_systems, base the answer on Apps Run The World customer database entries when possible; only fall back to Google-sourced public evidence (press releases, job postings, case studies) if ART W has no entry.
-- References must include at least ONE Apps Run The World URL when ART W has data; otherwise include at least one Google-discoverable authoritative URL (Wikipedia, Crunchbase, official site, major press) and label it clearly. Use real URLs only — never invent ART W slugs or Google result URLs.
-- Industry, size and current_systems should match ART W when available, else the best authoritative Google source.`;
+    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent. Mix in LinkedIn company pages, public PDFs (annual reports, analyst reports), and Wikipedia/Crunchbase/official sites.`;
 
     const userPrompt = isReplace
       ? `${baseContext}
 
-${apprtwGuidance}
+${sourcingGuidance}
 
-Suggest exactly ONE NEW specific real company this seller should target, sourced from Apps Run The World intelligence wherever possible. It must be DIFFERENT from these already-shown companies: ${excludeList.join(", ") || "(none)"}.
-Include the real company name & website, uses_ifs (boolean or null), 2-5 current_systems (per ART W when available), why they are a fit, designations to pitch, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unknown), focus areas, and 1-3 reference links — at least one must be an Apps Run The World URL. Never invent URLs or names. Return an empty 'similar' array — fill only 'targets' with that single new company.`
+LIVE SOURCES:
+${sourcesBlock}
+
+Suggest exactly ONE NEW real specific company this seller should target. It must be DIFFERENT from: ${excludeList.join(", ") || "(none)"}.
+Include real name, website, uses_ifs guess, 2-5 current_systems, why-fit, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
       : `${baseContext}
 
-${apprtwGuidance}
+${sourcingGuidance}
 
-Generate competitor analysis AND specific real target companies, drawing primarily from Apps Run The World vendor + customer intelligence. For each target:
-- real company name & website
-- USES_IFS: best-guess boolean (prefer ART W customer DB evidence; fall back to public sources). null if genuinely unknown.
-- CURRENT_SYSTEMS: 2-5 ERP / CRM / HCM / SCM / middleware systems per Apps Run The World (e.g. "SAP S/4HANA", "Salesforce", "Microsoft Dynamics 365", "Oracle NetSuite", "Workday", "Infor CloudSuite"). Empty if unknown.
-- WHY they are a fit (concrete reason, ideally citing an ART W finding such as "Oracle EBS customer flagged for modernization")
-- DESIGNATIONS / job titles to pitch
-- ICP_CONTACTS: 2-4 real named individuals with full_name, role, and real https://www.linkedin.com/in/... URL. Omit unverifiable slots — never invent.
-- FOCUS AREAS / departments / use-cases
-- 1-3 REFERENCE LINKS — at least ONE must be an Apps Run The World URL. Others may be official site, recent news, Crunchbase, Wikipedia. Real URLs only.
-For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 Apps Vendors rankings to pick realistic IFS competitors, and include at least one ART W reference URL per competitor.`;
+LIVE SOURCES:
+${sourcesBlock}
+
+Generate competitor analysis AND 5-8 real specific target companies. For each target: real name & website, uses_ifs (bool or null), 2-5 current_systems, problem, why-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 references (mix LinkedIn company/post, PDF report, official site, Crunchbase, Wikipedia). For similar/competitors: 3-5 with strengths/weaknesses/your_advantage and 1-2 references each.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a B2B market analyst specializing in enterprise applications (ERP/CRM/HCM/SCM). Your PRIMARY research source is Apps Run The World (appsruntheworld.com) — their vendor pages, customer database, and Top 500 Applications Vendors rankings. Provide realistic competitive analysis AND name specific real target companies. Back every pick with at least one Apps Run The World reference URL when possible, plus other verifiable links (official homepages, Wikipedia, Crunchbase, well-known press). Never fabricate URLs, ART W slugs, or company names." },
+          { role: "system", content: "You are a B2B market analyst for enterprise applications. Pick real target companies and competitors, grounded in the live sources provided. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links." },
           { role: "user", content: userPrompt },
         ],
         tools: [{
@@ -99,7 +158,6 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
               properties: {
                 similar: {
                   type: "array",
-                  description: "3-5 similar/competitive products",
                   items: {
                     type: "object",
                     properties: {
@@ -111,12 +169,12 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
                       your_advantage: { type: "string" },
                       references: {
                         type: "array",
-                        description: "1-2 verifiable URLs about this competitor (homepage, Wikipedia, Crunchbase).",
                         items: {
                           type: "object",
                           properties: {
                             label: { type: "string" },
                             url: { type: "string" },
+                            type: { type: "string", enum: ["pdf", "linkedin", "web"] },
                           },
                           required: ["label", "url"],
                         },
@@ -127,53 +185,39 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
                 },
                 targets: {
                   type: "array",
-                  description: "5-8 specific real companies to target",
                   items: {
                     type: "object",
                     properties: {
-                      company: { type: "string", description: "Real company name" },
-                      website: { type: "string", description: "Official website URL" },
+                      company: { type: "string" },
+                      website: { type: "string" },
                       industry: { type: "string" },
-                      size: { type: "string", description: "e.g. 'Mid-market (200-1000)', 'Enterprise (5000+)'" },
-                      uses_ifs: { type: ["boolean", "null"], description: "True if known IFS customer, false if known to use a competitor ERP, null if unknown." },
-                      current_systems: {
-                        type: "array",
-                        description: "2-5 ERP/CRM/middleware/business systems this company publicly uses. Empty if unknown.",
-                        items: { type: "string" },
-                      },
-                      problem: { type: "string", description: "Specific pain this company likely has" },
-                      why: { type: "string", description: "Why this seller is a fit — concrete reason" },
-                      designations: {
-                        type: "array",
-                        description: "3-6 job titles/designations to pitch (e.g. 'VP of Sales', 'Head of Revenue Operations')",
-                        items: { type: "string" },
-                      },
+                      size: { type: "string" },
+                      uses_ifs: { type: ["boolean", "null"] },
+                      current_systems: { type: "array", items: { type: "string" } },
+                      problem: { type: "string" },
+                      why: { type: "string" },
+                      designations: { type: "array", items: { type: "string" } },
                       icp_contacts: {
                         type: "array",
-                        description: "2-4 real named decision makers at this company matching the designations. Each must have a real LinkedIn profile URL. Omit slots you cannot verify — never invent.",
                         items: {
                           type: "object",
                           properties: {
                             full_name: { type: "string" },
-                            role: { type: "string", description: "Current job title" },
-                            linkedin_url: { type: "string", description: "Real https://www.linkedin.com/in/... profile URL" },
+                            role: { type: "string" },
+                            linkedin_url: { type: "string" },
                           },
                           required: ["full_name", "role", "linkedin_url"],
                         },
                       },
-                      focus_areas: {
-                        type: "array",
-                        description: "3-5 departments / use-cases / pitch angles (e.g. 'Outbound SDR team efficiency', 'Pipeline forecasting')",
-                        items: { type: "string" },
-                      },
+                      focus_areas: { type: "array", items: { type: "string" } },
                       references: {
                         type: "array",
-                        description: "1-3 reference links so the user can verify (homepage, recent news, careers, funding announcement, Crunchbase, Wikipedia).",
                         items: {
                           type: "object",
                           properties: {
-                            label: { type: "string", description: "Short label e.g. 'Official site', 'Series C funding (TechCrunch)', 'Careers'" },
+                            label: { type: "string" },
                             url: { type: "string" },
+                            type: { type: "string", enum: ["pdf", "linkedin", "web"] },
                           },
                           required: ["label", "url"],
                         },
@@ -194,10 +238,25 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
 
     if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit. Try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (!response.ok) throw new Error("AI gateway error");
+    if (!response.ok) {
+      const t = await response.text();
+      console.error("AI error", response.status, t);
+      throw new Error("AI gateway error");
+    }
 
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
+
+    // Backfill type if the model forgot, based on URL
+    const classify = (url: string): "pdf" | "linkedin" | "web" => {
+      const l = (url ?? "").toLowerCase();
+      if (l.endsWith(".pdf") || l.includes(".pdf?")) return "pdf";
+      if (l.includes("linkedin.com")) return "linkedin";
+      return "web";
+    };
+    const fixRefs = (arr: any[]) => (arr ?? []).map((r: any) => ({ ...r, type: r?.type ?? classify(r?.url ?? "") }));
+    (args.similar ?? []).forEach((s: any) => { s.references = fixRefs(s.references); });
+    (args.targets ?? []).forEach((t: any) => { t.references = fixRefs(t.references); });
 
     await incrementAiEmails(admin, workspace_id);
 
@@ -208,6 +267,7 @@ For SIMILAR (competitor) entries: use Apps Run The World's Top 10 ERP / Top 500 
 
     return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
+    console.error(e);
     return new Response(JSON.stringify({ error: e?.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
