@@ -83,6 +83,13 @@ interface TargetCompany {
   level: "high" | "medium" | "low";
 }
 
+interface MarketFilterContext {
+  companyName?: string | null;
+  description?: string | null;
+  productsSummary?: string | null;
+  targetSystems?: string[] | null;
+}
+
 const LEVEL_BADGES = {
   high: { label: "🔥 High", color: "bg-hot/15 text-hot border-hot/30" },
   medium: { label: "⚠️ Medium", color: "bg-warm/15 text-warm border-warm/30" },
@@ -90,6 +97,63 @@ const LEVEL_BADGES = {
 };
 
 const REPLACEMENT_TIMEOUT_MS = 60000;
+
+const normalizeMarketText = (value: unknown) =>
+  (value ?? "").toString().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const PROVIDER_SIGNALS = [
+  "implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator",
+  "integrator", "consultancy", "consulting", "it services", "software development", "software vendor",
+  "solution provider", "solutions provider", "managed service", "msp", "var", "digital transformation",
+  "erp consultant", "crm consultant", "partner"
+];
+
+const ENTERPRISE_VENDOR_TERMS = [
+  "ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite",
+  "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"
+];
+
+const isCompetitorTarget = (target: TargetCompany, context: MarketFilterContext | null, similar: SimilarProduct[] = []) => {
+  const targetName = normalizeMarketText(target.company ?? target.type);
+  if (!targetName || !context) return false;
+
+  const sellerName = normalizeMarketText(context.companyName);
+  if (sellerName && (targetName.includes(sellerName) || sellerName.includes(targetName))) return true;
+  if (similar.some((item) => normalizeMarketText(item.name) === targetName)) return true;
+
+  const sellerText = normalizeMarketText([
+    context.companyName,
+    context.description,
+    context.productsSummary,
+    ...(context.targetSystems ?? []),
+  ].filter(Boolean).join(" "));
+  const sellerVendors = ENTERPRISE_VENDOR_TERMS.filter((term) => sellerText.includes(normalizeMarketText(term)));
+  const sellerTerms = Array.from(new Set([
+    ...sellerVendors,
+    ...(context.targetSystems ?? []).flatMap((term) => normalizeMarketText(term).split(" ")),
+    ...sellerText.split(" "),
+  ].filter((term) => term.length > 3 && !["your", "company", "services", "solutions", "business", "with", "from", "that", "this", "their"].includes(term))));
+
+  const targetText = normalizeMarketText([
+    target.company,
+    target.type,
+    target.website,
+    target.industry,
+    target.problem,
+    target.why,
+    ...(target.current_systems ?? []),
+    ...(target.focus_areas ?? []),
+    ...(target.designations ?? []),
+  ].filter(Boolean).join(" "));
+
+  if (sellerVendors.some((vendor) => targetName.includes(normalizeMarketText(vendor)))) return true;
+  const isProvider = PROVIDER_SIGNALS.some((signal) => targetText.includes(normalizeMarketText(signal)));
+  const overlapsSellerOffer = sellerTerms.some((term) => targetText.includes(term)) || /\berp\b|\bcrm\b|enterprise application|business software|cloud software/.test(targetText);
+  return isProvider && overlapsSellerOffer;
+};
+
+const filterTargetCompanies = (nextTargets: TargetCompany[], context: MarketFilterContext | null, similar: SimilarProduct[] = []) =>
+  nextTargets.filter((target) => !isCompetitorTarget(target, context, similar));
 
 const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T> => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
