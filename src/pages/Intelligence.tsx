@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, RefreshCw, Target, Building2, AlertTriangle, TrendingUp, Compass, Clock } from "lucide-react";
+import { Sparkles, RefreshCw, Target, Building2, AlertTriangle, TrendingUp, Compass, Clock, FileText, Linkedin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspace } from "@/hooks/useWorkspace";
@@ -16,11 +16,17 @@ interface Opportunity {
   rationale: string | null;
 }
 
+interface SourceRef {
+  title: string;
+  url: string;
+  type: "pdf" | "linkedin" | "web";
+}
 interface PainPoint {
   pain_point: string;
   who_feels_it: string;
   severity: "critical" | "high" | "medium";
   evidence: string;
+  sources?: SourceRef[];
 }
 interface FocusRec {
   focus: string;
@@ -33,6 +39,7 @@ interface Trend {
   direction: "rising" | "shifting" | "declining";
   implication_for_seller: string;
   time_horizon: string;
+  sources?: SourceRef[];
 }
 
 const LEVEL_BADGES = {
@@ -151,6 +158,35 @@ export default function Intelligence() {
       })()
     : null;
 
+  const Sources = ({ items }: { items?: SourceRef[] }) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div className="mt-3 pt-3 border-t border-border/60">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+          Sources
+        </p>
+        <ul className="space-y-1">
+          {items.slice(0, 4).map((s, i) => {
+            const Icon = s.type === "pdf" ? FileText : s.type === "linkedin" ? Linkedin : ExternalLink;
+            return (
+              <li key={i}>
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-start gap-1.5 leading-snug"
+                >
+                  <Icon className="h-3 w-3 mt-0.5 shrink-0" />
+                  <span className="truncate">{s.title || s.url}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -223,6 +259,7 @@ export default function Intelligence() {
                   Felt by: {p.who_feels_it}
                 </p>
                 <p className="text-sm text-foreground/85 leading-relaxed">{p.evidence}</p>
+                <Sources items={p.sources} />
               </div>
             ))}
           </div>
@@ -278,6 +315,7 @@ export default function Intelligence() {
                 </div>
                 <p className="text-sm text-foreground/85 mb-2 leading-relaxed">{t.implication_for_seller}</p>
                 <p className="text-xs text-muted-foreground">Horizon: {t.time_horizon}</p>
+                <Sources items={t.sources} />
               </div>
             ))}
           </div>
