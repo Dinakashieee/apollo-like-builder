@@ -7,6 +7,49 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ResearchSource {
+  title: string;
+  url: string;
+  snippet: string;
+  type: "pdf" | "linkedin" | "web";
+}
+
+async function firecrawlSearch(query: string, limit = 5): Promise<ResearchSource[]> {
+  const key = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!key) return [];
+  try {
+    const r = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ query, limit, tbs: "qdr:y" }),
+    });
+    if (!r.ok) {
+      console.error("firecrawl search", query, r.status, await r.text());
+      return [];
+    }
+    const data = await r.json();
+    const results = data?.data?.web ?? data?.data ?? data?.web ?? [];
+    return (Array.isArray(results) ? results : []).map((x: any) => {
+      const url = x.url ?? x.link ?? "";
+      const lower = url.toLowerCase();
+      const type: ResearchSource["type"] = lower.endsWith(".pdf") || lower.includes(".pdf?")
+        ? "pdf"
+        : lower.includes("linkedin.com")
+        ? "linkedin"
+        : "web";
+      return {
+        title: (x.title ?? "").toString().slice(0, 200),
+        url,
+        snippet: (x.description ?? x.snippet ?? "").toString().slice(0, 400),
+        type,
+      };
+    }).filter((s: ResearchSource) => s.url);
+  } catch (e) {
+    console.error("firecrawl error", e);
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -63,23 +106,47 @@ serve(async (req) => {
 
     const today = new Date();
     const quarter = `Q${Math.floor(today.getMonth() / 3) + 1} ${today.getFullYear()}`;
+    const year = today.getFullYear();
 
-    const systemPrompt = `You are a senior B2B market strategist and sales advisor. The seller below has uploaded their company profile and product catalog. Produce a SHARP, SPECIFIC market brief — never generic SaaS clichés.
+    // === Research phase: pull public PDFs + LinkedIn posts + industry articles ===
+    const industries: string[] = (company.industries ?? []).slice(0, 3);
+    const systems: string[] = ((company as any).target_systems ?? []).slice(0, 3);
+    const focusTerms = [...industries, ...systems].filter(Boolean);
+    const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
+
+    const queries = [
+      `${topic} market trends ${year} filetype:pdf`,
+      `${topic} industry report ${year} filetype:pdf`,
+      `site:linkedin.com/pulse ${topic} ${year}`,
+      `site:linkedin.com/posts ${topic} trends`,
+      `${topic} buyer pain points ${year}`,
+    ];
+
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
+    const dedup = new Map<string, ResearchSource>();
+    researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
+    const sources = Array.from(dedup.values()).slice(0, 25);
+
+    const sourcesBlock = sources.length
+      ? sources.map((s, i) => `[${i + 1}] (${s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
+      : "(no live sources available — rely on training knowledge but stay specific)";
+
+    const systemPrompt = `You are a senior B2B market strategist and sales advisor. The seller below has uploaded their company profile and product catalog, and we have pulled live public sources (PDF reports, LinkedIn posts, industry articles). Produce a SHARP, SPECIFIC market brief grounded in those sources whenever possible.
 
 Return four sections:
 
-1. market_pain_points (5-8): Concrete pain points buyers in the seller's target industries are dealing with RIGHT NOW (${quarter}). Each item: { pain_point, who_feels_it (specific role/department), severity ("critical"|"high"|"medium"), evidence (one-sentence why this hurts) }.
+1. market_pain_points (5-8): Concrete pain points buyers in the seller's target industries are dealing with RIGHT NOW (${quarter}). Each item: { pain_point, who_feels_it, severity ("critical"|"high"|"medium"), evidence, source_refs (array of source numbers [1], [2]... that back this up, may be empty) }.
 
 2. focus_recommendations (4-6): Where the seller should focus their GTM energy this quarter. Each item: { focus, why, expected_impact ("high"|"medium"|"low"), product_to_lead_with (EXACT name from product list) }.
 
-3. market_trends (4-6): Macro + industry trends shaping demand in the next 3-6 months for the seller's space. Each item: { trend, direction ("rising"|"shifting"|"declining"), implication_for_seller, time_horizon (e.g. "next 3 months", "by EOY ${today.getFullYear()}") }. Treat the current quarter as ${quarter}.
+3. market_trends (4-6): Macro + industry trends shaping demand in the next 3-6 months. Each item: { trend, direction ("rising"|"shifting"|"declining"), implication_for_seller, time_horizon, source_refs (array of source numbers) }. Treat current quarter as ${quarter}.
 
 4. opportunities (5-7): Specific deal opportunities. Each item: { title, problem, industry, score (0-100), level ("high"|"medium"|"low"), product_match (EXACT name from list), rationale (start with "Solved by: <exact product name>") }.
 
 STRICT RULES:
 - Every product_match / product_to_lead_with MUST be copied verbatim from the product list.
 - Do NOT invent capabilities the seller doesn't have.
-- Pain points and trends must be tied to the seller's industries and product space — not generic "AI is hot" filler.
+- Prefer claims you can back with source_refs. Use [n] numbers referring to the numbered source list.
 - Be concrete: name actual buyer roles, regulations, vendor categories.`;
 
     const userPrompt = `CURRENT QUARTER: ${quarter} (today is ${today.toISOString().slice(0, 10)})
@@ -88,14 +155,17 @@ SELLER COMPANY:
 Name: ${company.company_name}
 Description: ${company.description ?? "n/a"}
 Positioning: ${(company as any).positioning ?? "n/a"}
-Target industries: ${(company.industries ?? []).join(", ") || "any"}
+Target industries: ${industries.join(", ") || "any"}
 Pain points they solve: ${((company as any).solved_pain_points ?? []).join(", ") || "n/a"}
-Target systems they integrate with: ${((company as any).target_systems ?? []).join(", ") || "n/a"}
+Target systems they integrate with: ${systems.join(", ") || "n/a"}
 
 PRODUCTS / SERVICES (sole source of truth for capabilities):
 ${productsList}
 
-Additional summary: ${company.products_summary ?? "n/a"}`;
+Additional summary: ${company.products_summary ?? "n/a"}
+
+LIVE PUBLIC SOURCES (PDFs, LinkedIn posts, articles — cite with [n]):
+${sourcesBlock}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -123,6 +193,7 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
                       who_feels_it: { type: "string" },
                       severity: { type: "string", enum: ["critical", "high", "medium"] },
                       evidence: { type: "string" },
+                      source_refs: { type: "array", items: { type: "number" } },
                     },
                     required: ["pain_point", "who_feels_it", "severity", "evidence"],
                   },
@@ -149,6 +220,7 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
                       direction: { type: "string", enum: ["rising", "shifting", "declining"] },
                       implication_for_seller: { type: "string" },
                       time_horizon: { type: "string" },
+                      source_refs: { type: "array", items: { type: "number" } },
                     },
                     required: ["trend", "direction", "implication_for_seller", "time_horizon"],
                   },
@@ -194,7 +266,22 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
     const ops = args.opportunities ?? [];
 
-    // Replace existing opportunities
+    // Attach resolved source objects to each pain point and trend
+    const resolveRefs = (refs: number[] | undefined) =>
+      (refs ?? [])
+        .map((n) => sources[n - 1])
+        .filter(Boolean)
+        .map((s) => ({ title: s.title, url: s.url, type: s.type }));
+
+    const enrichedPains = (args.market_pain_points ?? []).map((p: any) => ({
+      ...p,
+      sources: resolveRefs(p.source_refs),
+    }));
+    const enrichedTrends = (args.market_trends ?? []).map((t: any) => ({
+      ...t,
+      sources: resolveRefs(t.source_refs),
+    }));
+
     await supabase.from("opportunities").delete().eq("workspace_id", workspace_id);
     const inserts = ops.map((o: any) => ({
       workspace_id,
@@ -209,12 +296,11 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
       await supabase.from("opportunities").insert(inserts);
     }
 
-    // Upsert market intelligence (trends refreshed each generation)
     await admin.from("market_intelligence").upsert({
       workspace_id,
-      market_pain_points: args.market_pain_points ?? [],
+      market_pain_points: enrichedPains,
       focus_recommendations: args.focus_recommendations ?? [],
-      market_trends: args.market_trends ?? [],
+      market_trends: enrichedTrends,
       trends_refreshed_at: new Date().toISOString(),
       refreshed_at: new Date().toISOString(),
     }, { onConflict: "workspace_id" });
@@ -225,7 +311,7 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
       workspace_id,
       user_id: user.id,
       type: "opportunity_generated",
-      description: `Generated market brief + ${inserts.length} opportunities (auto-refresh: ${mode === "auto" ? "yes" : "manual"})`,
+      description: `Generated market brief from ${sources.length} live sources + ${inserts.length} opportunities (auto-refresh: ${mode === "auto" ? "yes" : "manual"})`,
     });
     await supabase.from("notifications").insert({
       workspace_id,
@@ -238,9 +324,10 @@ Additional summary: ${company.products_summary ?? "n/a"}`;
     return new Response(JSON.stringify({
       count: inserts.length,
       opportunities: inserts,
-      market_pain_points: args.market_pain_points ?? [],
+      market_pain_points: enrichedPains,
       focus_recommendations: args.focus_recommendations ?? [],
-      market_trends: args.market_trends ?? [],
+      market_trends: enrichedTrends,
+      sources_used: sources.length,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
