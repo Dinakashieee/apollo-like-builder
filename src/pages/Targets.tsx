@@ -86,6 +86,7 @@ export default function Targets() {
   const [addingNew, setAddingNew] = useState(false);
   const [hasCompany, setHasCompany] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [revealed, setRevealed] = useState<TargetCompany | null>(null);
 
   const netNewCount = useMemo(
     () => targets.filter((t) => t.uses_ifs === false).length,
