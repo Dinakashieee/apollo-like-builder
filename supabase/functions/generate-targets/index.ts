@@ -267,6 +267,27 @@ Generate competitor analysis AND 5-8 real specific target companies. For each ta
     (args.similar ?? []).forEach((s: any) => { s.references = fixRefs(s.references); });
     (args.targets ?? []).forEach((t: any) => { t.references = fixRefs(t.references); });
 
+    // Filter out competitor/vendor companies that slipped into targets
+    const competitorNames = new Set<string>(
+      (args.similar ?? []).map((s: any) => (s.company ?? "").toLowerCase().trim()).filter(Boolean)
+    );
+    const offeringTokens = sellerOffering
+      .flatMap((s: string) => s.toLowerCase().split(/[\s\-_/,]+/))
+      .filter((t) => t.length > 2);
+    const vendorBlocklist = ["sap", "oracle", "microsoft dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "ifs", "salesforce", "servicenow"];
+    const isCompetitor = (t: any): boolean => {
+      const name = (t.company ?? "").toLowerCase().trim();
+      if (!name) return false;
+      if (competitorNames.has(name)) return true;
+      if (vendorBlocklist.some((v) => offeringTokens.includes(v) && name.includes(v))) return true;
+      const sellerName = (company.company_name ?? "").toLowerCase().trim();
+      if (sellerName && name.includes(sellerName)) return true;
+      return false;
+    };
+    if (Array.isArray(args.targets)) {
+      args.targets = args.targets.filter((t: any) => !isCompetitor(t));
+    }
+
     await incrementAiEmails(admin, workspace_id);
 
     await supabase.from("activities").insert({
