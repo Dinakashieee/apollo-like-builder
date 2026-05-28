@@ -39,6 +39,7 @@ interface Trend {
   direction: "rising" | "shifting" | "declining";
   implication_for_seller: string;
   time_horizon: string;
+  sources?: SourceRef[];
 }
 
 const LEVEL_BADGES = {
