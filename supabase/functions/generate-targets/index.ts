@@ -119,7 +119,16 @@ Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
 Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}`;
 
-    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent. Mix in LinkedIn company pages, public PDFs (annual reports, analyst reports), and Wikipedia/Crunchbase/official sites.`;
+    const sellerProducts = (products?.map((p: any) => p.name).filter(Boolean) || []) as string[];
+    const sellerOffering = [...sellerProducts, ...((company as any).target_systems ?? [])].filter(Boolean);
+    const exclusionRule = `CRITICAL EXCLUSION RULE: This seller offers/implements: ${sellerOffering.join(", ") || company.company_name}. Therefore the TARGETS list MUST NOT include:
+- Vendors of the same product/category (e.g. if seller does IFS ERP, exclude IFS itself and other ERP vendors like SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, NetSuite, Sage, Odoo, etc.)
+- Resellers, implementation partners, system integrators, or consultancies that sell/implement the same product
+- Direct competitors of the seller
+Those belong in the 'similar' (competitors) list ONLY — never in 'targets'. Targets must be END-CUSTOMERS who would BUY/USE the seller's product, not sell it.`;
+    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent. Mix in LinkedIn company pages, public PDFs (annual reports, analyst reports), and Wikipedia/Crunchbase/official sites.
+
+${exclusionRule}`;
 
     const userPrompt = isReplace
       ? `${baseContext}
@@ -257,6 +266,27 @@ Generate competitor analysis AND 5-8 real specific target companies. For each ta
     const fixRefs = (arr: any[]) => (arr ?? []).map((r: any) => ({ ...r, type: r?.type ?? classify(r?.url ?? "") }));
     (args.similar ?? []).forEach((s: any) => { s.references = fixRefs(s.references); });
     (args.targets ?? []).forEach((t: any) => { t.references = fixRefs(t.references); });
+
+    // Filter out competitor/vendor companies that slipped into targets
+    const competitorNames = new Set<string>(
+      (args.similar ?? []).map((s: any) => (s.company ?? "").toLowerCase().trim()).filter(Boolean)
+    );
+    const offeringTokens = sellerOffering
+      .flatMap((s: string) => s.toLowerCase().split(/[\s\-_/,]+/))
+      .filter((t) => t.length > 2);
+    const vendorBlocklist = ["sap", "oracle", "microsoft dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "ifs", "salesforce", "servicenow"];
+    const isCompetitor = (t: any): boolean => {
+      const name = (t.company ?? "").toLowerCase().trim();
+      if (!name) return false;
+      if (competitorNames.has(name)) return true;
+      if (vendorBlocklist.some((v) => offeringTokens.includes(v) && name.includes(v))) return true;
+      const sellerName = (company.company_name ?? "").toLowerCase().trim();
+      if (sellerName && name.includes(sellerName)) return true;
+      return false;
+    };
+    if (Array.isArray(args.targets)) {
+      args.targets = args.targets.filter((t: any) => !isCompetitor(t));
+    }
 
     await incrementAiEmails(admin, workspace_id);
 
