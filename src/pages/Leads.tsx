@@ -210,6 +210,7 @@ export default function Leads() {
                   ? TEMP_BADGE[lead.last_reply_temperature]
                   : null;
                 const TempIcon = tempMeta?.icon;
+                const matches = matchOwnedProducts(lead, ownedProducts);
                 return (
                   <tr key={lead.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-4">
@@ -217,10 +218,25 @@ export default function Leads() {
                         <div className="h-9 w-9 rounded-md bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">
                           {lead.company_name?.slice(0, 2).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-semibold text-sm text-primary-deep">{lead.company_name}</p>
                           {lead.industry && (
                             <p className="text-[11px] text-muted-foreground">{lead.industry}</p>
+                          )}
+                          {matches.length > 0 && (
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge className="mt-1 bg-success/15 text-success border border-success/30 hover:bg-success/15 text-[10px] h-5 gap-1 cursor-default">
+                                    <CheckCircle2 className="h-2.5 w-2.5" />
+                                    Existing user · {matches.length}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Already using: {matches.join(", ")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                       </div>
