@@ -12,6 +12,7 @@ interface ResearchSource {
   url: string;
   snippet: string;
   type: "pdf" | "linkedin" | "web";
+  priority?: "appsruntheworld" | "standard";
 }
 
 interface GenerationBody {
@@ -139,9 +140,36 @@ async function processTargetGeneration(body: GenerationBody, authHeader: string,
     const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
     const year = new Date().getFullYear();
 
+    const cleanSearchTerm = (value: unknown) => (value ?? "")
+      .toString()
+      .replace(/[“”]/g, '"')
+      .replace(/\s+/g, " ")
+      .trim();
+    const sourceHints = Array.from(new Set([
+      ...systems,
+      ...sellerCategories,
+      ...sellerProducts,
+      sellerCategoryDescriptor,
+    ].map(cleanSearchTerm).filter(Boolean))).slice(0, 5);
+    const industryHints = industries.map(cleanSearchTerm).filter(Boolean);
+    const primarySystem = sourceHints[0] || sellerCategoryDescriptor;
+    const primaryIndustry = industryHints[0] || topic;
+
     // Quality-first queries — parallel + 8s timeout each, so latency stays bounded.
     // We deliberately include executive-targeting searches so the model has real named
     // contacts (CFO / CIO / VP) with real /in/ LinkedIn URLs to ground on.
+    const appsRunTheWorldQueries = isReplace
+      ? [
+          `site:appsruntheworld.com ${primaryIndustry} ${primarySystem} customer`,
+          `site:appsruntheworld.com ${topic} ${primarySystem} installed base`,
+        ]
+      : [
+          `site:appsruntheworld.com ${primaryIndustry} ${primarySystem} customers`,
+          `site:appsruntheworld.com ${topic} ${primarySystem} installed base`,
+          `site:appsruntheworld.com ${primaryIndustry} ERP CRM HCM SCM customers`,
+          `site:appsruntheworld.com "${primarySystem}" "customer"`,
+        ];
+
     const queries = isReplace
       ? [
           `${topic} ${sellerCategoryDescriptor} customer ${year}`,
@@ -157,15 +185,25 @@ async function processTargetGeneration(body: GenerationBody, authHeader: string,
           `${topic} funding OR M&A OR expansion ${year}`,
         ];
 
-    await updateJob({ progress: 32, message: "Searching live market sources" });
+    await updateJob({ progress: 28, message: "Searching AppsRunTheWorld customer sources" });
+    const appsRunTheWorldResults = await Promise.all(
+      appsRunTheWorldQueries.map((q) => firecrawlSearch(q, isReplace ? 4 : 6))
+    );
+    const prioritizedArtSources = appsRunTheWorldResults.flat().map((source) => ({
+      ...source,
+      priority: "appsruntheworld" as const,
+      type: "web" as const,
+    }));
+
+    await updateJob({ progress: 38, message: "Cross-checking LinkedIn, PDFs, and market news" });
     const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 5)));
     const dedup = new Map<string, ResearchSource>();
-    researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
-    const sources = Array.from(dedup.values()).slice(0, 30);
+    [...prioritizedArtSources, ...researchResults.flat()].forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
+    const sources = Array.from(dedup.values()).slice(0, 40);
 
 
     const sourcesBlock = sources.length
-      ? sources.map((s, i) => `[${i + 1}] (${s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
+      ? sources.map((s, i) => `[${i + 1}] (${s.priority === "appsruntheworld" ? "APPsRunTheWorld priority source" : s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
       : "(no live sources — rely on training knowledge but stay real & specific)";
 
     const baseContext = `Company: ${company.company_name}
@@ -191,7 +229,9 @@ QUALITY BAR — each target must include:
 - Real named ICP contacts with real /in/ LinkedIn URLs — if you cannot verify, return FEWER contacts rather than fabricate
 - 1-3 references that are real, working URLs (LinkedIn company page, recent post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.
 - 'uses_ifs' field actually means "is this target already using something in the seller's category?" — true if they already run a competing/adjacent product (potential rip-and-replace), false if they are a greenfield opportunity, null if unknown.`;
-    const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.
+    const sourcingGuidance = `Use the LIVE SOURCES below as primary evidence. APPsRunTheWorld priority sources are the strongest signals for verified software customers / installed-base clues and should be used before generic web results when relevant. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.
+
+Cross-check rule: mark a target as level "high" only when it is supported by either (a) an APPsRunTheWorld priority source plus another credible source, or (b) two independent credible non-ART sources. If a company only appears in weak/generic search results, downgrade to medium/low or omit it.
 
 ${exclusionRule}`;
 
@@ -214,14 +254,16 @@ ${sourcesBlock}
 
 Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category). For each target: real name & website, uses_ifs (true if they already run something in the seller's category — i.e. rip-and-replace opportunity, false if greenfield, null if unknown), 2-5 current_systems they actually run relevant to the seller's offering, a SPECIFIC problem grounded in a recent public event (funding, hiring, M&A, expansion, regulation) written in the seller's category language, why-you-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references. For similar/competitors: 3-5 real direct competitors of THIS seller's offering (whatever category that is) with strengths/weaknesses/your_advantage and 1-2 references each.`;
 
-    await updateJob({ progress: 58, message: "Analyzing sources with AI" });
+    const analystModel = isReplace ? "google/gemini-2.5-flash" : "openai/gpt-5-mini";
+
+    await updateJob({ progress: 62, message: "Analyzing verified sources with AI" });
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-pro",
+        model: analystModel,
         messages: [
-          { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
+          { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Prioritize AppsRunTheWorld/installed-base evidence, then cross-check with LinkedIn, PDFs, press releases, and market news. Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
         ],
         tools: [{
