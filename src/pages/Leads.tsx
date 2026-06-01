@@ -88,12 +88,15 @@ export default function Leads() {
   );
 
   const isTargetLead = (l: any) => l.source === "ai_targets";
+  const isSignalHireLead = (l: any) => l.source === "signalhire";
   const targetsCount = leads.filter(isTargetLead).length;
-  const mineCount = leads.length - targetsCount;
+  const signalhireCount = leads.filter(isSignalHireLead).length;
+  const mineCount = leads.length - targetsCount - signalhireCount;
 
   const filtered = leads.filter((l) => {
-    if (sourceFilter === "mine" && isTargetLead(l)) return false;
+    if (sourceFilter === "mine" && (isTargetLead(l) || isSignalHireLead(l))) return false;
     if (sourceFilter === "targets" && !isTargetLead(l)) return false;
+    if (sourceFilter === "signalhire" && !isSignalHireLead(l)) return false;
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (!query) return true;
     const q = query.toLowerCase();
