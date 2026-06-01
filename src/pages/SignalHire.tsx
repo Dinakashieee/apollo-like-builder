@@ -682,57 +682,101 @@ export default function SignalHire() {
         </DialogContent>
       </Dialog>
 
-      {/* Upgrade Account Modal */}
-      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="sm:max-w-[540px]">
+      {/* Buy Credits Modal — powered by EngageIQ's managed SignalHire account */}
+      <Dialog open={showUpgradeModal} onOpenChange={(o) => { setShowUpgradeModal(o); if (!o) setSelectedPack(null); }}>
+        <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="h-11 w-11 rounded-xl bg-primary/10 grid place-items-center mb-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle className="text-xl">Get more SignalHire credits</DialogTitle>
+            <DialogTitle className="text-xl">Buy SignalHire reveal credits</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              You have two ways to keep claiming verified leads inside EngageIQ. Pick whichever works for your team.
+              Billed through EngageIQ at <span className="font-semibold text-foreground">$0.25 / credit</span>.
+              Powered by EngageIQ's managed SignalHire account — no key needed. 1 credit = 1 verified email reveal.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid sm:grid-cols-2 gap-3 py-2">
-            <button
-              onClick={() => {
-                setShowUpgradeModal(false);
-                setShowConnectModal(true);
-              }}
-              className="text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 p-4 transition-all active:scale-[0.98]"
-            >
-              <div className="h-9 w-9 rounded-lg bg-primary/10 grid place-items-center mb-3">
-                <KeyRound className="h-4 w-4 text-primary" />
-              </div>
-              <h3 className="text-sm font-semibold mb-1">Connect your SignalHire API</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                Already pay SignalHire? Plug in your live API key and reuse every credit you already own — no extra fees.
-              </p>
-              <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
-                Connect API <ExternalLink className="h-3 w-3" />
-              </span>
-            </button>
+          <Tabs value={packMode} onValueChange={(v) => { setPackMode(v as "once" | "monthly"); setSelectedPack(null); }} className="mt-2">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="once">Pay once</TabsTrigger>
+              <TabsTrigger value="monthly">Monthly auto-refill</TabsTrigger>
+            </TabsList>
 
-            <button
-              onClick={() => {
-                setShowUpgradeModal(false);
-                toast({ title: "Opening credit packs", description: "Choose a credit pack — billed through EngageIQ, no SignalHire account needed." });
-              }}
-              className="text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 p-4 transition-all active:scale-[0.98]"
-            >
-              <div className="h-9 w-9 rounded-lg bg-primary/10 grid place-items-center mb-3">
-                <ShoppingCart className="h-4 w-4 text-primary" />
-              </div>
-              <h3 className="text-sm font-semibold mb-1">Buy credits from EngageIQ</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                No SignalHire account? Purchase credits directly from us — same verified data, billed on your EngageIQ invoice.
+            {(["once", "monthly"] as const).map((mode) => {
+              const packs = [
+                { credits: 100, price: 25, planId: mode === "once" ? "sh_credits_100_once" : "sh_credits_100_monthly" },
+                { credits: 500, price: 125, planId: mode === "once" ? "sh_credits_500_once" : "sh_credits_500_monthly" },
+                { credits: 1000, price: 250, planId: mode === "once" ? "sh_credits_1k_once" : "sh_credits_1k_monthly", popular: true },
+                { credits: 5000, price: 1250, planId: mode === "once" ? "sh_credits_5k_once" : "sh_credits_5k_monthly" },
+              ];
+              return (
+                <TabsContent key={mode} value={mode} className="mt-4 space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {packs.map((p) => {
+                      const active = selectedPack === p.planId;
+                      return (
+                        <button
+                          key={p.planId}
+                          onClick={() => setSelectedPack(p.planId)}
+                          className={cn(
+                            "relative text-left rounded-xl border-2 p-3 transition-all active:scale-[0.98]",
+                            active ? "border-primary bg-primary/5" : "border-border hover:border-primary/40",
+                          )}
+                        >
+                          {p.popular && (
+                            <Badge className="absolute -top-2 right-2 text-[10px] py-0 px-1.5">Popular</Badge>
+                          )}
+                          <div className="text-lg font-bold text-foreground">{p.credits.toLocaleString()}</div>
+                          <div className="text-[11px] text-muted-foreground mb-1.5">credits</div>
+                          <div className="text-sm font-semibold text-primary">
+                            ${p.price}
+                            {mode === "monthly" && <span className="text-[11px] text-muted-foreground font-normal">/mo</span>}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedPack && workspace?.id && (
+                    <div className="rounded-xl border border-border/60 p-4 bg-muted/20 space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        {mode === "once"
+                          ? "One-time purchase. Credits never expire and sit in your EngageIQ wallet until used."
+                          : "Charged monthly via PayPal. Credits added to your wallet on every renewal. Cancel anytime."}
+                      </p>
+                      <PayPalSmartButtons
+                        planId={selectedPack}
+                        workspaceId={workspace.id}
+                        onSuccess={() => {
+                          refetchCredits();
+                          setShowUpgradeModal(false);
+                          setSelectedPack(null);
+                          toast({ title: "Credits added", description: "Your SignalHire reveal credits are ready to use." });
+                        }}
+                      />
+                    </div>
+                  )}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+
+          <div className="mt-4 rounded-lg border border-border/40 bg-muted/20 p-3 flex items-start gap-3">
+            <KeyRound className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-foreground mb-0.5">Already paying SignalHire directly?</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Connect your live API key instead and reuse credits you already own — no extra fees.
               </p>
-              <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
-                See credit packs <Zap className="h-3 w-3" />
-              </span>
-            </button>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={() => { setShowUpgradeModal(false); setShowConnectModal(true); }}
+            >
+              Connect key
+            </Button>
           </div>
 
           <DialogFooter>
