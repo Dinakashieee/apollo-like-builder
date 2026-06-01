@@ -32,6 +32,8 @@ import { TeamSection } from "@/components/TeamSection";
 import { AddonsSection } from "@/components/AddonsSection";
 import { SenderSettingsCard } from "@/components/SenderSettingsCard";
 import { DemoDataCard } from "@/components/DemoDataCard";
+import { SignalHireTestButton } from "@/components/SignalHireTestButton";
+
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -278,6 +280,15 @@ john@engageiq.com  ·  +1 555 123 4567`}
           <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" />
         </div>
         <Button onClick={changePassword} variant="outline">Change password</Button>
+      </section>
+
+      {/* SignalHire integration */}
+      <section className="card-elevated p-6 space-y-3">
+        <h2 className="font-display font-bold text-lg text-primary-deep">SignalHire</h2>
+        <p className="text-sm text-muted-foreground">
+          Your SignalHire API key is connected. Run a test to confirm it can reach SignalHire and view remaining credits.
+        </p>
+        <SignalHireTestButton />
       </section>
 
 
