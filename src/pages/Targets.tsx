@@ -657,17 +657,17 @@ export default function Targets() {
                   <div className="flex flex-wrap items-center gap-1.5 mb-3">
                     {t.uses_ifs === true && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-success/10 text-success border border-success/30 rounded-full px-2 py-0.5">
-                        <ShieldCheck className="h-3 w-3" /> Existing IFS user
+                        <ShieldCheck className="h-3 w-3" /> Already uses {sellerCategoryLabel}
                       </span>
                     )}
                     {t.uses_ifs === false && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-warm/10 text-warm border border-warm/30 rounded-full px-2 py-0.5">
-                        <ShieldOff className="h-3 w-3" /> Not on IFS
+                        <ShieldOff className="h-3 w-3" /> Greenfield for {sellerCategoryLabel}
                       </span>
                     )}
                     {(t.uses_ifs === null || t.uses_ifs === undefined) && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-muted text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                        <HelpCircle className="h-3 w-3" /> IFS status unknown
+                        <HelpCircle className="h-3 w-3" /> {sellerCategoryLabel} usage unknown
                       </span>
                     )}
                     {t.current_systems?.map((s, j) => (
