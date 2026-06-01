@@ -314,10 +314,20 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       company.description,
       ...(products ?? []).flatMap((p: any) => [p.category, p.description]),
     ].filter(Boolean).join(" "));
+    // Seller-category tokens come from the seller's own profile, not a hardcoded vertical list.
+    // We still keep a list of well-known enterprise vendors so that IF the seller mentions one,
+    // we exclude that vendor from targets — but it does NOT bias non-enterprise sellers.
     const enterpriseVendors = ["ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"];
-    const providerSignals = ["implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator", "integrator", "consultancy", "consulting", "it services", "software development", "software vendor", "solution provider", "solutions provider", "managed service", "msp", "var", "partner", "digital transformation", "erp consultant", "crm consultant"];
+    const providerSignals = ["implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator", "integrator", "consultancy", "consulting", "it services", "software development", "software vendor", "solution provider", "solutions provider", "managed service", "msp", "var", "partner", "digital transformation"];
     const serviceNameSuffixes = ["technologies", "technology", "solutions", "systems", "services", "consulting", "consultancy", "labs", "digital", "infotech", "softlabs", "soft", "informatics", "softech", "tech", "global services", "softwares", "software"];
     const sellerVendorSignals = enterpriseVendors.filter((vendor) => offeringText.includes(normalize(vendor)));
+    // Seller-specific category keywords pulled from the profile itself (target_systems, product categories, product names)
+    const sellerCategoryTokens = Array.from(new Set(
+      [...sellerCategories, ...targetSystemsList, ...sellerProducts, sellerCategoryDescriptor]
+        .flatMap((s) => normalize(s).split(" "))
+        .filter((w) => w.length > 3)
+    ));
+    const sellerIsServicesFirm = providerSignals.some((s) => offeringText.includes(normalize(s)));
     const isCompetitor = (t: any): boolean => {
       const name = normalize(t.company ?? t.type);
       if (!name) return false;
@@ -326,26 +336,22 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       if (sellerName && (name.includes(sellerName) || sellerName.includes(name))) return true;
 
       const targetText = normalize([
-        t.company,
-        t.type,
-        t.website,
-        t.industry,
-        t.problem,
-        t.why,
-        ...(t.current_systems ?? []),
-        ...(t.focus_areas ?? []),
-        ...(t.designations ?? []),
+        t.company, t.type, t.website, t.industry, t.problem, t.why,
+        ...(t.current_systems ?? []), ...(t.focus_areas ?? []), ...(t.designations ?? []),
         ...((t.icp_contacts ?? []).flatMap((c: any) => [c?.role, c?.full_name])),
       ].filter(Boolean).join(" "));
 
       if (sellerVendorSignals.some((vendor) => name.includes(normalize(vendor)))) return true;
-      // Name ends with a services-firm suffix word
-      const nameTokens = name.split(" ").filter(Boolean);
-      const lastToken = nameTokens[nameTokens.length - 1] ?? "";
-      if (serviceNameSuffixes.includes(lastToken)) return true;
+      // Only strip "Services / Solutions / Consulting" named firms when the SELLER isn't itself one
+      if (!sellerIsServicesFirm) {
+        const nameTokens = name.split(" ").filter(Boolean);
+        const lastToken = nameTokens[nameTokens.length - 1] ?? "";
+        if (serviceNameSuffixes.includes(lastToken)) return true;
+      }
       const isProvider = providerSignals.some((signal) => targetText.includes(normalize(signal)));
-      const mentionsSellerCategory = sellerVendorSignals.some((vendor) => targetText.includes(normalize(vendor))) || /\berp\b|\bcrm\b|enterprise application|business software|cloud software/.test(targetText);
-      return isProvider && mentionsSellerCategory;
+      const mentionsSellerCategory = sellerVendorSignals.some((vendor) => targetText.includes(normalize(vendor)))
+        || sellerCategoryTokens.some((tok) => tok && targetText.includes(tok));
+      return !sellerIsServicesFirm && isProvider && mentionsSellerCategory;
     };
     if (Array.isArray(args.targets)) {
       args.targets = args.targets.filter((t: any) => !isCompetitor(t));
