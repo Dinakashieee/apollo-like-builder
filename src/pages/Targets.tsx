@@ -295,7 +295,7 @@ export default function Targets() {
 
   const waitForGenerationJob = async (jobId: string) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("target_generation_jobs")
         .select("id, status, progress, message, result, error")
         .eq("id", jobId)
@@ -527,10 +527,25 @@ export default function Targets() {
             ) : (
               <Sparkles className="h-4 w-4 mr-2" />
             )}
-            {loading ? "Analyzing market..." : "Generate with AI"}
+            {loading ? "Generating in background..." : "Generate with AI"}
           </Button>
         </div>
       </div>
+
+      {loading && (
+        <div className="card-elevated p-4 border-primary/20">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-sm font-semibold text-primary-deep">{generationStatus ?? "Analyzing market"}</p>
+            <span className="text-xs font-bold text-primary">{Math.max(5, generationProgress)}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-primary transition-all duration-500"
+              style={{ width: `${Math.max(5, Math.min(100, generationProgress))}%` }}
+            />
+          </div>
+        </div>
+      )}
 
 
       {!hasCompany && (
