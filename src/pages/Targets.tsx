@@ -753,7 +753,7 @@ export default function Targets() {
                   <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Crosshair className="h-3 w-3" /> Their problem</span>
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Users className="h-3 w-3" /> {t.icp_contacts?.length ?? 0} ICP contacts</span>
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn URLs</span>
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn + SignalHire</span>
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><ExternalLink className="h-3 w-3" /> {t.references?.length ?? 0} references</span>
                   </div>
                 </div>
