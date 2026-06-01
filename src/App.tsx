@@ -32,6 +32,7 @@ import Admin from "./pages/Admin";
 import Reminders from "./pages/Reminders";
 import GettingStarted from "./pages/GettingStarted";
 import SignalHire from "./pages/SignalHire";
+import EmailHealth from "./pages/EmailHealth";
 
 
 const queryClient = new QueryClient();
