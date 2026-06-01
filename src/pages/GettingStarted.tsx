@@ -209,28 +209,6 @@ export default function GettingStarted() {
         </Card>
       </div>
 
-      {/* Product tour dialog */}
-      <Dialog open={tourOpen} onOpenChange={setTourOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Play className="h-5 w-5 text-primary" /> Product tour
-            </DialogTitle>
-          </DialogHeader>
-          <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-              title="EngageIQ product tour"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Prefer a guided walk-through? <Link to="/app/help" className="text-primary underline" onClick={() => setTourOpen(false)}>Open the Help Center</Link> or <Link to="/app/support" className="text-primary underline" onClick={() => setTourOpen(false)}>chat with support</Link>.
-          </p>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
