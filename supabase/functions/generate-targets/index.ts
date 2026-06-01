@@ -17,11 +17,14 @@ interface ResearchSource {
 async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource[]> {
   const key = Deno.env.get("FIRECRAWL_API_KEY");
   if (!key) return [];
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => ctrl.abort(), 8000); // hard cap so slow searches don't stall generation
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({ query, limit, tbs: "qdr:y" }),
+      signal: ctrl.signal,
     });
     if (!r.ok) return [];
     const data = await r.json();
@@ -46,8 +49,11 @@ async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource
       .filter((s: ResearchSource) => s.url);
   } catch {
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -107,31 +113,24 @@ serve(async (req) => {
     const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
     const year = new Date().getFullYear();
 
+    // Slim, sharper queries — fewer round trips = much faster generation.
     const queries = isReplace
       ? [
-          `${topic} enterprise customers hiring ${year}`,
-          `${topic} digital transformation case study ${year}`,
-          `site:linkedin.com/company ${topic} ${year}`,
-          `${topic} funding expansion announcement ${year}`,
-          `${topic} ${sellerCategoryDescriptor} adoption ${year} filetype:pdf`,
+          `${topic} ${sellerCategoryDescriptor} customer ${year}`,
+          `${topic} funding OR hiring OR expansion ${year}`,
         ]
       : [
           `${topic} top companies ${year}`,
-          `${topic} market leaders ${year} filetype:pdf`,
-          `${topic} largest enterprises ${year} annual report filetype:pdf`,
-          `${topic} digital transformation case study ${year}`,
-          `${topic} customers list reference ${year}`,
-          `${topic} ${sellerCategoryDescriptor} industry analysis ${year} filetype:pdf`,
+          `${topic} ${sellerCategoryDescriptor} customers ${year}`,
           `site:linkedin.com/company ${topic}`,
-          `site:linkedin.com/pulse ${topic} ${year}`,
-          `${topic} hiring decision makers ${year}`,
-          `${topic} M&A OR acquisition OR funding ${year}`,
+          `${topic} funding OR M&A OR expansion ${year}`,
         ];
 
-    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 6)));
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
     const dedup = new Map<string, ResearchSource>();
     researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
-    const sources = Array.from(dedup.values()).slice(0, 40);
+    const sources = Array.from(dedup.values()).slice(0, 20);
+
 
     const sourcesBlock = sources.length
       ? sources.map((s, i) => `[${i + 1}] (${s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
@@ -187,7 +186,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
