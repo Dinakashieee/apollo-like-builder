@@ -191,7 +191,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash",
+        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
