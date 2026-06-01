@@ -95,20 +95,29 @@ serve(async (req) => {
 
     const queries = isReplace
       ? [
-          `${topic} companies hiring ${year}`,
+          `${topic} enterprise customers hiring ${year}`,
+          `${topic} digital transformation case study ${year}`,
           `site:linkedin.com/company ${topic} ${year}`,
+          `${topic} funding expansion announcement ${year}`,
+          `${topic} ERP migration OR implementation ${year} filetype:pdf`,
         ]
       : [
           `${topic} top companies ${year}`,
           `${topic} market leaders ${year} filetype:pdf`,
+          `${topic} largest enterprises ${year} annual report filetype:pdf`,
+          `${topic} digital transformation case study ${year}`,
+          `${topic} customers list reference ${year}`,
+          `${topic} industry analysis Gartner OR Forrester ${year} filetype:pdf`,
           `site:linkedin.com/company ${topic}`,
           `site:linkedin.com/pulse ${topic} ${year}`,
+          `${topic} hiring CIO OR CTO OR "head of IT" ${year}`,
+          `${topic} M&A OR acquisition OR funding ${year}`,
         ];
 
-    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 6)));
     const dedup = new Map<string, ResearchSource>();
     researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
-    const sources = Array.from(dedup.values()).slice(0, 20);
+    const sources = Array.from(dedup.values()).slice(0, 40);
 
     const sourcesBlock = sources.length
       ? sources.map((s, i) => `[${i + 1}] (${s.type}) ${s.title}\n    ${s.url}\n    ${s.snippet}`).join("\n")
@@ -163,7 +172,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: "You are a B2B market analyst for enterprise applications. Pick real target companies and competitors, grounded in the live sources provided. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links." },
           { role: "user", content: userPrompt },
