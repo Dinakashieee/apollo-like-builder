@@ -14,15 +14,7 @@ import {
   Target,
   Brain,
   Building2,
-  Play,
 } from "lucide-react";
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const steps = [
   {
