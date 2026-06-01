@@ -301,11 +301,26 @@ export function LeadEmailComposerPanel({ lead }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/60">
+        <div className="flex items-center justify-between pt-3 border-t border-border/60 gap-2 flex-wrap">
           <p className="text-[11px] text-muted-foreground">{body.length} characters</p>
-          <Button size="sm" onClick={send} disabled={!subject && !body}>
-            <Send className="h-3.5 w-3.5 mr-1.5" /> Send via {mailClient === "gmail" ? "Gmail" : mailClient === "outlook" ? "Outlook" : "mail client"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={openInClient} disabled={!subject && !body}>
+              Open in {mailClient === "gmail" ? "Gmail" : mailClient === "outlook" ? "Outlook" : "mail client"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={sendDirect}
+              disabled={sending || (!subject && !body)}
+              className="bg-gradient-primary shadow-glow"
+            >
+              {sending ? (
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              {sending ? "Sending..." : "Send now"}
+            </Button>
+          </div>
         </div>
 
         {lead?.country && findCountry(lead.country) && (
