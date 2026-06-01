@@ -20,6 +20,10 @@ import {
   KeyRound,
   ExternalLink,
   CheckCircle2,
+  FileSpreadsheet,
+  FileText,
+  Zap,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +38,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -44,25 +54,26 @@ type Lead = {
   initials: string;
   company: string;
   role: string;
+  email: string;
   status: "valid" | "guess" | "invalid";
 };
 
 const MOCK_LEADS: Lead[] = [
-  { id: "1", name: "Emily Gilbert", initials: "EG", company: "Apple", role: "Email Marketing Manager", status: "valid" },
-  { id: "2", name: "Emmet Morse", initials: "EM", company: "Google", role: "Senior Manager, Marketing", status: "valid" },
-  { id: "3", name: "Emma Watkins", initials: "EW", company: "Apple", role: "SEO Analyst", status: "valid" },
-  { id: "4", name: "Ella Ming Son", initials: "EM", company: "Meta", role: "Outbound Sales Executive", status: "valid" },
-  { id: "5", name: "Monique Smith", initials: "MS", company: "Google", role: "Copywriter, Lifestyle Creative", status: "valid" },
-  { id: "6", name: "Martha Hutchinson", initials: "MH", company: "Uber", role: "Marketing Director", status: "valid" },
-  { id: "7", name: "Ryan Tuotso", initials: "RT", company: "Accenture", role: "Senior Global Product Marketer", status: "valid" },
-  { id: "8", name: "Marcus Delight", initials: "MD", company: "Accenture", role: "Head of Product, Accounting", status: "valid" },
-  { id: "9", name: "Daniella Rashford", initials: "DR", company: "Santander", role: "Lead Product Designer", status: "valid" },
-  { id: "10", name: "Marcus Ndubusi", initials: "MN", company: "Accenture", role: "Lead Product Designer", status: "valid" },
-  { id: "11", name: "Sophia Bennett", initials: "SB", company: "Stripe", role: "Growth Marketing Lead", status: "valid" },
-  { id: "12", name: "Liam Carter", initials: "LC", company: "Airbnb", role: "Sr. Product Manager", status: "valid" },
+  { id: "1", name: "Emily Gilbert", initials: "EG", company: "Apple", role: "Email Marketing Manager", email: "emily.gilbert@apple.com", status: "valid" },
+  { id: "2", name: "Emmet Morse", initials: "EM", company: "Google", role: "Senior Manager, Marketing", email: "emmet.morse@google.com", status: "valid" },
+  { id: "3", name: "Emma Watkins", initials: "EW", company: "Apple", role: "SEO Analyst", email: "emma.watkins@apple.com", status: "valid" },
+  { id: "4", name: "Ella Ming Son", initials: "EM", company: "Meta", role: "Outbound Sales Executive", email: "ella.son@meta.com", status: "valid" },
+  { id: "5", name: "Monique Smith", initials: "MS", company: "Google", role: "Copywriter, Lifestyle Creative", email: "monique.smith@google.com", status: "valid" },
+  { id: "6", name: "Martha Hutchinson", initials: "MH", company: "Uber", role: "Marketing Director", email: "martha.h@uber.com", status: "valid" },
+  { id: "7", name: "Ryan Tuotso", initials: "RT", company: "Accenture", role: "Senior Global Product Marketer", email: "ryan.tuotso@accenture.com", status: "valid" },
+  { id: "8", name: "Marcus Delight", initials: "MD", company: "Accenture", role: "Head of Product, Accounting", email: "marcus.d@accenture.com", status: "valid" },
+  { id: "9", name: "Daniella Rashford", initials: "DR", company: "Santander", role: "Lead Product Designer", email: "daniella.r@santander.com", status: "valid" },
+  { id: "10", name: "Marcus Ndubusi", initials: "MN", company: "Accenture", role: "Lead Product Designer", email: "marcus.n@accenture.com", status: "valid" },
+  { id: "11", name: "Sophia Bennett", initials: "SB", company: "Stripe", role: "Growth Marketing Lead", email: "sophia.bennett@stripe.com", status: "valid" },
+  { id: "12", name: "Liam Carter", initials: "LC", company: "Airbnb", role: "Sr. Product Manager", email: "liam.carter@airbnb.com", status: "valid" },
 ];
 
-const LISTS = [
+const INITIAL_LISTS = [
   { name: "LinkedIn Leads", count: 100000 },
   { name: "Outbound Q1", count: 12480 },
   { name: "Enterprise ICP", count: 4320 },
@@ -97,13 +108,64 @@ function EmailBar() {
   );
 }
 
+function downloadFile(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function leadsToCSV(leads: Lead[]) {
+  const header = ["Name", "Company", "Email", "Job Role", "Status"];
+  const rows = leads.map((l) =>
+    [l.name, l.company, l.email, l.role, l.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+  );
+  return [header.join(","), ...rows].join("\n");
+}
+
+function leadsToXLS(leads: Lead[]) {
+  // Excel-readable XML spreadsheet (.xls)
+  const rows = leads
+    .map(
+      (l) => `<Row>
+        <Cell><Data ss:Type="String">${l.name}</Data></Cell>
+        <Cell><Data ss:Type="String">${l.company}</Data></Cell>
+        <Cell><Data ss:Type="String">${l.email}</Data></Cell>
+        <Cell><Data ss:Type="String">${l.role}</Data></Cell>
+        <Cell><Data ss:Type="String">${l.status}</Data></Cell>
+      </Row>`
+    )
+    .join("");
+  return `<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Worksheet ss:Name="Leads"><Table>
+<Row>
+  <Cell><Data ss:Type="String">Name</Data></Cell>
+  <Cell><Data ss:Type="String">Company</Data></Cell>
+  <Cell><Data ss:Type="String">Email</Data></Cell>
+  <Cell><Data ss:Type="String">Job Role</Data></Cell>
+  <Cell><Data ss:Type="String">Status</Data></Cell>
+</Row>
+${rows}
+</Table></Worksheet></Workbook>`;
+}
+
 export default function SignalHire() {
+  const [lists, setLists] = useState(INITIAL_LISTS);
   const [activeList, setActiveList] = useState("LinkedIn Leads");
   const [selected, setSelected] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters] = useState(true);
   const [filtersExpanded, setFiltersExpanded] = useState(true);
   const [query, setQuery] = useState("");
+  const [listSearch, setListSearch] = useState("");
+  const [activeRail, setActiveRail] = useState("Lists");
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [connected, setConnected] = useState(false);
   const [apiKey, setApiKey] = useState("");
 
@@ -125,6 +187,11 @@ export default function SignalHire() {
     );
   }, [query]);
 
+  const visibleLists = useMemo(() => {
+    if (!listSearch) return lists;
+    return lists.filter((l) => l.name.toLowerCase().includes(listSearch.toLowerCase()));
+  }, [lists, listSearch]);
+
   const allSelected = selected.length === filtered.length && filtered.length > 0;
   const toggleAll = () => setSelected(allSelected ? [] : filtered.map((l) => l.id));
   const toggleOne = (id: string) =>
@@ -136,18 +203,67 @@ export default function SignalHire() {
 
   const handleConnect = () => {
     if (!apiKey.trim()) {
-      toast({ title: "API key required", description: "Paste your SignalHire API key to connect.", variant: "destructive" });
+      toast({ title: "API key required", description: "Paste your live SignalHire API key to connect.", variant: "destructive" });
       return;
     }
     localStorage.setItem("signalhire_connected", "true");
     setConnected(true);
     setShowConnectModal(false);
-    toast({ title: "SignalHire connected", description: "Your account is now linked. Credits will sync shortly." });
+    setShowUpgradeModal(false);
+    toast({ title: "SignalHire connected", description: "Your live account is now linked. Credits will sync shortly." });
   };
 
   const handleDismiss = () => {
     localStorage.setItem("signalhire_connect_dismissed", "true");
     setShowConnectModal(false);
+  };
+
+  const exportLeads = (format: "csv" | "xls") => {
+    const rows = selected.length > 0 ? filtered.filter((l) => selected.includes(l.id)) : filtered;
+    if (format === "csv") {
+      downloadFile(`${activeList.replace(/\s+/g, "_")}.csv`, leadsToCSV(rows), "text/csv");
+    } else {
+      downloadFile(`${activeList.replace(/\s+/g, "_")}.xls`, leadsToXLS(rows), "application/vnd.ms-excel");
+    }
+    toast({ title: "Export ready", description: `${rows.length} leads exported as ${format.toUpperCase()}.` });
+  };
+
+  const handleNewList = () => {
+    const name = window.prompt("Name your new list");
+    if (!name?.trim()) return;
+    setLists((l) => [...l, { name: name.trim(), count: 0 }]);
+    setActiveList(name.trim());
+    toast({ title: "List created", description: `${name.trim()} is ready.` });
+  };
+
+  const handleDeleteList = () => {
+    if (lists.length <= 1) {
+      toast({ title: "Cannot delete", description: "Keep at least one list.", variant: "destructive" });
+      return;
+    }
+    setLists((l) => l.filter((x) => x.name !== activeList));
+    const next = lists.find((x) => x.name !== activeList);
+    if (next) setActiveList(next.name);
+    toast({ title: "List deleted" });
+  };
+
+  const handleCrmSync = () => {
+    if (selected.length === 0) return;
+    toast({ title: "CRM sync started", description: `Syncing ${selected.length} leads to your CRM.` });
+  };
+
+  const handleDeleteLeads = () => {
+    if (selected.length === 0) return;
+    toast({ title: "Leads removed", description: `${selected.length} leads removed from this list.` });
+    setSelected([]);
+  };
+
+  const handleEnrich = () => {
+    toast({ title: "Enrichment queued", description: "We're enriching these leads with verified contact data." });
+  };
+
+  const handleSearch = () => {
+    toast({ title: "Search running", description: "Pulling matching leads from SignalHire." });
   };
 
   return (
@@ -171,8 +287,8 @@ export default function SignalHire() {
               <KeyRound className="h-4 w-4" /> Connect SignalHire
             </Button>
           )}
-          <Button size="sm" className="gap-2">
-            <Sparkles className="h-4 w-4" /> Upgrade
+          <Button size="sm" className="gap-2" onClick={() => setShowUpgradeModal(true)}>
+            <Sparkles className="h-4 w-4" /> Upgrade Account
           </Button>
         </div>
       </div>
@@ -190,7 +306,17 @@ export default function SignalHire() {
             <div className="h-full bg-primary" style={{ width: `${creditsPct}%` }} />
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="text-primary gap-1.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-primary gap-1.5"
+          onClick={() =>
+            toast({
+              title: "How credits work",
+              description: "1 credit = 1 verified email reveal. Buy more or connect your own SignalHire API key to reuse existing credits.",
+            })
+          }
+        >
           <HelpCircle className="h-3.5 w-3.5" /> How credits work
         </Button>
       </div>
@@ -202,16 +328,20 @@ export default function SignalHire() {
           <div className="border-r border-border/60 py-4 flex flex-col items-center gap-2 bg-muted/20">
             {[
               { icon: Building2, label: "Companies" },
-              { icon: ListChecks, label: "Lists", active: true },
+              { icon: ListChecks, label: "Lists" },
               { icon: Search, label: "Search" },
               { icon: AtSign, label: "Email" },
-            ].map(({ icon: Icon, label, active }) => (
+            ].map(({ icon: Icon, label }) => (
               <button
                 key={label}
                 title={label}
+                onClick={() => {
+                  setActiveRail(label);
+                  if (label !== "Lists") toast({ title: label, description: `${label} workspace coming up.` });
+                }}
                 className={cn(
-                  "h-9 w-9 rounded-lg grid place-items-center transition-colors",
-                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  "h-9 w-9 rounded-lg grid place-items-center transition-colors active:scale-95",
+                  activeRail === label ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -222,24 +352,34 @@ export default function SignalHire() {
           {/* Lists column */}
           <div className="border-r border-border/60 p-4 relative">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">All Lists ({LISTS.length})</h2>
-              <button className="text-xs font-medium text-primary hover:underline">Export</button>
+              <h2 className="text-sm font-semibold">All Lists ({lists.length})</h2>
+              <button
+                onClick={() => exportLeads("csv")}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Export
+              </button>
             </div>
             <div className="relative mb-3">
               <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search lists" className="pl-8 h-9 bg-muted/30 border-border/60" />
+              <Input
+                value={listSearch}
+                onChange={(e) => setListSearch(e.target.value)}
+                placeholder="Search lists"
+                className="pl-8 h-9 bg-muted/30 border-border/60"
+              />
             </div>
-            <Button className="w-full mb-4 gap-2" size="sm">
+            <Button className="w-full mb-4 gap-2" size="sm" onClick={handleNewList}>
               <Plus className="h-4 w-4" /> New List
             </Button>
 
             <div className="space-y-1">
-              {LISTS.map((list) => (
+              {visibleLists.map((list) => (
                 <button
                   key={list.name}
                   onClick={() => setActiveList(list.name)}
                   className={cn(
-                    "w-full text-left px-3 py-2.5 rounded-lg text-sm flex items-center justify-between transition-colors",
+                    "w-full text-left px-3 py-2.5 rounded-lg text-sm flex items-center justify-between transition-colors active:scale-[0.99]",
                     activeList === list.name
                       ? "bg-primary/10 text-primary font-medium"
                       : "hover:bg-muted text-foreground/80"
@@ -275,7 +415,12 @@ export default function SignalHire() {
                       <span className="text-xs font-semibold flex items-center gap-1.5">
                         <Filter className="h-3 w-3" /> Filters
                       </span>
-                      <button className="text-[11px] font-medium text-primary hover:underline">Reset</button>
+                      <button
+                        onClick={() => toast({ title: "Filters reset" })}
+                        className="text-[11px] font-medium text-primary hover:underline"
+                      >
+                        Reset
+                      </button>
                     </div>
 
                     <button
@@ -310,7 +455,7 @@ export default function SignalHire() {
                     )}
 
                     <div className="p-2.5 border-t border-border/60 bg-muted/20 rounded-b-xl">
-                      <Button className="w-full" size="sm">Search</Button>
+                      <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
                     </div>
                   </TabsContent>
 
@@ -323,7 +468,7 @@ export default function SignalHire() {
                       <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Industry</label>
                       <Input placeholder="SaaS" className="h-8 text-xs" />
                     </div>
-                    <Button className="w-full" size="sm">Search</Button>
+                    <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
                   </TabsContent>
                 </Tabs>
               </div>
@@ -335,26 +480,66 @@ export default function SignalHire() {
             <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold">{activeList}</h2>
-                <button className="text-muted-foreground hover:text-foreground">
+                <button
+                  onClick={() => {
+                    const next = window.prompt("Rename list", activeList);
+                    if (next?.trim()) {
+                      setLists((l) => l.map((x) => (x.name === activeList ? { ...x, name: next.trim() } : x)));
+                      setActiveList(next.trim());
+                    }
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
               </div>
               <div className="flex items-center gap-1.5">
-                {[
-                  { icon: Sparkles, label: "Enrich" },
-                  { icon: Building2, label: "Companies" },
-                  { icon: ArrowLeftRight, label: "Sync" },
-                  { icon: Download, label: "Export" },
-                  { icon: Trash2, label: "Delete" },
-                ].map(({ icon: Icon, label }) => (
-                  <button
-                    key={label}
-                    title={label}
-                    className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                  </button>
-                ))}
+                <button
+                  onClick={handleEnrich}
+                  title="Enrich"
+                  className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors active:scale-95"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => toast({ title: "Company view", description: "Grouping leads by company." })}
+                  title="Companies"
+                  className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors active:scale-95"
+                >
+                  <Building2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={handleCrmSync}
+                  title="CRM Sync"
+                  className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors active:scale-95"
+                >
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      title="Export"
+                      className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors active:scale-95"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => exportLeads("xls")} className="gap-2">
+                      <FileSpreadsheet className="h-4 w-4 text-success" /> Excel (.xls)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportLeads("csv")} className="gap-2">
+                      <FileText className="h-4 w-4 text-primary" /> CSV (.csv)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <button
+                  onClick={handleDeleteList}
+                  title="Delete list"
+                  className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors active:scale-95"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
 
@@ -373,10 +558,10 @@ export default function SignalHire() {
                     className="pl-8 h-9 w-[220px] bg-muted/30 border-border/60"
                   />
                 </div>
-                <Button variant="outline" size="sm" className="gap-2" disabled={selected.length === 0}>
+                <Button variant="outline" size="sm" className="gap-2" disabled={selected.length === 0} onClick={handleCrmSync}>
                   <ArrowLeftRight className="h-3.5 w-3.5" /> CRM Sync
                 </Button>
-                <Button variant="outline" size="sm" disabled={selected.length === 0}>
+                <Button variant="outline" size="sm" disabled={selected.length === 0} onClick={handleDeleteLeads}>
                   Delete
                 </Button>
               </div>
@@ -398,11 +583,13 @@ export default function SignalHire() {
                 {filtered.map((lead) => (
                   <div
                     key={lead.id}
-                    className="grid grid-cols-[40px_1.4fr_1fr_1.6fr_0.9fr_1.6fr] items-center px-4 py-3 hover:bg-muted/30 transition-colors"
+                    className="grid grid-cols-[40px_1.4fr_1fr_1.6fr_0.9fr_1.6fr] items-center px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => toggleOne(lead.id)}
                   >
                     <Checkbox
                       checked={selected.includes(lead.id)}
                       onCheckedChange={() => toggleOne(lead.id)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Avatar initials={lead.initials} />
@@ -420,7 +607,7 @@ export default function SignalHire() {
             </div>
 
             <p className="text-xs text-muted-foreground mt-4">
-              Claim leads pulled from SignalHire's database. Filter by role, company, or location and sync directly to your CRM.
+              Claim leads pulled from SignalHire's live database. Filter by role, company, or location and sync directly to your CRM.
             </p>
           </div>
         </div>
@@ -433,9 +620,9 @@ export default function SignalHire() {
             <div className="h-11 w-11 rounded-xl bg-primary/10 grid place-items-center mb-2">
               <KeyRound className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle className="text-xl">Connect your SignalHire account</DialogTitle>
+            <DialogTitle className="text-xl">Connect your live SignalHire account</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              We support the SignalHire API directly inside EngageIQ. Connect your account
+              We support the SignalHire API directly inside EngageIQ. Connect your live account
               to claim leads, pull verified emails, and sync them to your CRM — all without leaving the platform.
             </DialogDescription>
           </DialogHeader>
@@ -457,13 +644,13 @@ export default function SignalHire() {
             </div>
 
             <div>
-              <Label htmlFor="sh-api-key" className="text-xs font-semibold">SignalHire API Key</Label>
+              <Label htmlFor="sh-api-key" className="text-xs font-semibold">SignalHire Live API Key</Label>
               <Input
                 id="sh-api-key"
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sh_live_..."
+                placeholder="Paste your live API key"
                 className="mt-1.5"
               />
               <a
@@ -483,6 +670,67 @@ export default function SignalHire() {
             </Button>
             <Button onClick={handleConnect} className="gap-2">
               <KeyRound className="h-4 w-4" /> Connect
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Account Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="sm:max-w-[540px]">
+          <DialogHeader>
+            <div className="h-11 w-11 rounded-xl bg-primary/10 grid place-items-center mb-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <DialogTitle className="text-xl">Get more SignalHire credits</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              You have two ways to keep claiming verified leads inside EngageIQ. Pick whichever works for your team.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid sm:grid-cols-2 gap-3 py-2">
+            <button
+              onClick={() => {
+                setShowUpgradeModal(false);
+                setShowConnectModal(true);
+              }}
+              className="text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 p-4 transition-all active:scale-[0.98]"
+            >
+              <div className="h-9 w-9 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                <KeyRound className="h-4 w-4 text-primary" />
+              </div>
+              <h3 className="text-sm font-semibold mb-1">Connect your SignalHire API</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                Already pay SignalHire? Plug in your live API key and reuse every credit you already own — no extra fees.
+              </p>
+              <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
+                Connect API <ExternalLink className="h-3 w-3" />
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowUpgradeModal(false);
+                toast({ title: "Opening credit packs", description: "Choose a credit pack — billed through EngageIQ, no SignalHire account needed." });
+              }}
+              className="text-left rounded-xl border border-border hover:border-primary hover:bg-primary/5 p-4 transition-all active:scale-[0.98]"
+            >
+              <div className="h-9 w-9 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                <ShoppingCart className="h-4 w-4 text-primary" />
+              </div>
+              <h3 className="text-sm font-semibold mb-1">Buy credits from EngageIQ</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                No SignalHire account? Purchase credits directly from us — same verified data, billed on your EngageIQ invoice.
+              </p>
+              <span className="text-xs font-semibold text-primary inline-flex items-center gap-1">
+                See credit packs <Zap className="h-3 w-3" />
+              </span>
+            </button>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowUpgradeModal(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
