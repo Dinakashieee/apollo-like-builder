@@ -62,6 +62,7 @@ const App = () => (
                   <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
                   <Route path="signalhire" element={<SignalHire />} />
+                  <Route path="email-health" element={<EmailHealth />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
                   <Route path="targets" element={<Targets />} />
