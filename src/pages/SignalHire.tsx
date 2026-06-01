@@ -204,9 +204,9 @@ export default function SignalHire() {
   const toggleOne = (id: string) =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
-  const creditsUsed = 1455;
-  const creditsTotal = 150000;
-  const creditsPct = (creditsUsed / creditsTotal) * 100;
+  const creditsUsed = Math.max(0, lifetimePurchased - signalhireBalance);
+  const creditsTotal = Math.max(lifetimePurchased, signalhireBalance, 0);
+  const creditsPct = creditsTotal > 0 ? (creditsUsed / creditsTotal) * 100 : 0;
 
   const handleConnect = () => {
     if (!apiKey.trim()) {
