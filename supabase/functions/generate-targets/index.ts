@@ -226,7 +226,7 @@ TARGETS MUST BE END-CUSTOMERS that fit the seller's actual ICP based on the prof
 QUALITY BAR — each target must include:
 - Real, verifiable company name + correct primary website
 - A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — written in the language of the seller's category (NOT generic "needs modernization")
-- Real named ICP contacts with real /in/ LinkedIn URLs — if you cannot verify, return FEWER contacts rather than fabricate
+- Real named ICP contacts pulled from **LinkedIn profiles** (real /in/ URLs) and cross-referenced with the **SignalHire subscription database** for verified work emails — if you cannot verify a contact on LinkedIn, return FEWER contacts rather than fabricate. Every contact MUST have a real /in/ LinkedIn URL.
 - 1-3 references that are real, working URLs (LinkedIn company page, recent post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.
 - 'uses_ifs' field actually means "is this target already using something in the seller's category?" — true if they already run a competing/adjacent product (potential rip-and-replace), false if they are a greenfield opportunity, null if unknown.`;
     const sourcingGuidance = `Use the LIVE SOURCES below as primary evidence. APPsRunTheWorld priority sources are the strongest signals for verified software customers / installed-base clues and should be used before generic web results when relevant. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock, Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -489,6 +489,64 @@ export default function Targets() {
     setAddingNew(false);
   };
 
+  // Always keep at least 5 fresh targets in the pipeline. Tops up on mount (refresh)
+  // and again every 5 minutes — sourced from LinkedIn + the SignalHire subscription.
+  const MIN_TARGETS = 5;
+  const TOP_UP_INTERVAL_MS = 5 * 60 * 1000;
+  const topUpInFlight = useRef(false);
+  const topUpToMinimum = async () => {
+    if (!current || !hasCompany) return;
+    if (topUpInFlight.current) return;
+    if (loading) return;
+    topUpInFlight.current = true;
+    try {
+      let safety = 8;
+      while (safety-- > 0) {
+        const currentCount = targetsRef.current.length;
+        if (currentCount >= MIN_TARGETS) break;
+        const existingNames = new Set(
+          targetsRef.current.map((t) => (t.company ?? t.type ?? "").toLowerCase()).filter(Boolean)
+        );
+        let replacement: TargetCompany | undefined;
+        try {
+          replacement = await fetchReplacementTarget();
+        } catch {
+          break;
+        }
+        if (!replacement) break;
+        const nm = (replacement.company ?? replacement.type ?? "").toLowerCase();
+        if (nm && existingNames.has(nm)) continue;
+        const nextTargets = [...targetsRef.current, replacement];
+        setTargets(nextTargets);
+        persist(similar, nextTargets);
+      }
+    } finally {
+      topUpInFlight.current = false;
+    }
+  };
+
+  // Keep a ref to the latest targets array so the async loop doesn't restart on every state change.
+  const targetsRef = useRef<TargetCompany[]>([]);
+  useEffect(() => {
+    targetsRef.current = targets;
+  }, [targets]);
+
+  // Top up on mount / refresh once company context is available.
+  useEffect(() => {
+    if (!current || !hasCompany) return;
+    if (targets.length >= MIN_TARGETS) return;
+    void topUpToMinimum();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, hasCompany]);
+
+  // Top up every 5 minutes — guarantees ≥5 fresh leads in the pipeline.
+  useEffect(() => {
+    if (!current || !hasCompany) return;
+    const id = setInterval(() => { void topUpToMinimum(); }, TOP_UP_INTERVAL_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, hasCompany]);
+
   return (
     <div className="p-6 lg:p-8 space-y-8 animate-fade-in">
       {/* Hero header */}
@@ -753,7 +811,7 @@ export default function Targets() {
                   <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Crosshair className="h-3 w-3" /> Their problem</span>
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Users className="h-3 w-3" /> {t.icp_contacts?.length ?? 0} ICP contacts</span>
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn URLs</span>
+                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn + SignalHire</span>
                     <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><ExternalLink className="h-3 w-3" /> {t.references?.length ?? 0} references</span>
                   </div>
                 </div>
