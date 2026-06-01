@@ -225,10 +225,15 @@ TARGETS MUST BE END-CUSTOMERS that fit the seller's actual ICP based on the prof
 
 QUALITY BAR — each target must include:
 - Real, verifiable company name + correct primary website
-- A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — written in the language of the seller's category (NOT generic "needs modernization")
+- A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — written in the language of the seller's category (NOT generic "needs modernization"). Mine the target's website, LinkedIn posts, press releases, job ads, annual reports, and news mentions for the pain.
 - Real named ICP contacts pulled from **LinkedIn profiles** (real /in/ URLs) and cross-referenced with the **SignalHire subscription database** for verified work emails — if you cannot verify a contact on LinkedIn, return FEWER contacts rather than fabricate. Every contact MUST have a real /in/ LinkedIn URL.
 - 1-3 references that are real, working URLs (LinkedIn company page, recent post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.
-- 'uses_ifs' field actually means "is this target already using something in the seller's category?" — true if they already run a competing/adjacent product (potential rip-and-replace), false if they are a greenfield opportunity, null if unknown.`;
+- 'uses_ifs' field actually means "is this target already using something in the seller's category?" — true if they already run a competing/adjacent product (potential rip-and-replace / partnership-switch), false if they are a greenfield / net-new opportunity, null if unknown.
+- 'current_systems' — list the actual named products/services they currently use that overlap with what THIS seller offers (e.g. "Salesforce CRM", "SAP S/4HANA", "HubSpot Marketing Hub"). Pull from job ads, case studies, vendor logo pages, integration listings, tech-stack databases. Do NOT invent.
+- 'pitch_angle' — one of "switch" (already on a competing product → pitch partnership change / migration / consolidation), "expansion" (already a customer of a similar product → pitch add-on / replacement of a module), "greenfield" (no current solution → pitch net-new adoption). Derive from current_systems + uses_ifs.
+- 'pain_points' — 2-4 SPECIFIC pains inferred from public evidence (e.g. "scaling support team after Series B — legacy ticketing can't handle multilingual queues", "M&A integration of 3 ERPs creates duplicate master data"). Tie each pain to a source when possible. Never generic.
+- 'talking_points' — 3-5 ready-to-use conversation openers the seller can drop straight into an email. Each line must reference a SPECIFIC fact about the target (a hire, launch, funding, post, tech-stack item) and connect it to the seller's product. Write them in first-person sales voice, e.g. "Saw your VP Engineering post about migrating off Zendesk — we helped [similar company] cut response time 38% on the same move." Output as an array of standalone sentences.`;
+
     const sourcingGuidance = `Use the LIVE SOURCES below as primary evidence. APPsRunTheWorld priority sources are the strongest signals for verified software customers / installed-base clues and should be used before generic web results when relevant. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.
 
 Cross-check rule: mark a target as level "high" only when it is supported by either (a) an APPsRunTheWorld priority source plus another credible source, or (b) two independent credible non-ART sources. If a company only appears in weak/generic search results, downgrade to medium/low or omit it.
@@ -244,7 +249,7 @@ LIVE SOURCES:
 ${sourcesBlock}
 
 Suggest exactly ONE NEW real specific END-CUSTOMER company this seller should target — matched to the seller's actual ICP from the profile above. It must be DIFFERENT from: ${excludeList.join(", ") || "(none)"}.
-Include real name, website, uses_ifs guess (true if they already run something in the seller's category, false if greenfield, null if unknown), 2-5 current_systems they actually run that are relevant to the seller, a SPECIFIC problem tied to a recent public event written in the seller's category language, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 real verifiable references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
+Include real name, website, uses_ifs guess, 2-5 current_systems they ACTUALLY run (named products that overlap with the seller's category), pitch_angle ("switch" | "expansion" | "greenfield"), a SPECIFIC problem tied to a recent public event, 2-4 pain_points grounded in public evidence, 3-5 ready-to-use talking_points the seller can paste into an email, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 real verifiable references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
       : `${baseContext}
 
 ${sourcingGuidance}
@@ -252,7 +257,17 @@ ${sourcingGuidance}
 LIVE SOURCES:
 ${sourcesBlock}
 
-Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category). For each target: real name & website, uses_ifs (true if they already run something in the seller's category — i.e. rip-and-replace opportunity, false if greenfield, null if unknown), 2-5 current_systems they actually run relevant to the seller's offering, a SPECIFIC problem grounded in a recent public event (funding, hiring, M&A, expansion, regulation) written in the seller's category language, why-you-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references. For similar/competitors: 3-5 real direct competitors of THIS seller's offering (whatever category that is) with strengths/weaknesses/your_advantage and 1-2 references each.`;
+Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category).
+For each target include:
+- company, website, industry, size
+- uses_ifs (true = already on a competing/adjacent product → partnership-switch / rip-and-replace; false = greenfield / net-new; null = unknown)
+- current_systems: 2-5 NAMED products they actually run that overlap with the seller's offering (pull from job ads, case studies, integration pages, vendor logo pages)
+- pitch_angle: "switch" | "expansion" | "greenfield" derived from current_systems + uses_ifs
+- problem: SPECIFIC, tied to a recent public event (funding, hiring, M&A, expansion, regulation) in the seller's category language
+- pain_points: 2-4 concrete pains inferred from public evidence (job ads, reviews, press, LinkedIn posts)
+- talking_points: 3-5 ready-to-use sales lines that reference SPECIFIC facts about the target and connect them to the seller's product — written in first-person so the user can paste them straight into an email
+- why (one-line fit summary), 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references
+For similar/competitors: 3-5 real direct competitors of THIS seller's offering with strengths/weaknesses/your_advantage and 1-2 references each — these are who the seller competes against when pitching switch deals.`;
 
     const analystModel = isReplace ? "google/gemini-2.5-flash" : "openai/gpt-5-mini";
 
@@ -263,7 +278,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       body: JSON.stringify({
         model: analystModel,
         messages: [
-          { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Prioritize AppsRunTheWorld/installed-base evidence, then cross-check with LinkedIn, PDFs, press releases, and market news. Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
+          { role: "system", content: `You are a B2B market analyst AND sales-enablement writer. The seller's category is: "${sellerCategoryDescriptor}" (could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Your job is two-fold: (1) map who competes with this seller (direct competitors in 'similar'), and (2) find real END-CUSTOMER targets — both companies already using a competing/adjacent product (partnership-switch / rip-and-replace plays) AND net-new greenfield accounts. For every target, dig into publicly available info (LinkedIn, press releases, job ads, case studies, annual reports, AppsRunTheWorld installed-base data, news) to identify what they currently use, their specific pain points, and concrete talking points the seller can paste into an email. Prioritize AppsRunTheWorld/installed-base evidence, then cross-check with LinkedIn, PDFs, press releases, and market news. Ground every claim in live sources. Never fabricate URLs, names, contacts, or tech-stack guesses. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
         ],
         tools: [{
@@ -311,7 +326,10 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
                       size: { type: "string" },
                       uses_ifs: { type: ["boolean", "null"] },
                       current_systems: { type: "array", items: { type: "string" } },
+                      pitch_angle: { type: "string", enum: ["switch", "expansion", "greenfield"] },
                       problem: { type: "string" },
+                      pain_points: { type: "array", items: { type: "string" } },
+                      talking_points: { type: "array", items: { type: "string" } },
                       why: { type: "string" },
                       designations: { type: "array", items: { type: "string" } },
                       icp_contacts: {
@@ -341,7 +359,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
                       },
                       level: { type: "string", enum: ["high", "medium", "low"] },
                     },
-                    required: ["company", "website", "industry", "size", "uses_ifs", "current_systems", "problem", "why", "designations", "icp_contacts", "focus_areas", "references", "level"],
+                    required: ["company", "website", "industry", "size", "uses_ifs", "current_systems", "pitch_angle", "problem", "pain_points", "talking_points", "why", "designations", "icp_contacts", "focus_areas", "references", "level"],
                   },
                 },
               },
