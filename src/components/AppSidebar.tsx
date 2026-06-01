@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Bell,
   Rocket,
+  ListChecks,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,6 +36,8 @@ const mainItems = [
   { title: "Getting Started", url: "/app/getting-started", icon: Rocket, badge: "New" },
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Leads", url: "/app/leads", icon: Users },
+  { title: "SignalHire Claim", url: "/app/signalhire", icon: ListChecks, badge: "New" },
+  
   
   { title: "AI Insights", url: "/app/intelligence", icon: Sparkles, badge: "AI" },
   { title: "Targets", url: "/app/targets", icon: Target },
