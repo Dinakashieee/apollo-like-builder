@@ -90,6 +90,15 @@ interface MarketFilterContext {
   targetSystems?: string[] | null;
 }
 
+interface TargetGenerationJob {
+  id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  progress: number | null;
+  message: string | null;
+  result: { similar?: SimilarProduct[]; targets?: TargetCompany[] } | null;
+  error: string | null;
+}
+
 const LEVEL_BADGES = {
   high: { label: "🔥 High", color: "bg-hot/15 text-hot border-hot/30" },
   medium: { label: "⚠️ Medium", color: "bg-warm/15 text-warm border-warm/30" },
@@ -182,6 +191,8 @@ const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T>
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Try again";
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function Targets() {
   const { current } = useWorkspace();
   const { user } = useAuth();
@@ -190,6 +201,8 @@ export default function Targets() {
   const [targets, setTargets] = useState<TargetCompany[]>([]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState(0);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
@@ -272,6 +285,39 @@ export default function Targets() {
     localStorage.setItem(`targets-claimed-${current.id}`, JSON.stringify(next));
   };
 
+  const applyGeneratedTargets = (data: { similar?: SimilarProduct[]; targets?: TargetCompany[] }) => {
+    const safeSimilar = data.similar ?? [];
+    const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, safeSimilar);
+    setSimilar(safeSimilar);
+    setTargets(safeTargets);
+    persist(safeSimilar, safeTargets);
+  };
+
+  const waitForGenerationJob = async (jobId: string) => {
+    for (let attempt = 0; attempt < 90; attempt += 1) {
+      const { data, error } = await (supabase as any)
+        .from("target_generation_jobs")
+        .select("id, status, progress, message, result, error")
+        .eq("id", jobId)
+        .maybeSingle();
+      if (error) throw error;
+      const job = data as TargetGenerationJob | null;
+      if (!job) throw new Error("Generation job not found");
+
+      setGenerationProgress(job.progress ?? 0);
+      setGenerationStatus(job.message ?? (job.status === "pending" ? "Queued market research" : "Analyzing market"));
+
+      if (job.status === "completed") {
+        if (!job.result) throw new Error("Generation finished without results");
+        return job.result;
+      }
+      if (job.status === "failed") throw new Error(job.error ?? "Target generation failed");
+
+      await delay(attempt < 10 ? 1500 : 2500);
+    }
+    throw new Error("Generation is still running. Please try again in a moment.");
+  };
+
   const generate = async () => {
     if (!current) return;
     if (!hasCompany) {
@@ -283,21 +329,26 @@ export default function Targets() {
       return;
     }
     setLoading(true);
+    setGenerationProgress(5);
+    setGenerationStatus("Queued market research");
     try {
       const { data, error } = await supabase.functions.invoke("generate-targets", {
-        body: { workspace_id: current.id },
+        body: { workspace_id: current.id, async: true },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      const safeSimilar = data.similar ?? [];
-      const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, safeSimilar);
-      setSimilar(data.similar ?? []);
-      setTargets(safeTargets);
-      persist(safeSimilar, safeTargets);
+      if (data?.job_id) {
+        const result = await waitForGenerationJob(data.job_id);
+        applyGeneratedTargets(result);
+      } else {
+        applyGeneratedTargets(data);
+      }
       toast({ title: "Insights generated" });
     } catch (e: unknown) {
       toast({ title: "Failed", description: getErrorMessage(e), variant: "destructive" });
     }
+    setGenerationStatus(null);
+    setGenerationProgress(0);
     setLoading(false);
   };
 
@@ -476,10 +527,25 @@ export default function Targets() {
             ) : (
               <Sparkles className="h-4 w-4 mr-2" />
             )}
-            {loading ? "Analyzing market..." : "Generate with AI"}
+            {loading ? "Generating in background..." : "Generate with AI"}
           </Button>
         </div>
       </div>
+
+      {loading && (
+        <div className="card-elevated p-4 border-primary/20">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-sm font-semibold text-primary-deep">{generationStatus ?? "Analyzing market"}</p>
+            <span className="text-xs font-bold text-primary">{Math.max(5, generationProgress)}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-primary transition-all duration-500"
+              style={{ width: `${Math.max(5, Math.min(100, generationProgress))}%` }}
+            />
+          </div>
+        </div>
+      )}
 
 
       {!hasCompany && (
