@@ -280,6 +280,15 @@ john@engageiq.com  ·  +1 555 123 4567`}
         <Button onClick={changePassword} variant="outline">Change password</Button>
       </section>
 
+      {/* SignalHire integration */}
+      <section className="card-elevated p-6 space-y-3">
+        <h2 className="font-display font-bold text-lg text-primary-deep">SignalHire</h2>
+        <p className="text-sm text-muted-foreground">
+          Your SignalHire API key is connected. Run a test to confirm it can reach SignalHire and view remaining credits.
+        </p>
+        <SignalHireTestButton />
+      </section>
+
 
       {/* Data control */}
       <section className="card-elevated p-6 space-y-4">
