@@ -14,6 +14,7 @@ import {
   Bell,
   Rocket,
   ListChecks,
+  ShieldCheck as ShieldHealth,
 } from "lucide-react";
 import {
   Sidebar,
