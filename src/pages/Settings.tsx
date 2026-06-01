@@ -284,9 +284,25 @@ john@engageiq.com  ·  +1 555 123 4567`}
 
       {/* SignalHire integration */}
       <section className="card-elevated p-6 space-y-3">
-        <h2 className="font-display font-bold text-lg text-primary-deep">SignalHire</h2>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h2 className="font-display font-bold text-lg text-primary-deep">SignalHire</h2>
+          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            Bring your own API key
+          </span>
+        </div>
         <p className="text-sm text-muted-foreground">
-          Your SignalHire API key is connected. Run a test to confirm it can reach SignalHire and view remaining credits.
+          EngageIQ lets you connect your own SignalHire account — you keep full control of your credits, billing, and data.
+          Grab your API key from{" "}
+          <a
+            href="https://www.signalhire.com/settings/api"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline underline-offset-2 hover:no-underline"
+          >
+            SignalHire → Settings → API
+          </a>
+          , then send it to us and we'll store it securely as <code className="px-1 py-0.5 rounded bg-muted text-xs">SIGNALHIRE_API_KEY</code>.
+          Run a test below to confirm the connection and see remaining credits.
         </p>
         <SignalHireTestButton />
       </section>
