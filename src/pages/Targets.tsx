@@ -198,6 +198,17 @@ export default function Targets() {
   const [revealed, setRevealed] = useState<TargetCompany | null>(null);
   const [marketContext, setMarketContext] = useState<MarketFilterContext | null>(null);
 
+  const sellerCategoryLabel = useMemo(() => {
+    const sys = marketContext?.targetSystems?.find(Boolean);
+    if (sys) return sys;
+    const desc = (marketContext?.productsSummary || marketContext?.description || "").trim();
+    if (desc) {
+      const firstWords = desc.split(/[.,;\n]/)[0]?.trim().split(/\s+/).slice(0, 3).join(" ");
+      if (firstWords && firstWords.length > 2) return firstWords;
+    }
+    return "your category";
+  }, [marketContext]);
+
   const netNewCount = useMemo(
     () => targets.filter((t) => t.uses_ifs === false).length,
     [targets]
@@ -646,17 +657,17 @@ export default function Targets() {
                   <div className="flex flex-wrap items-center gap-1.5 mb-3">
                     {t.uses_ifs === true && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-success/10 text-success border border-success/30 rounded-full px-2 py-0.5">
-                        <ShieldCheck className="h-3 w-3" /> Existing IFS user
+                        <ShieldCheck className="h-3 w-3" /> Already uses {sellerCategoryLabel}
                       </span>
                     )}
                     {t.uses_ifs === false && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-warm/10 text-warm border border-warm/30 rounded-full px-2 py-0.5">
-                        <ShieldOff className="h-3 w-3" /> Not on IFS
+                        <ShieldOff className="h-3 w-3" /> Greenfield for {sellerCategoryLabel}
                       </span>
                     )}
                     {(t.uses_ifs === null || t.uses_ifs === undefined) && (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-muted text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                        <HelpCircle className="h-3 w-3" /> IFS status unknown
+                        <HelpCircle className="h-3 w-3" /> {sellerCategoryLabel} usage unknown
                       </span>
                     )}
                     {t.current_systems?.map((s, j) => (
@@ -743,8 +754,8 @@ export default function Targets() {
                 )}
                 {revealed.industry && <Field label="Industry">{revealed.industry}</Field>}
                 {revealed.size && <Field label="Company size">{revealed.size}</Field>}
-                <Field label="IFS status">
-                  {revealed.uses_ifs === true ? "Existing IFS user" : revealed.uses_ifs === false ? "Not on IFS" : "Unknown"}
+                <Field label={`${sellerCategoryLabel} usage`}>
+                  {revealed.uses_ifs === true ? `Already uses ${sellerCategoryLabel}` : revealed.uses_ifs === false ? `Greenfield for ${sellerCategoryLabel}` : "Unknown"}
                 </Field>
               </div>
 
