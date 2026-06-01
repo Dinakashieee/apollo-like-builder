@@ -113,23 +113,28 @@ serve(async (req) => {
     const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
     const year = new Date().getFullYear();
 
-    // Slim, sharper queries — fewer round trips = much faster generation.
+    // Quality-first queries — parallel + 8s timeout each, so latency stays bounded.
+    // We deliberately include executive-targeting searches so the model has real named
+    // contacts (CFO / CIO / VP) with real /in/ LinkedIn URLs to ground on.
     const queries = isReplace
       ? [
           `${topic} ${sellerCategoryDescriptor} customer ${year}`,
           `${topic} funding OR hiring OR expansion ${year}`,
+          `site:linkedin.com/in "${topic}" (CFO OR CIO OR "VP" OR "Chief Information Officer")`,
         ]
       : [
           `${topic} top companies ${year}`,
           `${topic} ${sellerCategoryDescriptor} customers ${year}`,
           `site:linkedin.com/company ${topic}`,
+          `site:linkedin.com/in "${topic}" (CFO OR CIO OR "Chief Financial Officer" OR "Chief Information Officer")`,
+          `${topic} ${year} "annual report" filetype:pdf`,
           `${topic} funding OR M&A OR expansion ${year}`,
         ];
 
-    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 5)));
     const dedup = new Map<string, ResearchSource>();
     researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
-    const sources = Array.from(dedup.values()).slice(0, 20);
+    const sources = Array.from(dedup.values()).slice(0, 30);
 
 
     const sourcesBlock = sources.length
