@@ -198,6 +198,17 @@ export default function Targets() {
   const [revealed, setRevealed] = useState<TargetCompany | null>(null);
   const [marketContext, setMarketContext] = useState<MarketFilterContext | null>(null);
 
+  const sellerCategoryLabel = useMemo(() => {
+    const sys = marketContext?.targetSystems?.find(Boolean);
+    if (sys) return sys;
+    const desc = (marketContext?.productsSummary || marketContext?.description || "").trim();
+    if (desc) {
+      const firstWords = desc.split(/[.,;\n]/)[0]?.trim().split(/\s+/).slice(0, 3).join(" ");
+      if (firstWords && firstWords.length > 2) return firstWords;
+    }
+    return "your category";
+  }, [marketContext]);
+
   const netNewCount = useMemo(
     () => targets.filter((t) => t.uses_ifs === false).length,
     [targets]
