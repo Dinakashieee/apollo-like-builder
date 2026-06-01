@@ -74,6 +74,9 @@ interface TargetCompany {
   references?: RefLink[];
   uses_ifs?: boolean | null;
   current_systems?: string[];
+  pitch_angle?: "switch" | "expansion" | "greenfield";
+  pain_points?: string[];
+  talking_points?: string[];
   icp_contacts?: IcpContact[];
   // legacy shape (kept for backward compat with cached data)
   type?: string;
