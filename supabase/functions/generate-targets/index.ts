@@ -311,8 +311,8 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       }),
     });
 
-    if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit. Try again." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (response.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (response.status === 429) throw new HttpError("Rate limit. Try again.", 429);
+    if (response.status === 402) throw new HttpError("AI credits exhausted.", 402);
     if (!response.ok) {
       const t = await response.text();
       console.error("AI error", response.status, t);
