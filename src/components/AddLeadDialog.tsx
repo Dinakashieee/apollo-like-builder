@@ -22,12 +22,20 @@ import { Plus, Sparkles, Loader2, Globe } from "lucide-react";
 import { z } from "zod";
 import { CountryPicker } from "@/components/CountryPicker";
 import { findCountry, guessCountryFromEmail } from "@/lib/countries";
+import { isDisposableEmail } from "@/lib/disposableEmails";
 
 const schema = z.object({
   company_name: z.string().trim().min(1, "Company required").max(120),
   contact_name: z.string().trim().max(80).optional(),
   role: z.string().trim().max(80).optional(),
-  email: z.string().trim().email().max(120).optional().or(z.literal("")),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .max(120)
+    .refine((v) => !isDisposableEmail(v), "Disposable / throwaway email domains aren't allowed")
+    .optional()
+    .or(z.literal("")),
   industry: z.string().trim().max(80).optional(),
   country: z.string().trim().max(2).optional(),
   systems_in_use: z.string().trim().max(2000).optional(),
