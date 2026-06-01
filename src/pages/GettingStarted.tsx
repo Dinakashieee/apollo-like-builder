@@ -14,15 +14,7 @@ import {
   Target,
   Brain,
   Building2,
-  Play,
 } from "lucide-react";
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const steps = [
   {
@@ -117,8 +109,6 @@ const flow = [
 ];
 
 export default function GettingStarted() {
-  const [tourOpen, setTourOpen] = useState(false);
-
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-10">
       {/* Hero */}
@@ -130,11 +120,6 @@ export default function GettingStarted() {
         <p className="text-muted-foreground max-w-2xl mx-auto">
           A seven-step workflow from defining your offer to closing follow-ups — built for B2B sales teams running personalised outbound at scale.
         </p>
-        <div className="flex justify-center pt-2">
-          <Button size="lg" onClick={() => setTourOpen(true)} className="gap-2">
-            <Play className="h-4 w-4" /> Watch product tour
-          </Button>
-        </div>
       </div>
 
       {/* Workflow diagram */}
@@ -224,28 +209,6 @@ export default function GettingStarted() {
         </Card>
       </div>
 
-      {/* Product tour dialog */}
-      <Dialog open={tourOpen} onOpenChange={setTourOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Play className="h-5 w-5 text-primary" /> Product tour
-            </DialogTitle>
-          </DialogHeader>
-          <div className="aspect-video w-full rounded-lg overflow-hidden bg-muted">
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-              title="EngageIQ product tour"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Prefer a guided walk-through? <Link to="/app/help" className="text-primary underline" onClick={() => setTourOpen(false)}>Open the Help Center</Link> or <Link to="/app/support" className="text-primary underline" onClick={() => setTourOpen(false)}>chat with support</Link>.
-          </p>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
