@@ -113,23 +113,28 @@ serve(async (req) => {
     const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
     const year = new Date().getFullYear();
 
-    // Slim, sharper queries — fewer round trips = much faster generation.
+    // Quality-first queries — parallel + 8s timeout each, so latency stays bounded.
+    // We deliberately include executive-targeting searches so the model has real named
+    // contacts (CFO / CIO / VP) with real /in/ LinkedIn URLs to ground on.
     const queries = isReplace
       ? [
           `${topic} ${sellerCategoryDescriptor} customer ${year}`,
           `${topic} funding OR hiring OR expansion ${year}`,
+          `site:linkedin.com/in "${topic}" (CFO OR CIO OR "VP" OR "Chief Information Officer")`,
         ]
       : [
           `${topic} top companies ${year}`,
           `${topic} ${sellerCategoryDescriptor} customers ${year}`,
           `site:linkedin.com/company ${topic}`,
+          `site:linkedin.com/in "${topic}" (CFO OR CIO OR "Chief Financial Officer" OR "Chief Information Officer")`,
+          `${topic} ${year} "annual report" filetype:pdf`,
           `${topic} funding OR M&A OR expansion ${year}`,
         ];
 
-    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 4)));
+    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 5)));
     const dedup = new Map<string, ResearchSource>();
     researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
-    const sources = Array.from(dedup.values()).slice(0, 20);
+    const sources = Array.from(dedup.values()).slice(0, 30);
 
 
     const sourcesBlock = sources.length
@@ -186,7 +191,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash",
+        model: isReplace ? "google/gemini-2.5-flash" : "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: `You are a B2B market analyst. The seller's category is: "${sellerCategoryDescriptor}" (derived from their profile — could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Pick real END-CUSTOMER companies that match the seller's actual ICP from their profile, and real direct competitors in the seller's category. Ground every pick in the live sources. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
@@ -354,6 +359,14 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
     };
     if (Array.isArray(args.targets)) {
       args.targets = args.targets.filter((t: any) => !isCompetitor(t));
+      // Quality gate: only keep ICP contacts with a real linkedin.com/in/ URL and a real-looking name.
+      const validLinkedIn = /^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9\-_%]+\/?/i;
+      args.targets.forEach((t: any) => {
+        t.icp_contacts = (t.icp_contacts ?? []).filter((c: any) =>
+          c?.full_name && c.full_name.trim().split(/\s+/).length >= 2 &&
+          c?.linkedin_url && validLinkedIn.test(c.linkedin_url)
+        );
+      });
     }
 
     await incrementAiEmails(admin, workspace_id);
