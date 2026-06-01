@@ -249,7 +249,7 @@ LIVE SOURCES:
 ${sourcesBlock}
 
 Suggest exactly ONE NEW real specific END-CUSTOMER company this seller should target — matched to the seller's actual ICP from the profile above. It must be DIFFERENT from: ${excludeList.join(", ") || "(none)"}.
-Include real name, website, uses_ifs guess (true if they already run something in the seller's category, false if greenfield, null if unknown), 2-5 current_systems they actually run that are relevant to the seller, a SPECIFIC problem tied to a recent public event written in the seller's category language, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 real verifiable references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
+Include real name, website, uses_ifs guess, 2-5 current_systems they ACTUALLY run (named products that overlap with the seller's category), pitch_angle ("switch" | "expansion" | "greenfield"), a SPECIFIC problem tied to a recent public event, 2-4 pain_points grounded in public evidence, 3-5 ready-to-use talking_points the seller can paste into an email, 3-6 designations, 2-4 real named ICP contacts with real /in/ LinkedIn URLs (omit if unsure), focus areas, and 1-3 real verifiable references (mix LinkedIn / PDF / web). Return empty 'similar', single-item 'targets'.`
       : `${baseContext}
 
 ${sourcingGuidance}
@@ -257,7 +257,17 @@ ${sourcingGuidance}
 LIVE SOURCES:
 ${sourcesBlock}
 
-Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category). For each target: real name & website, uses_ifs (true if they already run something in the seller's category — i.e. rip-and-replace opportunity, false if greenfield, null if unknown), 2-5 current_systems they actually run relevant to the seller's offering, a SPECIFIC problem grounded in a recent public event (funding, hiring, M&A, expansion, regulation) written in the seller's category language, why-you-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references. For similar/competitors: 3-5 real direct competitors of THIS seller's offering (whatever category that is) with strengths/weaknesses/your_advantage and 1-2 references each.`;
+Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category).
+For each target include:
+- company, website, industry, size
+- uses_ifs (true = already on a competing/adjacent product → partnership-switch / rip-and-replace; false = greenfield / net-new; null = unknown)
+- current_systems: 2-5 NAMED products they actually run that overlap with the seller's offering (pull from job ads, case studies, integration pages, vendor logo pages)
+- pitch_angle: "switch" | "expansion" | "greenfield" derived from current_systems + uses_ifs
+- problem: SPECIFIC, tied to a recent public event (funding, hiring, M&A, expansion, regulation) in the seller's category language
+- pain_points: 2-4 concrete pains inferred from public evidence (job ads, reviews, press, LinkedIn posts)
+- talking_points: 3-5 ready-to-use sales lines that reference SPECIFIC facts about the target and connect them to the seller's product — written in first-person so the user can paste them straight into an email
+- why (one-line fit summary), 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references
+For similar/competitors: 3-5 real direct competitors of THIS seller's offering with strengths/weaknesses/your_advantage and 1-2 references each — these are who the seller competes against when pitching switch deals.`;
 
     const analystModel = isReplace ? "google/gemini-2.5-flash" : "openai/gpt-5-mini";
 
