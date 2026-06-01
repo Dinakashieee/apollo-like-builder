@@ -364,7 +364,7 @@ export default function Leads() {
                   <LeadIntelligencePanel leadId={convLead.id} contactName={convLead.contact_name} />
                 </TabsContent>
                 <TabsContent value="email" className="mt-4">
-                  <LeadConversation leadId={convLead.id} />
+                  <LeadEmailComposerPanel lead={convLead} />
                 </TabsContent>
                 <TabsContent value="whatsapp" className="mt-4">
                   <WhatsAppPanel leadId={convLead.id} />
