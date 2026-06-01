@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddLeadDialog } from "@/components/AddLeadDialog";
 import { ImportDialog } from "@/components/ImportDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { LeadConversation } from "@/components/LeadConversation";
+import { LeadEmailComposerPanel } from "@/components/LeadEmailComposerPanel";
 import { WhatsAppPanel } from "@/components/WhatsAppPanel";
 import { LeadIntelligencePanel } from "@/components/LeadIntelligencePanel";
 import { LeadProfilePanel } from "@/components/LeadProfilePanel";
