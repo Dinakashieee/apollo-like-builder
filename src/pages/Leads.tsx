@@ -52,7 +52,7 @@ export default function Leads() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<"mine" | "targets" | "all">("mine");
+  const [sourceFilter, setSourceFilter] = useState<"mine" | "targets" | "signalhire" | "all">("mine");
   const [convLead, setConvLead] = useState<any | null>(null);
   const [sheetTab, setSheetTab] = useState<string>("profile");
   const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
@@ -88,12 +88,15 @@ export default function Leads() {
   );
 
   const isTargetLead = (l: any) => l.source === "ai_targets";
+  const isSignalHireLead = (l: any) => l.source === "signalhire";
   const targetsCount = leads.filter(isTargetLead).length;
-  const mineCount = leads.length - targetsCount;
+  const signalhireCount = leads.filter(isSignalHireLead).length;
+  const mineCount = leads.length - targetsCount - signalhireCount;
 
   const filtered = leads.filter((l) => {
-    if (sourceFilter === "mine" && isTargetLead(l)) return false;
+    if (sourceFilter === "mine" && (isTargetLead(l) || isSignalHireLead(l))) return false;
     if (sourceFilter === "targets" && !isTargetLead(l)) return false;
+    if (sourceFilter === "signalhire" && !isSignalHireLead(l)) return false;
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (!query) return true;
     const q = query.toLowerCase();
@@ -172,12 +175,15 @@ export default function Leads() {
                   AI hot picks · {targetsCount}
                 </span>
               </TabsTrigger>
+              <TabsTrigger value="signalhire">SignalHire · {signalhireCount}</TabsTrigger>
               <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
             </TabsList>
           </Tabs>
           <p className="text-xs text-muted-foreground mt-2">
             {sourceFilter === "targets"
               ? "Companies you claimed from the AI Targets page."
+              : sourceFilter === "signalhire"
+              ? "Verified contacts claimed from the SignalHire database."
               : sourceFilter === "mine"
               ? "Leads you added or imported yourself."
               : "All leads in this workspace."}
@@ -256,6 +262,11 @@ export default function Leads() {
                             {isTargetLead(lead) && (
                               <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/10 text-[10px] h-5">
                                 Targeted
+                              </Badge>
+                            )}
+                            {isSignalHireLead(lead) && (
+                              <Badge className="bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/30 hover:bg-violet-500/10 text-[10px] h-5">
+                                SignalHire lead
                               </Badge>
                             )}
                           </div>
