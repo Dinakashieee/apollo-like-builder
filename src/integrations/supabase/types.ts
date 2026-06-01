@@ -105,6 +105,45 @@ export type Database = {
           },
         ]
       }
+      credit_ledger: {
+        Row: {
+          balance_after: number | null
+          created_at: string
+          credit_type: string
+          delta: number
+          id: string
+          metadata: Json
+          reason: string
+          ref_id: string | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          balance_after?: number | null
+          created_at?: string
+          credit_type: string
+          delta: number
+          id?: string
+          metadata?: Json
+          reason: string
+          ref_id?: string | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          balance_after?: number | null
+          created_at?: string
+          credit_type?: string
+          delta?: number
+          id?: string
+          metadata?: Json
+          reason?: string
+          ref_id?: string | null
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       email_accounts: {
         Row: {
           access_token: string | null
@@ -1726,19 +1765,29 @@ export type Database = {
         Args: { _workspace_id: string }
         Returns: string
       }
-      grant_signalhire_credits: {
-        Args: {
-          _amount_usd: number
-          _credits: number
-          _is_subscription?: boolean
-          _paypal_order_id: string
-          _paypal_subscription_id?: string
-          _plan_id: string
-          _user_id: string
-          _workspace_id: string
-        }
-        Returns: number
-      }
+      grant_signalhire_credits:
+        | {
+            Args: {
+              _credits: number
+              _external_id: string
+              _source: string
+              _workspace_id: string
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              _amount_usd: number
+              _credits: number
+              _is_subscription?: boolean
+              _paypal_order_id: string
+              _paypal_subscription_id?: string
+              _plan_id: string
+              _user_id: string
+              _workspace_id: string
+            }
+            Returns: number
+          }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
