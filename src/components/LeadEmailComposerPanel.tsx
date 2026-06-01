@@ -102,7 +102,42 @@ export function LeadEmailComposerPanel({ lead }: Props) {
     setGenerating(false);
   };
 
-  const send = () => {
+  const [sending, setSending] = useState(false);
+
+  const sendDirect = async () => {
+    if (!lead?.email) {
+      toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
+      return;
+    }
+    if (!subject.trim() && !body.trim()) return;
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          template_name: "lead-outreach",
+          recipient_email: lead.email,
+          template_data: { subject, body, signature: signatureOverride },
+          idempotency_key: `lead-${lead.id}-${Date.now()}`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (current) {
+        await logActivity(
+          current.id,
+          user?.id,
+          "email_sent",
+          `Email sent to ${lead.contact_name || lead.email}`,
+        );
+      }
+      toast({ title: "Email queued", description: `Sending to ${lead.email}` });
+    } catch (e: any) {
+      toast({ title: "Send failed", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setSending(false);
+  };
+
+  const openInClient = () => {
     if (!lead?.email) {
       toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
       return;
@@ -266,11 +301,26 @@ export function LeadEmailComposerPanel({ lead }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/60">
+        <div className="flex items-center justify-between pt-3 border-t border-border/60 gap-2 flex-wrap">
           <p className="text-[11px] text-muted-foreground">{body.length} characters</p>
-          <Button size="sm" onClick={send} disabled={!subject && !body}>
-            <Send className="h-3.5 w-3.5 mr-1.5" /> Send via {mailClient === "gmail" ? "Gmail" : mailClient === "outlook" ? "Outlook" : "mail client"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={openInClient} disabled={!subject && !body}>
+              Open in {mailClient === "gmail" ? "Gmail" : mailClient === "outlook" ? "Outlook" : "mail client"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={sendDirect}
+              disabled={sending || (!subject && !body)}
+              className="bg-gradient-primary shadow-glow"
+            >
+              {sending ? (
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              {sending ? "Sending..." : "Send now"}
+            </Button>
+          </div>
         </div>
 
         {lead?.country && findCountry(lead.country) && (
