@@ -32,7 +32,7 @@ export function CreditHistoryDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const { workspace } = useWorkspace();
+  const { current: workspace } = useWorkspace();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
 
