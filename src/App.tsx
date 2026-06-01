@@ -31,6 +31,7 @@ import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import Reminders from "./pages/Reminders";
 import GettingStarted from "./pages/GettingStarted";
+import SignalHire from "./pages/SignalHire";
 
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
                   <Route index element={<Dashboard />} />
                   <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
+                  <Route path="signalhire" element={<SignalHire />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
                   <Route path="targets" element={<Targets />} />
