@@ -14,6 +14,24 @@ interface ResearchSource {
   type: "pdf" | "linkedin" | "web";
 }
 
+interface GenerationBody {
+  workspace_id?: string;
+  mode?: string;
+  exclude?: unknown;
+  async?: boolean;
+}
+
+class HttpError extends Error {
+  status: number;
+  payload: Record<string, unknown>;
+
+  constructor(message: string, status = 500, payload?: Record<string, unknown>) {
+    super(message);
+    this.status = status;
+    this.payload = payload ?? { error: message };
+  }
+}
+
 async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource[]> {
   const key = Deno.env.get("FIRECRAWL_API_KEY");
   if (!key) return [];
@@ -55,31 +73,39 @@ async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource
 }
 
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+async function processTargetGeneration(body: GenerationBody, authHeader: string, jobId?: string) {
+  const { workspace_id, mode, exclude } = body;
+  if (!workspace_id || typeof workspace_id !== "string") {
+    throw new HttpError("Missing workspace_id", 400);
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  const updateJob = async (patch: Record<string, unknown>) => {
+    if (!jobId) return;
+    const { error } = await admin.from("target_generation_jobs").update(patch).eq("id", jobId);
+    if (error) console.error("target_generation_jobs update failed", error.message);
+  };
+
   try {
-    const { workspace_id, mode, exclude } = await req.json();
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Unauthorized");
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    await updateJob({ status: "running", progress: 10, message: "Checking workspace profile" });
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
+    if (!user) throw new HttpError("Unauthorized", 401);
 
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
     const quota = await checkAiEmailQuota(admin, workspace_id);
     if (quota) {
-      return new Response(JSON.stringify({ error: quota.reason, code: "quota_exceeded", ...quota }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      throw new HttpError(quota.reason, 402, { error: quota.reason, code: "quota_exceeded", ...quota });
     }
+
+    await updateJob({ progress: 18, message: "Reading company profile" });
 
     const { data: company } = await supabase
       .from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle();
@@ -131,6 +157,7 @@ serve(async (req) => {
           `${topic} funding OR M&A OR expansion ${year}`,
         ];
 
+    await updateJob({ progress: 32, message: "Searching live market sources" });
     const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 5)));
     const dedup = new Map<string, ResearchSource>();
     researchResults.flat().forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
@@ -187,6 +214,7 @@ ${sourcesBlock}
 
 Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies that match THIS seller's ICP (no vendors / consultancies / competitors in the seller's category). For each target: real name & website, uses_ifs (true if they already run something in the seller's category — i.e. rip-and-replace opportunity, false if greenfield, null if unknown), 2-5 current_systems they actually run relevant to the seller's offering, a SPECIFIC problem grounded in a recent public event (funding, hiring, M&A, expansion, regulation) written in the seller's category language, why-you-fit, 3-6 designations, 2-4 real named ICP contacts (full_name + role + real /in/ LinkedIn URL — omit if unverifiable), focus_areas, 1-3 real verifiable references. For similar/competitors: 3-5 real direct competitors of THIS seller's offering (whatever category that is) with strengths/weaknesses/your_advantage and 1-2 references each.`;
 
+    await updateJob({ progress: 58, message: "Analyzing sources with AI" });
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -291,6 +319,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       throw new Error("AI gateway error");
     }
 
+    await updateJob({ progress: 82, message: "Validating target quality" });
     const json = await response.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
@@ -376,9 +405,87 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       description: `AI generated ${args.targets?.length ?? 0} targets and ${args.similar?.length ?? 0} competitor profiles`,
     });
 
-    return new Response(JSON.stringify(args), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await updateJob({
+      status: "completed",
+      progress: 100,
+      message: "Targets ready",
+      result: args,
+      completed_at: new Date().toISOString(),
+    });
+
+    return args;
+  } catch (e: any) {
+    await updateJob({
+      status: "failed",
+      progress: 100,
+      message: "Generation failed",
+      error: e?.message ?? "Target generation failed",
+      completed_at: new Date().toISOString(),
+    });
+    throw e;
+  }
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const body: GenerationBody = await req.json();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new HttpError("Unauthorized", 401);
+
+    if (body.async && body.mode !== "replace") {
+      if (!body.workspace_id || typeof body.workspace_id !== "string") {
+        throw new HttpError("Missing workspace_id", 400);
+      }
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new HttpError("Unauthorized", 401);
+
+      const { data: workspace } = await supabase
+        .from("workspaces")
+        .select("id")
+        .eq("id", body.workspace_id)
+        .maybeSingle();
+      if (!workspace) throw new HttpError("Workspace not found", 403);
+
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const { data: job, error: jobError } = await admin
+        .from("target_generation_jobs")
+        .insert({
+          workspace_id: body.workspace_id,
+          user_id: user.id,
+          mode: "generate",
+          status: "pending",
+          progress: 5,
+          message: "Queued market research",
+        })
+        .select("id, status, progress, message")
+        .single();
+      if (jobError) throw jobError;
+
+      const background = processTargetGeneration(body, authHeader, job.id).catch((e) => {
+        console.error("generate-targets background failed", e);
+      });
+      (globalThis as any).EdgeRuntime?.waitUntil?.(background);
+
+      return new Response(JSON.stringify({ job_id: job.id, status: job.status, progress: job.progress, message: job.message }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const result = await processTargetGeneration(body, authHeader);
+    return new Response(JSON.stringify(result), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     console.error(e);
-    return new Response(JSON.stringify({ error: e?.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const status = e instanceof HttpError ? e.status : 500;
+    const payload = e instanceof HttpError ? e.payload : { error: e?.message ?? "Target generation failed" };
+    return new Response(JSON.stringify(payload), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
