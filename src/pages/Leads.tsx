@@ -175,12 +175,15 @@ export default function Leads() {
                   AI hot picks · {targetsCount}
                 </span>
               </TabsTrigger>
+              <TabsTrigger value="signalhire">SignalHire · {signalhireCount}</TabsTrigger>
               <TabsTrigger value="all">All · {leads.length}</TabsTrigger>
             </TabsList>
           </Tabs>
           <p className="text-xs text-muted-foreground mt-2">
             {sourceFilter === "targets"
               ? "Companies you claimed from the AI Targets page."
+              : sourceFilter === "signalhire"
+              ? "Verified contacts claimed from the SignalHire database."
               : sourceFilter === "mine"
               ? "Leads you added or imported yourself."
               : "All leads in this workspace."}
