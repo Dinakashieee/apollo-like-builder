@@ -754,8 +754,8 @@ export default function Targets() {
                 )}
                 {revealed.industry && <Field label="Industry">{revealed.industry}</Field>}
                 {revealed.size && <Field label="Company size">{revealed.size}</Field>}
-                <Field label="IFS status">
-                  {revealed.uses_ifs === true ? "Existing IFS user" : revealed.uses_ifs === false ? "Not on IFS" : "Unknown"}
+                <Field label={`${sellerCategoryLabel} usage`}>
+                  {revealed.uses_ifs === true ? `Already uses ${sellerCategoryLabel}` : revealed.uses_ifs === false ? `Greenfield for ${sellerCategoryLabel}` : "Unknown"}
                 </Field>
               </div>
 
