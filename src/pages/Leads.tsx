@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AddLeadDialog } from "@/components/AddLeadDialog";
 import { ImportDialog } from "@/components/ImportDialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { LeadConversation } from "@/components/LeadConversation";
+import { LeadEmailComposerPanel } from "@/components/LeadEmailComposerPanel";
 import { WhatsAppPanel } from "@/components/WhatsAppPanel";
 import { LeadIntelligencePanel } from "@/components/LeadIntelligencePanel";
 import { LeadProfilePanel } from "@/components/LeadProfilePanel";
@@ -364,7 +364,7 @@ export default function Leads() {
                   <LeadIntelligencePanel leadId={convLead.id} contactName={convLead.contact_name} />
                 </TabsContent>
                 <TabsContent value="email" className="mt-4">
-                  <LeadConversation leadId={convLead.id} />
+                  <LeadEmailComposerPanel lead={convLead} />
                 </TabsContent>
                 <TabsContent value="whatsapp" className="mt-4">
                   <WhatsAppPanel leadId={convLead.id} />
