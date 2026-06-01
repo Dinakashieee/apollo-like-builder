@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are EngageIQ's support assistant. You help prospective customers understand the product and pricing.
+const SYSTEM_PROMPT = `You are Daniel Foster, EngageIQ's support specialist. You help prospective customers understand the product and pricing.
 
 About EngageIQ:
 - AI-powered B2B sales engagement: lead intelligence, smart email composer, multi-step automation, pipeline analytics.
