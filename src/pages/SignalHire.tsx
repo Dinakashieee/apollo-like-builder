@@ -304,9 +304,14 @@ export default function SignalHire() {
       <div className="card-elevated p-4 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-muted-foreground font-medium">Email Finder Credits</span>
+            <span className="text-muted-foreground font-medium">SignalHire Reveal Credits</span>
             <span className="font-semibold text-foreground">
-              {creditsUsed.toLocaleString()} / {creditsTotal.toLocaleString()}
+              {signalhireBalance.toLocaleString()} available
+              {lifetimePurchased > 0 && (
+                <span className="text-muted-foreground font-normal">
+                  {" · "}{creditsUsed.toLocaleString()} used of {lifetimePurchased.toLocaleString()} purchased
+                </span>
+              )}
             </span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -314,17 +319,12 @@ export default function SignalHire() {
           </div>
         </div>
         <Button
-          variant="ghost"
+          variant="default"
           size="sm"
-          className="text-primary gap-1.5"
-          onClick={() =>
-            toast({
-              title: "How credits work",
-              description: "1 credit = 1 verified email reveal. Buy more or connect your own SignalHire API key to reuse existing credits.",
-            })
-          }
+          className="gap-1.5"
+          onClick={() => { setSelectedPack(null); setShowUpgradeModal(true); }}
         >
-          <HelpCircle className="h-3.5 w-3.5" /> How credits work
+          <ShoppingCart className="h-3.5 w-3.5" /> Buy credits
         </Button>
       </div>
 
