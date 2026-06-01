@@ -86,9 +86,23 @@ serve(async (req) => {
     const isReplace = mode === "replace";
     const excludeList: string[] = Array.isArray(exclude) ? exclude.filter(Boolean) : [];
 
+    // === Derive seller category dynamically from the company profile ===
+    const sellerProducts = (products?.map((p: any) => p.name).filter(Boolean) || []) as string[];
+    const sellerCategories = (products?.map((p: any) => p.category).filter(Boolean) || []) as string[];
+    const targetSystemsList: string[] = ((company as any).target_systems ?? []).filter(Boolean);
+    const sellerOffering = [...sellerProducts, ...sellerCategories, ...targetSystemsList].filter(Boolean);
+
+    // Build a short category descriptor (e.g. "IFS ERP implementation", "Cybersecurity SaaS", "Logistics platform")
+    // entirely from the user's own profile — no hardcoded vertical.
+    const sellerCategoryDescriptor = [
+      sellerCategories[0],
+      targetSystemsList[0],
+      sellerProducts[0],
+    ].filter(Boolean).join(" / ") || company.company_name;
+
     // === Research phase: pull public PDFs + LinkedIn posts + industry articles ===
     const industries: string[] = (company.industries ?? []).slice(0, 3);
-    const systems: string[] = ((company as any).target_systems ?? []).slice(0, 3);
+    const systems: string[] = targetSystemsList.slice(0, 3);
     const focusTerms = [...industries, ...systems].filter(Boolean);
     const topic = focusTerms.length ? focusTerms.join(" ") : company.company_name;
     const year = new Date().getFullYear();
@@ -99,7 +113,7 @@ serve(async (req) => {
           `${topic} digital transformation case study ${year}`,
           `site:linkedin.com/company ${topic} ${year}`,
           `${topic} funding expansion announcement ${year}`,
-          `${topic} ERP migration OR implementation ${year} filetype:pdf`,
+          `${topic} ${sellerCategoryDescriptor} adoption ${year} filetype:pdf`,
         ]
       : [
           `${topic} top companies ${year}`,
@@ -107,10 +121,10 @@ serve(async (req) => {
           `${topic} largest enterprises ${year} annual report filetype:pdf`,
           `${topic} digital transformation case study ${year}`,
           `${topic} customers list reference ${year}`,
-          `${topic} industry analysis Gartner OR Forrester ${year} filetype:pdf`,
+          `${topic} ${sellerCategoryDescriptor} industry analysis ${year} filetype:pdf`,
           `site:linkedin.com/company ${topic}`,
           `site:linkedin.com/pulse ${topic} ${year}`,
-          `${topic} hiring CIO OR CTO OR "head of IT" ${year}`,
+          `${topic} hiring decision makers ${year}`,
           `${topic} M&A OR acquisition OR funding ${year}`,
         ];
 
@@ -126,25 +140,26 @@ serve(async (req) => {
     const baseContext = `Company: ${company.company_name}
 Description: ${company.description ?? ""}
 Industries: ${(company.industries ?? []).join(", ")}
-Products: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}`;
+Products / Offering: ${products?.map((p: any) => p.name + ": " + (p.description ?? "")).join(" | ") || company.products_summary || ""}
+Target systems / categories the seller works with: ${targetSystemsList.join(", ") || "(not specified)"}
+Derived seller category: ${sellerCategoryDescriptor}`;
 
-    const sellerProducts = (products?.map((p: any) => p.name).filter(Boolean) || []) as string[];
-    const sellerOffering = [...sellerProducts, ...((company as any).target_systems ?? [])].filter(Boolean);
-    const exclusionRule = `CRITICAL EXCLUSION RULE: This seller offers/implements: ${sellerOffering.join(", ") || company.company_name}. Therefore the TARGETS list MUST NOT include:
-- Vendors of the same product/category (e.g. if seller does IFS ERP, exclude IFS itself and other ERP vendors like SAP, Oracle, Microsoft Dynamics, Infor, Epicor, Workday, NetSuite, Sage, Odoo, etc.)
-- Companies that sell, implement, consult on, integrate, resell, support, or compete with similar products/services
+    const exclusionRule = `CRITICAL EXCLUSION RULE — derive this seller's category from the profile above (do NOT assume any specific vertical like IFS/SAP/ERP unless the profile says so). This seller offers/implements: ${sellerOffering.join(", ") || company.company_name}. The TARGETS list MUST NOT include:
+- Vendors of the same product/category as the seller (whatever that category is — ERP, CRM, cybersecurity, logistics SaaS, marketing tools, fintech APIs, etc.)
+- Companies that sell, implement, consult on, integrate, resell, support, or compete with similar products/services in the seller's category
 - Resellers, implementation partners, system integrators, IT consultancies, software vendors, VARs/MSPs, or solution providers for the seller's category
-- Any IT-services firm or boutique whose name suggests services/consulting (e.g. ending in "Technologies", "Solutions", "Systems", "Services", "Consulting", "Labs", "Digital", "Infotech", "Softlabs")
+- Any services / consulting firm whose name suggests services (e.g. ending in "Technologies", "Solutions", "Systems", "Services", "Consulting", "Labs", "Digital", "Infotech", "Softlabs") UNLESS the seller's own offering is targeted at services firms
 - Direct competitors of the seller, including smaller regional providers/partners
 Those belong in the 'similar' (competitors) list ONLY — never in 'targets'.
 
-TARGETS MUST BE END-CUSTOMERS — real operating companies that would BUY/USE the seller's product (e.g. manufacturers, utilities, hospitals, airlines, retailers, banks, energy producers, telecoms, logistics operators, construction, defense, F&B). Their primary business must be making goods, operating infrastructure, or serving end consumers — NOT selling software, consulting, or implementation. If you cannot confidently say "this company is the BUYER, not a SELLER", drop it.
+TARGETS MUST BE END-CUSTOMERS that fit the seller's actual ICP based on the profile. Look at the seller's description, products, and industries to decide who the buyer is. If the seller sells to manufacturers, list manufacturers. If they sell to hospitals, list hospitals. If they sell to e-commerce brands, list e-commerce brands. If they sell to law firms, list law firms. Never default to a generic "enterprise" list — match the buyer profile to the seller's stated industries and product description.
 
 QUALITY BAR — each target must include:
 - Real, verifiable company name + correct primary website
-- A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — NOT a generic "needs ERP modernization"
+- A SPECIFIC 'problem' grounded in a recent public event (funding round, hiring spree, migration, M&A, regulatory change, expansion) — written in the language of the seller's category (NOT generic "needs modernization")
 - Real named ICP contacts with real /in/ LinkedIn URLs — if you cannot verify, return FEWER contacts rather than fabricate
-- 1-3 references that are real, working URLs (LinkedIn company page, recent LinkedIn post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.`;
+- 1-3 references that are real, working URLs (LinkedIn company page, recent post/article, press release, annual-report PDF, Crunchbase, Wikipedia). If the LIVE SOURCES below contain a relevant URL for the company, REUSE that exact URL verbatim.
+- 'uses_ifs' field actually means "is this target already using something in the seller's category?" — true if they already run a competing/adjacent product (potential rip-and-replace), false if they are a greenfield opportunity, null if unknown.`;
     const sourcingGuidance = `Use the LIVE SOURCES below (LinkedIn pages, PDFs, articles) as primary evidence. Each company you pick MUST include at least one reference URL — prefer linking back to the live sources by their URL when relevant. Real URLs only — never invent.
 
 ${exclusionRule}`;
