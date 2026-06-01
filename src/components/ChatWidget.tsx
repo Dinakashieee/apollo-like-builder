@@ -224,7 +224,7 @@ export function ChatWidget({ mode }: Props) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display font-bold text-sm leading-tight">
-                {mode === "support" ? "EngageIQ Support" : "AI Assistant"}
+                {mode === "support" ? "Daniel Foster" : "AI Assistant"}
               </p>
               <p className="text-[11px] opacity-80 leading-tight mt-0.5 flex items-center gap-1.5">
                 <span className="relative flex h-1.5 w-1.5">
