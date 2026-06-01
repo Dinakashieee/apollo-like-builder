@@ -32,6 +32,8 @@ import { TeamSection } from "@/components/TeamSection";
 import { AddonsSection } from "@/components/AddonsSection";
 import { SenderSettingsCard } from "@/components/SenderSettingsCard";
 import { DemoDataCard } from "@/components/DemoDataCard";
+import { SignalHireTestButton } from "@/components/SignalHireTestButton";
+
 
 export default function Settings() {
   const { user, signOut } = useAuth();
