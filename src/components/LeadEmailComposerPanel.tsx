@@ -102,7 +102,42 @@ export function LeadEmailComposerPanel({ lead }: Props) {
     setGenerating(false);
   };
 
-  const send = () => {
+  const [sending, setSending] = useState(false);
+
+  const sendDirect = async () => {
+    if (!lead?.email) {
+      toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
+      return;
+    }
+    if (!subject.trim() && !body.trim()) return;
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          template_name: "lead-outreach",
+          recipient_email: lead.email,
+          template_data: { subject, body, signature: signatureOverride },
+          idempotency_key: `lead-${lead.id}-${Date.now()}`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (current) {
+        await logActivity(
+          current.id,
+          user?.id,
+          "email_sent",
+          `Email sent to ${lead.contact_name || lead.email}`,
+        );
+      }
+      toast({ title: "Email queued", description: `Sending to ${lead.email}` });
+    } catch (e: any) {
+      toast({ title: "Send failed", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+    setSending(false);
+  };
+
+  const openInClient = () => {
     if (!lead?.email) {
       toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
       return;
