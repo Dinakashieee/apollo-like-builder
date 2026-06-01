@@ -172,7 +172,7 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: "You are a B2B market analyst for enterprise applications. Pick real target companies and competitors, grounded in the live sources provided. Never fabricate URLs or names. Always include a mix of LinkedIn, PDF, and web reference links." },
           { role: "user", content: userPrompt },
