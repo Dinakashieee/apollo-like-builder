@@ -394,60 +394,36 @@ For similar/competitors: 3-5 real direct competitors of THIS seller's offering w
     (args.similar ?? []).forEach((s: any) => { s.references = fixRefs(s.references); });
     (args.targets ?? []).forEach((t: any) => { t.references = fixRefs(t.references); });
 
-    // Filter out competitor/vendor/implementation-partner companies that slipped into targets
+    // Filter out ONLY direct competitors (named in 'similar') and the seller themselves.
+    // Any other company that fits the seller's ICP is allowed as a target — we no longer
+    // strip companies just because their name ends in "Solutions" or because they mention
+    // common service-industry keywords, which was previously removing legitimate end-customers.
     const normalize = (value: unknown) => (value ?? "").toString().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const competitorNames = new Set<string>(
       (args.similar ?? [])
         .map((s: any) => normalize(s.name ?? s.company))
         .filter(Boolean)
     );
-    const offeringText = normalize([
-      ...sellerOffering,
-      company.products_summary,
-      company.description,
-      ...(products ?? []).flatMap((p: any) => [p.category, p.description]),
-    ].filter(Boolean).join(" "));
-    // Seller-category tokens come from the seller's own profile, not a hardcoded vertical list.
-    // We still keep a list of well-known enterprise vendors so that IF the seller mentions one,
-    // we exclude that vendor from targets — but it does NOT bias non-enterprise sellers.
-    const enterpriseVendors = ["ifs", "sap", "oracle", "microsoft dynamics", "dynamics", "infor", "epicor", "workday", "netsuite", "sage", "odoo", "salesforce", "servicenow", "siemens plm", "hubspot", "zoho"];
-    const providerSignals = ["implementation partner", "implement", "implementation", "reseller", "system integrator", "systems integrator", "integrator", "consultancy", "consulting", "it services", "software development", "software vendor", "solution provider", "solutions provider", "managed service", "msp", "var", "partner", "digital transformation"];
-    const serviceNameSuffixes = ["technologies", "technology", "solutions", "systems", "services", "consulting", "consultancy", "labs", "digital", "infotech", "softlabs", "soft", "informatics", "softech", "tech", "global services", "softwares", "software"];
-    const sellerVendorSignals = enterpriseVendors.filter((vendor) => offeringText.includes(normalize(vendor)));
-    // Seller-specific category keywords pulled from the profile itself (target_systems, product categories, product names)
-    const sellerCategoryTokens = Array.from(new Set(
-      [...sellerCategories, ...targetSystemsList, ...sellerProducts, sellerCategoryDescriptor]
-        .flatMap((s) => normalize(s).split(" "))
-        .filter((w) => w.length > 3)
-    ));
-    const sellerIsServicesFirm = providerSignals.some((s) => offeringText.includes(normalize(s)));
     const isCompetitor = (t: any): boolean => {
       const name = normalize(t.company ?? t.type);
       if (!name) return false;
       if (competitorNames.has(name)) return true;
       const sellerName = normalize(company.company_name);
-      if (sellerName && (name.includes(sellerName) || sellerName.includes(name))) return true;
-
-      const targetText = normalize([
-        t.company, t.type, t.website, t.industry, t.problem, t.why,
-        ...(t.current_systems ?? []), ...(t.focus_areas ?? []), ...(t.designations ?? []),
-        ...((t.icp_contacts ?? []).flatMap((c: any) => [c?.role, c?.full_name])),
-      ].filter(Boolean).join(" "));
-
-      if (sellerVendorSignals.some((vendor) => name.includes(normalize(vendor)))) return true;
-      // Only strip "Services / Solutions / Consulting" named firms when the SELLER isn't itself one
-      if (!sellerIsServicesFirm) {
-        const nameTokens = name.split(" ").filter(Boolean);
-        const lastToken = nameTokens[nameTokens.length - 1] ?? "";
-        if (serviceNameSuffixes.includes(lastToken)) return true;
-      }
-      const isProvider = providerSignals.some((signal) => targetText.includes(normalize(signal)));
-      const mentionsSellerCategory = sellerVendorSignals.some((vendor) => targetText.includes(normalize(vendor)))
-        || sellerCategoryTokens.some((tok) => tok && targetText.includes(tok));
-      return !sellerIsServicesFirm && isProvider && mentionsSellerCategory;
+      if (sellerName && (name === sellerName || name.includes(sellerName) || sellerName.includes(name))) return true;
+      return false;
     };
     if (Array.isArray(args.targets)) {
       args.targets = args.targets.filter((t: any) => !isCompetitor(t));
+      // Quality gate: only keep ICP contacts with a real linkedin.com/in/ URL and a real-looking name.
+      const validLinkedIn = /^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9\-_%]+\/?/i;
+      args.targets.forEach((t: any) => {
+        t.icp_contacts = (t.icp_contacts ?? []).filter((c: any) =>
+          c?.full_name && c.full_name.trim().split(/\s+/).length >= 2 &&
+          c?.linkedin_url && validLinkedIn.test(c.linkedin_url)
+        );
+      });
+    }
+
       // Quality gate: only keep ICP contacts with a real linkedin.com/in/ URL and a real-looking name.
       const validLinkedIn = /^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9\-_%]+\/?/i;
       args.targets.forEach((t: any) => {
