@@ -254,9 +254,61 @@ export default function SignalHire() {
     toast({ title: "List deleted" });
   };
 
-  const handleCrmSync = () => {
+  const [claiming, setClaiming] = useState(false);
+
+  const handleCrmSync = async () => {
     if (selected.length === 0) return;
-    toast({ title: "CRM sync started", description: `Syncing ${selected.length} leads to your CRM.` });
+    if (!workspace?.id) {
+      toast({ title: "No workspace", description: "Pick a workspace first.", variant: "destructive" });
+      return;
+    }
+    if (signalhireBalance < selected.length) {
+      toast({
+        title: "Not enough credits",
+        description: `Claiming ${selected.length} leads needs ${selected.length} credits — you have ${signalhireBalance}.`,
+        variant: "destructive",
+      });
+      setShowUpgradeModal(true);
+      return;
+    }
+    const rows = MOCK_LEADS.filter((l) => selected.includes(l.id));
+    setClaiming(true);
+    let claimed = 0;
+    for (const lead of rows) {
+      const { error: consumeErr } = await supabase.rpc("consume_signalhire_credit", {
+        _workspace_id: workspace.id,
+        _amount: 1,
+      });
+      if (consumeErr) {
+        toast({ title: "Credit error", description: consumeErr.message, variant: "destructive" });
+        break;
+      }
+      const [first, ...rest] = lead.name.split(" ");
+      const { error: insertErr } = await supabase.from("leads").insert({
+        workspace_id: workspace.id,
+        company_name: lead.company,
+        contact_name: lead.name,
+        role: lead.role,
+        email: lead.email,
+        source: "signalhire",
+        status: "new",
+      });
+      if (insertErr) {
+        toast({ title: "Lead insert failed", description: insertErr.message, variant: "destructive" });
+        break;
+      }
+      claimed += 1;
+      void first; void rest;
+    }
+    setClaiming(false);
+    await refetchCredits();
+    setSelected([]);
+    if (claimed > 0) {
+      toast({
+        title: "Leads claimed",
+        description: `${claimed} SignalHire lead${claimed === 1 ? "" : "s"} added to your Leads · ${claimed} credit${claimed === 1 ? "" : "s"} used.`,
+      });
+    }
   };
 
   const handleDeleteLeads = () => {
