@@ -359,6 +359,14 @@ Generate competitor analysis AND 5-8 real specific END-CUSTOMER target companies
     };
     if (Array.isArray(args.targets)) {
       args.targets = args.targets.filter((t: any) => !isCompetitor(t));
+      // Quality gate: only keep ICP contacts with a real linkedin.com/in/ URL and a real-looking name.
+      const validLinkedIn = /^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9\-_%]+\/?/i;
+      args.targets.forEach((t: any) => {
+        t.icp_contacts = (t.icp_contacts ?? []).filter((c: any) =>
+          c?.full_name && c.full_name.trim().split(/\s+/).length >= 2 &&
+          c?.linkedin_url && validLinkedIn.test(c.linkedin_url)
+        );
+      });
     }
 
     await incrementAiEmails(admin, workspace_id);
