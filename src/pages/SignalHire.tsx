@@ -171,6 +171,10 @@ export default function SignalHire() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [connected, setConnected] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [packMode, setPackMode] = useState<"once" | "monthly">("once");
+  const [selectedPack, setSelectedPack] = useState<string | null>(null);
+  const { current: workspace } = useWorkspace();
+  const { balance: signalhireBalance, lifetimePurchased, refetch: refetchCredits } = useSignalHireCredits();
 
   useEffect(() => {
     const dismissed = localStorage.getItem("signalhire_connect_dismissed");
