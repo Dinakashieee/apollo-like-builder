@@ -46,6 +46,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { useSignalHireCredits } from "@/hooks/useSignalHireCredits";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { cn } from "@/lib/utils";
 
 type Lead = {
