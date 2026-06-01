@@ -32,6 +32,7 @@ import Admin from "./pages/Admin";
 import Reminders from "./pages/Reminders";
 import GettingStarted from "./pages/GettingStarted";
 import SignalHire from "./pages/SignalHire";
+import EmailHealth from "./pages/EmailHealth";
 
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
                   <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
                   <Route path="signalhire" element={<SignalHire />} />
+                  <Route path="email-health" element={<EmailHealth />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
                   <Route path="targets" element={<Targets />} />

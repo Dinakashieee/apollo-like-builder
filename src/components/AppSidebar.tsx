@@ -14,6 +14,7 @@ import {
   Bell,
   Rocket,
   ListChecks,
+  ShieldCheck as ShieldHealth,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const mainItems = [
   { title: "Targets", url: "/app/targets", icon: Target },
   { title: "Email Composer", url: "/app/composer", icon: Mail },
   { title: "Automation", url: "/app/automation", icon: Workflow },
+  { title: "Email Health", url: "/app/email-health", icon: ShieldHealth, badge: "Free" },
   { title: "Follow-ups", url: "/app/reminders", icon: Bell },
 ];
 
