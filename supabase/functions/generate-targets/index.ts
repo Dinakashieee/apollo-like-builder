@@ -270,13 +270,15 @@ For each target include:
 For similar/competitors: 3-5 real direct competitors of THIS seller's offering with strengths/weaknesses/your_advantage and 1-2 references each — these are who the seller competes against when pitching switch deals.`;
 
     const analystModel = isReplace ? "google/gemini-2.5-flash" : "openai/gpt-5-mini";
+    const { getResearchAiEndpoint } = await import("../_shared/ai-endpoint.ts");
+    const aiEp = getResearchAiEndpoint(analystModel);
 
-    await updateJob({ progress: 62, message: "Analyzing verified sources with AI" });
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    await updateJob({ progress: 62, message: `Analyzing verified sources with AI (${aiEp.provider})` });
+    const response = await fetch(aiEp.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: aiEp.headers,
       body: JSON.stringify({
-        model: analystModel,
+        model: aiEp.model,
         messages: [
           { role: "system", content: `You are a B2B market analyst AND sales-enablement writer. The seller's category is: "${sellerCategoryDescriptor}" (could be anything: ERP, cybersecurity, logistics SaaS, fintech APIs, marketing tools, legal tech, healthtech, etc. — do NOT assume a vertical). Your job is two-fold: (1) map who competes with this seller (direct competitors in 'similar'), and (2) find real END-CUSTOMER targets — both companies already using a competing/adjacent product (partnership-switch / rip-and-replace plays) AND net-new greenfield accounts. For every target, dig into publicly available info (LinkedIn, press releases, job ads, case studies, annual reports, AppsRunTheWorld installed-base data, news) to identify what they currently use, their specific pain points, and concrete talking points the seller can paste into an email. Prioritize AppsRunTheWorld/installed-base evidence, then cross-check with LinkedIn, PDFs, press releases, and market news. Ground every claim in live sources. Never fabricate URLs, names, contacts, or tech-stack guesses. Always include a mix of LinkedIn, PDF, and web reference links.` },
           { role: "user", content: userPrompt },
