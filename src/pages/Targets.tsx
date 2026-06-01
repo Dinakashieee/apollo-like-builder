@@ -90,6 +90,15 @@ interface MarketFilterContext {
   targetSystems?: string[] | null;
 }
 
+interface TargetGenerationJob {
+  id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  progress: number | null;
+  message: string | null;
+  result: { similar?: SimilarProduct[]; targets?: TargetCompany[] } | null;
+  error: string | null;
+}
+
 const LEVEL_BADGES = {
   high: { label: "🔥 High", color: "bg-hot/15 text-hot border-hot/30" },
   medium: { label: "⚠️ Medium", color: "bg-warm/15 text-warm border-warm/30" },
@@ -182,6 +191,8 @@ const withTimeout = async <T,>(promise: Promise<T>, message: string): Promise<T>
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Try again";
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function Targets() {
   const { current } = useWorkspace();
   const { user } = useAuth();
@@ -190,6 +201,8 @@ export default function Targets() {
   const [targets, setTargets] = useState<TargetCompany[]>([]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState(0);
   const [replacingIdx, setReplacingIdx] = useState<number | null>(null);
   const [decliningIdx, setDecliningIdx] = useState<number | null>(null);
   const [addingNew, setAddingNew] = useState(false);
