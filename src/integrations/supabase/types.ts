@@ -1114,6 +1114,50 @@ export type Database = {
         }
         Relationships: []
       }
+      signalhire_credit_purchases: {
+        Row: {
+          amount_usd: number
+          created_at: string
+          credits: number
+          is_subscription: boolean
+          paypal_order_id: string
+          paypal_subscription_id: string | null
+          plan_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          amount_usd: number
+          created_at?: string
+          credits: number
+          is_subscription?: boolean
+          paypal_order_id: string
+          paypal_subscription_id?: string | null
+          plan_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          amount_usd?: number
+          created_at?: string
+          credits?: number
+          is_subscription?: boolean
+          paypal_order_id?: string
+          paypal_subscription_id?: string | null
+          plan_id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signalhire_credit_purchases_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -1599,6 +1643,35 @@ export type Database = {
           },
         ]
       }
+      workspace_signalhire_credits: {
+        Row: {
+          balance: number
+          lifetime_purchased: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          balance?: number
+          lifetime_purchased?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          balance?: number
+          lifetime_purchased?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_signalhire_credits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           created_at: string
@@ -1631,6 +1704,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_signalhire_credit: {
+        Args: { _amount?: number; _workspace_id: string }
+        Returns: number
+      }
       current_lead_count: { Args: { _workspace_id: string }; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -1648,6 +1725,19 @@ export type Database = {
       get_workspace_owner_tier: {
         Args: { _workspace_id: string }
         Returns: string
+      }
+      grant_signalhire_credits: {
+        Args: {
+          _amount_usd: number
+          _credits: number
+          _is_subscription?: boolean
+          _paypal_order_id: string
+          _paypal_subscription_id?: string
+          _plan_id: string
+          _user_id: string
+          _workspace_id: string
+        }
+        Returns: number
       }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }

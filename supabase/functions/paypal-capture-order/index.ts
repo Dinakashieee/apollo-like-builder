@@ -83,6 +83,58 @@ Deno.serve(async (req) => {
     const payerId = data?.payer?.payer_id ?? 'paypal';
     const payerEmail = data?.payer?.email_address ?? u.user.email ?? 'paypal-buyer';
 
+    // SignalHire reveal-credit packs (one-time top-up OR monthly subscription).
+    if (plan.signalhireCredits) {
+      const workspaceId = custom.workspaceId;
+      if (!workspaceId) {
+        return new Response(JSON.stringify({ error: 'workspaceId missing in order' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: ws } = await admin
+        .from('workspaces').select('id, owner_id').eq('id', workspaceId).maybeSingle();
+      if (!ws || !(await admin.from('workspace_members')
+        .select('user_id').eq('workspace_id', workspaceId).eq('user_id', u.user.id).maybeSingle()).data) {
+        return new Response(JSON.stringify({ error: 'Not authorized for this workspace' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: newBalance, error: grantErr } = await admin.rpc('grant_signalhire_credits', {
+        _workspace_id: workspaceId,
+        _user_id: u.user.id,
+        _credits: plan.signalhireCredits,
+        _amount_usd: Number(plan.amount),
+        _plan_id: plan.priceId,
+        _paypal_order_id: orderId,
+        _is_subscription: !!plan.isSubscription,
+        _paypal_subscription_id: plan.isSubscription ? `paypal:${orderId}` : null,
+      });
+      if (grantErr) throw grantErr;
+
+      // Record monthly subscriptions in workspace_addons so renewals show in billing UI.
+      if (plan.isSubscription) {
+        await admin.from('workspace_addons').upsert({
+          workspace_id: workspaceId,
+          user_id: u.user.id,
+          paddle_subscription_id: `paypal:${orderId}`,
+          paddle_customer_id: `paypal:${payerId}:${payerEmail}`,
+          product_id: plan.productId,
+          price_id: plan.priceId,
+          quantity: 1,
+          status: 'active',
+          current_period_start: capturedAt.toISOString(),
+          current_period_end: addMonths(capturedAt, plan.intervalMonths).toISOString(),
+          environment: getPayPalEnv(),
+          updated_at: capturedAt.toISOString(),
+        }, { onConflict: 'paddle_subscription_id' });
+      }
+
+      return new Response(JSON.stringify({
+        ok: true, planId: plan.priceId, signalhireCredits: plan.signalhireCredits,
+        balance: newBalance, addon: true, ...data,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     if (plan.isAddon) {
       const workspaceId = custom.workspaceId;
       if (!workspaceId) {

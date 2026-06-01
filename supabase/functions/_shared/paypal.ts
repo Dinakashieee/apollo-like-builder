@@ -13,7 +13,15 @@ export type PayPalPlanId =
   | 'addon_seat_monthly'
   | 'addon_credits_1k_monthly'
   | 'addon_credits_5k_monthly'
-  | 'addon_leads_100_monthly';
+  | 'addon_leads_100_monthly'
+  | 'sh_credits_100_once'
+  | 'sh_credits_500_once'
+  | 'sh_credits_1k_once'
+  | 'sh_credits_5k_once'
+  | 'sh_credits_100_monthly'
+  | 'sh_credits_500_monthly'
+  | 'sh_credits_1k_monthly'
+  | 'sh_credits_5k_monthly';
 
 const PAYPAL_PLANS: Record<PayPalPlanId, {
   amount: string;
@@ -23,6 +31,10 @@ const PAYPAL_PLANS: Record<PayPalPlanId, {
   priceId: string;
   intervalMonths: number;
   isAddon?: boolean;
+  /** SignalHire reveal credits granted on capture (one-time or per renewal). */
+  signalhireCredits?: number;
+  /** True for monthly recurring SignalHire credit subscriptions, false for one-time top-ups. */
+  isSubscription?: boolean;
 }> = {
   starter_monthly: { amount: '19.00', currency: 'USD', description: 'EngageIQ Starter Plan - monthly', productId: 'starter_plan', priceId: 'starter_monthly', intervalMonths: 1 },
   starter_yearly: { amount: '182.40', currency: 'USD', description: 'EngageIQ Starter Plan - yearly', productId: 'starter_plan', priceId: 'starter_yearly', intervalMonths: 12 },
@@ -34,6 +46,18 @@ const PAYPAL_PLANS: Record<PayPalPlanId, {
   addon_seat_monthly: { amount: '8.00', currency: 'USD', description: 'EngageIQ Add-on: Extra User Seat / month', productId: 'addon_seat', priceId: 'addon_seat_monthly', intervalMonths: 1, isAddon: true },
   addon_credits_1k_monthly: { amount: '15.00', currency: 'USD', description: 'EngageIQ Add-on: +1,000 AI Credits / month', productId: 'addon_credits_1k', priceId: 'addon_credits_1k_monthly', intervalMonths: 1, isAddon: true },
   addon_credits_5k_monthly: { amount: '59.00', currency: 'USD', description: 'EngageIQ Add-on: +5,000 AI Credits / month', productId: 'addon_credits_5k', priceId: 'addon_credits_5k_monthly', intervalMonths: 1, isAddon: true },
+
+  // SignalHire reveal credits @ $0.25 each — one-time top-ups (never expire)
+  sh_credits_100_once: { amount: '25.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 100 (one-time)', productId: 'sh_credits_100', priceId: 'sh_credits_100_once', intervalMonths: 0, signalhireCredits: 100, isSubscription: false },
+  sh_credits_500_once: { amount: '125.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 500 (one-time)', productId: 'sh_credits_500', priceId: 'sh_credits_500_once', intervalMonths: 0, signalhireCredits: 500, isSubscription: false },
+  sh_credits_1k_once: { amount: '250.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 1,000 (one-time)', productId: 'sh_credits_1k', priceId: 'sh_credits_1k_once', intervalMonths: 0, signalhireCredits: 1000, isSubscription: false },
+  sh_credits_5k_once: { amount: '1250.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 5,000 (one-time)', productId: 'sh_credits_5k', priceId: 'sh_credits_5k_once', intervalMonths: 0, signalhireCredits: 5000, isSubscription: false },
+
+  // SignalHire reveal credits @ $0.25 each — monthly recurring (auto-refill)
+  sh_credits_100_monthly: { amount: '25.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 100 / month', productId: 'sh_credits_100_sub', priceId: 'sh_credits_100_monthly', intervalMonths: 1, signalhireCredits: 100, isSubscription: true },
+  sh_credits_500_monthly: { amount: '125.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 500 / month', productId: 'sh_credits_500_sub', priceId: 'sh_credits_500_monthly', intervalMonths: 1, signalhireCredits: 500, isSubscription: true },
+  sh_credits_1k_monthly: { amount: '250.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 1,000 / month', productId: 'sh_credits_1k_sub', priceId: 'sh_credits_1k_monthly', intervalMonths: 1, signalhireCredits: 1000, isSubscription: true },
+  sh_credits_5k_monthly: { amount: '1250.00', currency: 'USD', description: 'EngageIQ SignalHire Credits — 5,000 / month', productId: 'sh_credits_5k_sub', priceId: 'sh_credits_5k_monthly', intervalMonths: 1, signalhireCredits: 5000, isSubscription: true },
 };
 
 export function getPayPalPlan(planId: unknown) {
