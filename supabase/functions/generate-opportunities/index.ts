@@ -167,11 +167,13 @@ Additional summary: ${company.products_summary ?? "n/a"}
 LIVE PUBLIC SOURCES (PDFs, LinkedIn posts, articles — cite with [n]):
 ${sourcesBlock}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const { getResearchAiEndpoint } = await import("../_shared/ai-endpoint.ts");
+    const aiEp = getResearchAiEndpoint("google/gemini-2.5-flash");
+    const response = await fetch(aiEp.url, {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: aiEp.headers,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiEp.model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
