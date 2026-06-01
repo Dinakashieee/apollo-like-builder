@@ -908,6 +908,57 @@ export default function Targets() {
                 </Section>
               )}
 
+              {revealed.pitch_angle && (
+                <Section title="Pitch angle" icon={Flag}>
+                  <p className="text-sm text-foreground/90 leading-relaxed">
+                    {revealed.pitch_angle === "switch" && (
+                      <><strong className="text-primary-deep">Partnership switch</strong> — they already run something in your category. Ask them to consolidate / migrate / partner with you instead.</>
+                    )}
+                    {revealed.pitch_angle === "expansion" && (
+                      <><strong className="text-primary-deep">Expansion / add-on</strong> — they use an adjacent product. Pitch the module they're missing or a better replacement for part of their stack.</>
+                    )}
+                    {revealed.pitch_angle === "greenfield" && (
+                      <><strong className="text-primary-deep">Net-new / greenfield</strong> — no current solution detected. Lead with category education and ROI.</>
+                    )}
+                  </p>
+                </Section>
+              )}
+
+              {revealed.pain_points && revealed.pain_points.length > 0 && (
+                <Section title="Pain points (from public info)" icon={Crosshair}>
+                  <ul className="space-y-1.5">
+                    {revealed.pain_points.map((p, i) => (
+                      <li key={i} className="text-sm text-foreground/90 leading-relaxed flex gap-2">
+                        <span className="text-warm mt-1.5 h-1.5 w-1.5 rounded-full bg-warm shrink-0" />
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              )}
+
+              {revealed.talking_points && revealed.talking_points.length > 0 && (
+                <Section title="What to say in your email" icon={Sparkles}>
+                  <div className="space-y-2">
+                    {revealed.talking_points.map((tp, i) => (
+                      <div key={i} className="group relative rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-foreground/90 leading-relaxed">
+                        <p className="pr-16">{tp}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(tp);
+                            toast({ title: "Copied", description: "Talking point copied to clipboard." });
+                          }}
+                          className="absolute top-2 right-2 text-[10px] font-semibold uppercase tracking-wide text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
               {revealed.designations && revealed.designations.length > 0 && (
                 <Section title="Decision-maker designations" icon={Users}>
                   <div className="flex flex-wrap gap-1.5">
