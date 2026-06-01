@@ -50,6 +50,7 @@ import { useSignalHireCredits } from "@/hooks/useSignalHireCredits";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 type Lead = {
   id: string;
