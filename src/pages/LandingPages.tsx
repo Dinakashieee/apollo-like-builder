@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { Copy, ExternalLink, Plus, Trash2, Eye, MousePointerClick, Clock, Users } from "lucide-react";
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null };
+export type CTA = { label: string; url: string; style: "primary" | "secondary" | "outline" };
 type Page = {
   id: string;
   slug: string;
@@ -29,6 +30,7 @@ type Page = {
   body: string | null;
   cta_label: string | null;
   cta_url: string | null;
+  ctas: CTA[];
   logo_url: string | null;
   accent_color: string | null;
   lead_id: string | null;
