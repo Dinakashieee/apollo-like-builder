@@ -15,6 +15,7 @@ import {
   Rocket,
   ListChecks,
   ShieldCheck as ShieldHealth,
+  Globe,
 } from "lucide-react";
 import {
   Sidebar,
