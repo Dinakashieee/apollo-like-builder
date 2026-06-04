@@ -293,6 +293,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
         body: p.body,
         cta_label: p.cta_label,
         cta_url: p.cta_url,
+        ctas: p.ctas as any,
         logo_url: p.logo_url,
         accent_color: p.accent_color,
         lead_id: p.lead_id,
