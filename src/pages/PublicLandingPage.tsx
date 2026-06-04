@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 
+type CTA = { label: string; url: string; style: "primary" | "secondary" | "outline" };
 type Page = {
   id: string;
   template: string;
@@ -14,6 +14,7 @@ type Page = {
   body: string | null;
   cta_label: string | null;
   cta_url: string | null;
+  ctas: CTA[];
   logo_url: string | null;
   accent_color: string | null;
 };
@@ -35,6 +36,14 @@ function interpolate(s: string | null, p: Page) {
     .replace(/\{company\}/gi, p.prospect_company || "your company");
 }
 
+function ctaStyle(s: CTA["style"], accent: string, onDark = false): React.CSSProperties {
+  if (s === "primary") return { background: accent, color: "#fff", border: `1px solid ${accent}` };
+  if (s === "secondary") return onDark
+    ? { background: "#fff", color: "#0f172a", border: "1px solid #fff" }
+    : { background: "#0f172a", color: "#fff", border: "1px solid #0f172a" };
+  return { background: "transparent", color: onDark ? "#fff" : accent, border: `1px solid ${onDark ? "#fff" : accent}` };
+}
+
 export default function PublicLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState<Page | null>(null);
@@ -47,18 +56,19 @@ export default function PublicLandingPage() {
     (async () => {
       const { data } = await supabase
         .from("landing_pages")
-        .select("id,template,title,prospect_name,prospect_company,headline,subheadline,body,cta_label,cta_url,logo_url,accent_color")
+        .select("id,template,title,prospect_name,prospect_company,headline,subheadline,body,cta_label,cta_url,ctas,logo_url,accent_color")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
-      setPage(data as Page | null);
+      const p = data ? ({ ...(data as any), ctas: Array.isArray((data as any).ctas) ? (data as any).ctas : [] } as Page) : null;
+      setPage(p);
       setLoading(false);
-      if (data) {
-        document.title = (data as Page).title;
+      if (p) {
+        document.title = p.title;
         const { data: view } = await supabase
           .from("landing_page_views")
           .insert({
-            page_id: (data as Page).id,
+            page_id: p.id,
             visitor_id: visitorId(),
             referrer: document.referrer || null,
             user_agent: navigator.userAgent,
@@ -74,10 +84,7 @@ export default function PublicLandingPage() {
     const send = () => {
       if (!viewIdRef.current) return;
       const duration = Date.now() - startRef.current;
-      supabase
-        .from("landing_page_views")
-        .update({ duration_ms: duration })
-        .eq("id", viewIdRef.current);
+      supabase.from("landing_page_views").update({ duration_ms: duration }).eq("id", viewIdRef.current);
     };
     window.addEventListener("beforeunload", send);
     const i = setInterval(send, 15000);
@@ -88,14 +95,14 @@ export default function PublicLandingPage() {
     };
   }, []);
 
-  const onCta = async () => {
+  const onCta = async (cta: CTA, idx: number) => {
     if (viewIdRef.current) {
       await supabase
         .from("landing_page_views")
-        .update({ cta_clicked: true, duration_ms: Date.now() - startRef.current })
+        .update({ cta_clicked: true, cta_index: idx, duration_ms: Date.now() - startRef.current })
         .eq("id", viewIdRef.current);
     }
-    if (page?.cta_url) window.open(page.cta_url, "_blank");
+    if (cta.url) window.open(cta.url, "_blank");
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
@@ -106,6 +113,28 @@ export default function PublicLandingPage() {
   const sub = interpolate(page.subheadline, page);
   const body = interpolate(page.body, page);
 
+  // Backwards-compat: if no ctas array but legacy single CTA exists
+  const ctas: CTA[] = page.ctas?.length
+    ? page.ctas
+    : page.cta_label && page.cta_url
+    ? [{ label: page.cta_label, url: page.cta_url, style: "primary" }]
+    : [];
+
+  const CtaRow = ({ onDark = false }: { onDark?: boolean }) => (
+    <div className="flex flex-wrap gap-3">
+      {ctas.map((c, i) => (
+        <button
+          key={i}
+          onClick={() => onCta(c, i)}
+          className="px-6 py-3 rounded-md text-base font-medium hover:opacity-90 transition-opacity"
+          style={ctaStyle(c.style, accent, onDark)}
+        >
+          {interpolate(c.label, page)}
+        </button>
+      ))}
+    </div>
+  );
+
   if (page.template === "bold") {
     return (
       <div className="min-h-screen" style={{ background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)` }}>
@@ -114,11 +143,7 @@ export default function PublicLandingPage() {
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">{headline}</h1>
           <p className="text-xl text-white/80 mb-8">{sub}</p>
           <div className="whitespace-pre-wrap text-white/90 mb-10 leading-relaxed">{body}</div>
-          {page.cta_label && (
-            <Button size="lg" onClick={onCta} className="bg-white text-slate-900 hover:bg-white/90">
-              {page.cta_label}
-            </Button>
-          )}
+          <CtaRow onDark />
         </div>
       </div>
     );
@@ -134,17 +159,12 @@ export default function PublicLandingPage() {
         </div>
         <div className="p-12 flex flex-col justify-center bg-background">
           <div className="whitespace-pre-wrap text-foreground/80 leading-relaxed mb-8">{body}</div>
-          {page.cta_label && (
-            <Button size="lg" onClick={onCta} style={{ background: accent }} className="text-white hover:opacity-90 w-fit">
-              {page.cta_label}
-            </Button>
-          )}
+          <CtaRow />
         </div>
       </div>
     );
   }
 
-  // minimal default
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-6 py-20">
@@ -154,11 +174,7 @@ export default function PublicLandingPage() {
         </h1>
         <p className="text-lg text-muted-foreground mb-8">{sub}</p>
         <div className="whitespace-pre-wrap text-foreground/85 leading-relaxed mb-10">{body}</div>
-        {page.cta_label && (
-          <Button size="lg" onClick={onCta} style={{ background: accent }} className="text-white hover:opacity-90">
-            {page.cta_label}
-          </Button>
-        )}
+        <CtaRow />
       </div>
     </div>
   );
