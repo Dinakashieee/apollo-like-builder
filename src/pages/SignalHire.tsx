@@ -694,8 +694,22 @@ export default function SignalHire() {
 
             <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">100,000</span> results ·{" "}
-                <span className="font-semibold text-foreground">20</span> displayed
+                {hasRealResults ? (
+                  searchStatus === "pending" ? (
+                    <span>Waiting for SignalHire to return results…</span>
+                  ) : searchStatus === "failed" ? (
+                    <span className="text-destructive">Search failed{searchError ? `: ${searchError}` : ""}</span>
+                  ) : (
+                    <>
+                      <span className="font-semibold text-foreground">{results.length.toLocaleString()}</span> results
+                    </>
+                  )
+                ) : (
+                  <>
+                    <span className="font-semibold text-foreground">100,000</span> results ·{" "}
+                    <span className="font-semibold text-foreground">20</span> displayed
+                  </>
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -729,6 +743,16 @@ export default function SignalHire() {
               </div>
 
               <div className="divide-y divide-border/60 max-h-[480px] overflow-y-auto">
+                {hasRealResults && searchStatus === "pending" && (
+                  <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    SignalHire is processing your search. Results will appear here automatically.
+                  </div>
+                )}
+                {hasRealResults && searchStatus === "completed" && filtered.length === 0 && (
+                  <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    No profiles matched. Try broadening your filters.
+                  </div>
+                )}
                 {filtered.map((lead) => (
                   <div
                     key={lead.id}
@@ -745,15 +769,20 @@ export default function SignalHire() {
                       <span className="text-sm font-medium truncate">{lead.name}</span>
                     </div>
                     <CompanyChip name={lead.company} />
-                    <EmailBar />
-                    <Badge variant="secondary" className="bg-success/10 text-success border-success/20 gap-1 w-fit">
-                      <CheckCircle2 className="h-3 w-3" /> Valid
+                    {lead.email ? (
+                      <span className="text-sm text-foreground/80 truncate">{lead.email}</span>
+                    ) : (
+                      <EmailBar />
+                    )}
+                    <Badge variant="secondary" className={cn("gap-1 w-fit", lead.email ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
+                      <CheckCircle2 className="h-3 w-3" /> {lead.email ? "Valid" : "Pending"}
                     </Badge>
                     <span className="text-sm text-foreground/80 truncate">{lead.role}</span>
                   </div>
                 ))}
               </div>
             </div>
+
 
             <p className="text-xs text-muted-foreground mt-4">
               Claim leads pulled from SignalHire's live database. Filter by role, company, or location and sync directly to your CRM.
