@@ -322,8 +322,9 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
       </SheetHeader>
 
       <Tabs defaultValue="content" className="mt-4">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="ctas">CTAs</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>
