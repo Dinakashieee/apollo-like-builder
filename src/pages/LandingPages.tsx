@@ -218,8 +218,9 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
         headline: `Hi {name}, this is for {company}`,
         subheadline: `A quick look at how we can help you grow.`,
         body: `Hi {name},\n\nWe put together this page just for {company}. Let us know what you think.`,
-        cta_label: "Book a call",
-        cta_url: "https://",
+        cta_label: null,
+        cta_url: null,
+        ctas: [{ label: "Book a call", url: "https://", style: "primary" }] as any,
         accent_color: "#6366f1",
       })
       .select()
