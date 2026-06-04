@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { Copy, ExternalLink, Plus, Trash2, Eye, MousePointerClick, Clock, Users } from "lucide-react";
 
-type Lead = { id: string; name: string | null; company: string | null };
+type Lead = { id: string; contact_name: string | null; company_name: string | null };
 type Page = {
   id: string;
   slug: string;
