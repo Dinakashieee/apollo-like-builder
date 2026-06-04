@@ -323,7 +323,7 @@ export default function SignalHire() {
       setShowUpgradeModal(true);
       return;
     }
-    const rows = MOCK_LEADS.filter((l) => selected.includes(l.id));
+    const rows = baseLeads.filter((l) => selected.includes(l.id));
     setClaiming(true);
     let claimed = 0;
     for (const lead of rows) {
