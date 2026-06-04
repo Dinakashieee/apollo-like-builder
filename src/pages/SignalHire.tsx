@@ -177,6 +177,20 @@ export default function SignalHire() {
   const { current: workspace } = useWorkspace();
   const { balance: signalhireBalance, lifetimePurchased, refetch: refetchCredits } = useSignalHireCredits();
 
+  // Filter inputs
+  const [fName, setFName] = useState("");
+  const [fJobTitle, setFJobTitle] = useState("");
+  const [fLocation, setFLocation] = useState("");
+  const [fCompany, setFCompany] = useState("");
+  const [fIndustry, setFIndustry] = useState("");
+
+  // Real results
+  const [searching, setSearching] = useState(false);
+  const [currentSearchId, setCurrentSearchId] = useState<string | null>(null);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "pending" | "completed" | "failed">("idle");
+  const [results, setResults] = useState<Lead[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
   useEffect(() => {
     const dismissed = localStorage.getItem("signalhire_connect_dismissed");
     const saved = localStorage.getItem("signalhire_connected");
@@ -187,13 +201,50 @@ export default function SignalHire() {
     }
   }, []);
 
+  // Subscribe to the search row for realtime callback completion
+  useEffect(() => {
+    if (!currentSearchId) return;
+    const ch = supabase
+      .channel(`sh-search-${currentSearchId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "signalhire_searches", filter: `id=eq.${currentSearchId}` },
+        (payload: any) => {
+          const row = payload.new;
+          setSearchStatus(row.status);
+          if (row.status === "completed") {
+            const mapped: Lead[] = (row.results ?? []).map((r: any) => ({
+              id: String(r.id),
+              name: r.name || "Unknown",
+              initials: (r.name || "?").split(" ").map((p: string) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase(),
+              company: r.company || "—",
+              role: r.role || "—",
+              email: r.email || "",
+              status: r.email ? "valid" : "guess",
+            }));
+            setResults(mapped);
+            setSearching(false);
+          } else if (row.status === "failed") {
+            setSearchError(row.error ?? "Search failed");
+            setSearching(false);
+          }
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [currentSearchId]);
+
+  const hasRealResults = currentSearchId !== null;
+  const baseLeads = hasRealResults ? results : MOCK_LEADS;
+
   const filtered = useMemo(() => {
-    if (!query) return MOCK_LEADS;
+    if (!query) return baseLeads;
     const q = query.toLowerCase();
-    return MOCK_LEADS.filter(
+    return baseLeads.filter(
       (l) => l.name.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) || l.role.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, baseLeads]);
+
 
   const visibleLists = useMemo(() => {
     if (!listSearch) return lists;
