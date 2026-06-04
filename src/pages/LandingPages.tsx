@@ -348,11 +348,11 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
           <Field label="Headline"><Input value={p.headline || ""} onChange={(e) => set("headline", e.target.value)} placeholder="Hi {name}, …" /></Field>
           <Field label="Subheadline"><Input value={p.subheadline || ""} onChange={(e) => set("subheadline", e.target.value)} /></Field>
           <Field label="Body"><Textarea rows={6} value={p.body || ""} onChange={(e) => set("body", e.target.value)} /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="CTA label"><Input value={p.cta_label || ""} onChange={(e) => set("cta_label", e.target.value)} /></Field>
-            <Field label="CTA URL"><Input value={p.cta_url || ""} onChange={(e) => set("cta_url", e.target.value)} placeholder="https://" /></Field>
-          </div>
           <p className="text-xs text-muted-foreground">Tip: use <code className="bg-muted px-1 rounded">{"{name}"}</code> and <code className="bg-muted px-1 rounded">{"{company}"}</code> as personalization tokens.</p>
+        </TabsContent>
+
+        <TabsContent value="ctas" className="space-y-3 mt-4">
+          <CtaBuilder ctas={p.ctas} onChange={(v) => set("ctas", v)} accent={p.accent_color || "#6366f1"} />
         </TabsContent>
 
         <TabsContent value="design" className="space-y-4 mt-4">
