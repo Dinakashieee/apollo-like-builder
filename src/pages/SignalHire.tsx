@@ -373,9 +373,42 @@ export default function SignalHire() {
     toast({ title: "Enrichment queued", description: "We're enriching these leads with verified contact data." });
   };
 
-  const handleSearch = () => {
-    toast({ title: "Search running", description: "Pulling matching leads from SignalHire." });
+  const handleSearch = async () => {
+    if (!workspace?.id) {
+      toast({ title: "No workspace", description: "Pick a workspace first.", variant: "destructive" });
+      return;
+    }
+    const filters = {
+      name: fName.trim() || undefined,
+      job_title: fJobTitle.trim() || undefined,
+      location: fLocation.trim() || undefined,
+      company: fCompany.trim() || undefined,
+      industry: fIndustry.trim() || undefined,
+    };
+    if (!Object.values(filters).some(Boolean)) {
+      toast({ title: "Add a filter", description: "Enter a name, job title, location, company or industry.", variant: "destructive" });
+      return;
+    }
+    setSearching(true);
+    setSearchError(null);
+    setResults([]);
+    setSearchStatus("pending");
+    setCurrentSearchId(null);
+    const { data, error } = await supabase.functions.invoke("signalhire-search", {
+      body: { workspace_id: workspace.id, filters, size: 20 },
+    });
+    if (error || !data?.ok) {
+      const msg = error?.message ?? (typeof data?.error === "string" ? data.error : JSON.stringify(data?.error ?? "Search failed"));
+      setSearchError(msg);
+      setSearching(false);
+      setSearchStatus("failed");
+      toast({ title: "SignalHire search failed", description: msg, variant: "destructive" });
+      return;
+    }
+    setCurrentSearchId(data.search_id);
+    toast({ title: "Search submitted", description: "Results will appear shortly." });
   };
+
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
