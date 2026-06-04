@@ -60,7 +60,7 @@ export default function LandingPages() {
     setLoading(true);
     const [{ data: ps }, { data: ls }] = await Promise.all([
       supabase.from("landing_pages").select("*").eq("workspace_id", current.id).order("created_at", { ascending: false }),
-      supabase.from("leads").select("id,name,company").eq("workspace_id", current.id).order("created_at", { ascending: false }).limit(500),
+      supabase.from("leads").select("id,contact_name,company_name").eq("workspace_id", current.id).order("created_at", { ascending: false }).limit(500),
     ]);
     setPages((ps as Page[]) || []);
     setLeads((ls as Lead[]) || []);
@@ -211,8 +211,8 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
         template,
         slug,
         lead_id: leadId === "none" ? null : leadId,
-        prospect_name: lead?.name || null,
-        prospect_company: lead?.company || null,
+        prospect_name: lead?.contact_name || null,
+        prospect_company: lead?.company_name || null,
         headline: `Hi {name}, this is for {company}`,
         subheadline: `A quick look at how we can help you grow.`,
         body: `Hi {name},\n\nWe put together this page just for {company}. Let us know what you think.`,
@@ -255,7 +255,7 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {leads.map((l: Lead) => (
-                  <SelectItem key={l.id} value={l.id}>{l.name || "Unnamed"} {l.company ? `— ${l.company}` : ""}</SelectItem>
+                  <SelectItem key={l.id} value={l.id}>{l.contact_name || "Unnamed"} {l.company_name ? `— ${l.company_name}` : ""}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -336,7 +336,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
-                {leads.map((l) => <SelectItem key={l.id} value={l.id}>{l.name || "Unnamed"} {l.company ? `— ${l.company}` : ""}</SelectItem>)}
+                {leads.map((l) => <SelectItem key={l.id} value={l.id}>{l.contact_name || "Unnamed"} {l.company_name ? `— ${l.company_name}` : ""}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
