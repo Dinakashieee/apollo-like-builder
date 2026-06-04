@@ -46,6 +46,7 @@ const mainItems = [
   { title: "Email Composer", url: "/app/composer", icon: Mail },
   { title: "Automation", url: "/app/automation", icon: Workflow },
   { title: "Email Health", url: "/app/email-health", icon: ShieldHealth, badge: "Free" },
+  { title: "Landing Pages", url: "/app/pages", icon: Globe, badge: "New" },
   { title: "Follow-ups", url: "/app/reminders", icon: Bell },
 ];
 
