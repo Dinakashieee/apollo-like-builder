@@ -64,7 +64,7 @@ export default function LandingPages() {
       supabase.from("landing_pages").select("*").eq("workspace_id", current.id).order("created_at", { ascending: false }),
       supabase.from("leads").select("id,contact_name,company_name").eq("workspace_id", current.id).order("created_at", { ascending: false }).limit(500),
     ]);
-    setPages((ps as Page[]) || []);
+    setPages(((ps as any[]) || []).map((p) => ({ ...p, ctas: Array.isArray(p.ctas) ? p.ctas : [] })));
     setLeads((ls as Lead[]) || []);
     setLoading(false);
   };
