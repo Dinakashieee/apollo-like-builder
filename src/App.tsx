@@ -56,6 +56,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/refund" element={<Refund />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/p/:slug" element={<PublicLandingPage />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/onboarding" element={<Onboarding />} />
