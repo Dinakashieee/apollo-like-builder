@@ -454,3 +454,82 @@ function StatsPanel({ pageId }: { pageId: string }) {
     </div>
   );
 }
+
+function CtaBuilder({ ctas, onChange, accent }: { ctas: CTA[]; onChange: (v: CTA[]) => void; accent: string }) {
+  const update = (i: number, patch: Partial<CTA>) => onChange(ctas.map((c, idx) => idx === i ? { ...c, ...patch } : c));
+  const remove = (i: number) => onChange(ctas.filter((_, idx) => idx !== i));
+  const add = () => onChange([...ctas, { label: "Click here", url: "https://", style: "primary" }]);
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= ctas.length) return;
+    const next = [...ctas];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+
+  const previewStyle = (s: CTA["style"]): React.CSSProperties => {
+    if (s === "primary") return { background: accent, color: "#fff", border: `1px solid ${accent}` };
+    if (s === "secondary") return { background: "#1f2937", color: "#fff", border: "1px solid #1f2937" };
+    return { background: "transparent", color: accent, border: `1px solid ${accent}` };
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label className="text-sm">Call-to-action buttons</Label>
+          <p className="text-xs text-muted-foreground">Add one or more CTAs. They appear in order at the bottom of the page.</p>
+        </div>
+        <Button size="sm" onClick={add}><Plus className="h-3.5 w-3.5" /> Add CTA</Button>
+      </div>
+
+      {ctas.length === 0 && (
+        <div className="border border-dashed rounded-md p-6 text-center text-sm text-muted-foreground">
+          No CTAs yet. Add one to drive action.
+        </div>
+      )}
+
+      {ctas.map((c, i) => (
+        <div key={i} className="border rounded-md p-3 space-y-3 bg-card">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">CTA #{i + 1}</span>
+            <div className="flex gap-1">
+              <Button size="sm" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}>↑</Button>
+              <Button size="sm" variant="ghost" onClick={() => move(i, 1)} disabled={i === ctas.length - 1}>↓</Button>
+              <Button size="sm" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-3.5 w-3.5" /></Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Label</Label>
+              <Input value={c.label} onChange={(e) => update(i, { label: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Style</Label>
+              <Select value={c.style} onValueChange={(v) => update(i, { style: v as CTA["style"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Primary (accent)</SelectItem>
+                  <SelectItem value="secondary">Secondary (dark)</SelectItem>
+                  <SelectItem value="outline">Outline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">URL</Label>
+            <Input value={c.url} onChange={(e) => update(i, { url: e.target.value })} placeholder="https://" />
+          </div>
+          <div className="pt-1">
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Preview</span>
+            <div className="mt-1">
+              <button type="button" className="px-4 py-2 rounded-md text-sm font-medium" style={previewStyle(c.style)}>
+                {c.label || "Button"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
