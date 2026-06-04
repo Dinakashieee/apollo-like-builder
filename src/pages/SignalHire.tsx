@@ -177,6 +177,20 @@ export default function SignalHire() {
   const { current: workspace } = useWorkspace();
   const { balance: signalhireBalance, lifetimePurchased, refetch: refetchCredits } = useSignalHireCredits();
 
+  // Filter inputs
+  const [fName, setFName] = useState("");
+  const [fJobTitle, setFJobTitle] = useState("");
+  const [fLocation, setFLocation] = useState("");
+  const [fCompany, setFCompany] = useState("");
+  const [fIndustry, setFIndustry] = useState("");
+
+  // Real results
+  const [searching, setSearching] = useState(false);
+  const [currentSearchId, setCurrentSearchId] = useState<string | null>(null);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "pending" | "completed" | "failed">("idle");
+  const [results, setResults] = useState<Lead[]>([]);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
   useEffect(() => {
     const dismissed = localStorage.getItem("signalhire_connect_dismissed");
     const saved = localStorage.getItem("signalhire_connected");
@@ -187,13 +201,50 @@ export default function SignalHire() {
     }
   }, []);
 
+  // Subscribe to the search row for realtime callback completion
+  useEffect(() => {
+    if (!currentSearchId) return;
+    const ch = supabase
+      .channel(`sh-search-${currentSearchId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "signalhire_searches", filter: `id=eq.${currentSearchId}` },
+        (payload: any) => {
+          const row = payload.new;
+          setSearchStatus(row.status);
+          if (row.status === "completed") {
+            const mapped: Lead[] = (row.results ?? []).map((r: any) => ({
+              id: String(r.id),
+              name: r.name || "Unknown",
+              initials: (r.name || "?").split(" ").map((p: string) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase(),
+              company: r.company || "—",
+              role: r.role || "—",
+              email: r.email || "",
+              status: r.email ? "valid" : "guess",
+            }));
+            setResults(mapped);
+            setSearching(false);
+          } else if (row.status === "failed") {
+            setSearchError(row.error ?? "Search failed");
+            setSearching(false);
+          }
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [currentSearchId]);
+
+  const hasRealResults = currentSearchId !== null;
+  const baseLeads = hasRealResults ? results : MOCK_LEADS;
+
   const filtered = useMemo(() => {
-    if (!query) return MOCK_LEADS;
+    if (!query) return baseLeads;
     const q = query.toLowerCase();
-    return MOCK_LEADS.filter(
+    return baseLeads.filter(
       (l) => l.name.toLowerCase().includes(q) || l.company.toLowerCase().includes(q) || l.role.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, baseLeads]);
+
 
   const visibleLists = useMemo(() => {
     if (!listSearch) return lists;
@@ -272,7 +323,7 @@ export default function SignalHire() {
       setShowUpgradeModal(true);
       return;
     }
-    const rows = MOCK_LEADS.filter((l) => selected.includes(l.id));
+    const rows = baseLeads.filter((l) => selected.includes(l.id));
     setClaiming(true);
     let claimed = 0;
     for (const lead of rows) {
@@ -322,9 +373,42 @@ export default function SignalHire() {
     toast({ title: "Enrichment queued", description: "We're enriching these leads with verified contact data." });
   };
 
-  const handleSearch = () => {
-    toast({ title: "Search running", description: "Pulling matching leads from SignalHire." });
+  const handleSearch = async () => {
+    if (!workspace?.id) {
+      toast({ title: "No workspace", description: "Pick a workspace first.", variant: "destructive" });
+      return;
+    }
+    const filters = {
+      name: fName.trim() || undefined,
+      job_title: fJobTitle.trim() || undefined,
+      location: fLocation.trim() || undefined,
+      company: fCompany.trim() || undefined,
+      industry: fIndustry.trim() || undefined,
+    };
+    if (!Object.values(filters).some(Boolean)) {
+      toast({ title: "Add a filter", description: "Enter a name, job title, location, company or industry.", variant: "destructive" });
+      return;
+    }
+    setSearching(true);
+    setSearchError(null);
+    setResults([]);
+    setSearchStatus("pending");
+    setCurrentSearchId(null);
+    const { data, error } = await supabase.functions.invoke("signalhire-search", {
+      body: { workspace_id: workspace.id, filters, size: 20 },
+    });
+    if (error || !data?.ok) {
+      const msg = error?.message ?? (typeof data?.error === "string" ? data.error : JSON.stringify(data?.error ?? "Search failed"));
+      setSearchError(msg);
+      setSearching(false);
+      setSearchStatus("failed");
+      toast({ title: "SignalHire search failed", description: msg, variant: "destructive" });
+      return;
+    }
+    setCurrentSearchId(data.search_id);
+    toast({ title: "Search submitted", description: "Results will appear shortly." });
   };
+
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -476,7 +560,7 @@ export default function SignalHire() {
                         <Filter className="h-3 w-3" /> Filters
                       </span>
                       <button
-                        onClick={() => toast({ title: "Filters reset" })}
+                        onClick={() => { setFName(""); setFJobTitle(""); setFLocation(""); setFCompany(""); setFIndustry(""); toast({ title: "Filters reset" }); }}
                         className="text-[11px] font-medium text-primary hover:underline"
                       >
                         Reset
@@ -497,39 +581,44 @@ export default function SignalHire() {
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <UserIcon className="h-3 w-3" /> Name
                           </label>
-                          <Input placeholder="John Doe" className="h-8 text-xs" />
+                          <Input value={fName} onChange={(e) => setFName(e.target.value)} placeholder="John Doe" className="h-8 text-xs" />
                         </div>
                         <div>
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <Briefcase className="h-3 w-3" /> Job Title
                           </label>
-                          <Input placeholder="Head of Product" className="h-8 text-xs" />
+                          <Input value={fJobTitle} onChange={(e) => setFJobTitle(e.target.value)} placeholder="Head of Product" className="h-8 text-xs" />
                         </div>
                         <div>
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <MapPin className="h-3 w-3" /> Location
                           </label>
-                          <Input placeholder="Los Angeles, CA" className="h-8 text-xs" />
+                          <Input value={fLocation} onChange={(e) => setFLocation(e.target.value)} placeholder="Los Angeles, CA" className="h-8 text-xs" />
                         </div>
                       </div>
                     )}
 
                     <div className="p-2.5 border-t border-border/60 bg-muted/20 rounded-b-xl">
-                      <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
+                      <Button className="w-full" size="sm" onClick={handleSearch} disabled={searching}>
+                        {searching ? "Searching…" : "Search"}
+                      </Button>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="company" className="m-0 p-3 space-y-2.5">
                     <div>
                       <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Company Name</label>
-                      <Input placeholder="Acme Corp" className="h-8 text-xs" />
+                      <Input value={fCompany} onChange={(e) => setFCompany(e.target.value)} placeholder="Acme Corp" className="h-8 text-xs" />
                     </div>
                     <div>
                       <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Industry</label>
-                      <Input placeholder="SaaS" className="h-8 text-xs" />
+                      <Input value={fIndustry} onChange={(e) => setFIndustry(e.target.value)} placeholder="SaaS" className="h-8 text-xs" />
                     </div>
-                    <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
+                    <Button className="w-full" size="sm" onClick={handleSearch} disabled={searching}>
+                      {searching ? "Searching…" : "Search"}
+                    </Button>
                   </TabsContent>
+
                 </Tabs>
               </div>
             )}
@@ -605,8 +694,22 @@ export default function SignalHire() {
 
             <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">100,000</span> results ·{" "}
-                <span className="font-semibold text-foreground">20</span> displayed
+                {hasRealResults ? (
+                  searchStatus === "pending" ? (
+                    <span>Waiting for SignalHire to return results…</span>
+                  ) : searchStatus === "failed" ? (
+                    <span className="text-destructive">Search failed{searchError ? `: ${searchError}` : ""}</span>
+                  ) : (
+                    <>
+                      <span className="font-semibold text-foreground">{results.length.toLocaleString()}</span> results
+                    </>
+                  )
+                ) : (
+                  <>
+                    <span className="font-semibold text-foreground">100,000</span> results ·{" "}
+                    <span className="font-semibold text-foreground">20</span> displayed
+                  </>
+                )}
               </p>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -640,6 +743,16 @@ export default function SignalHire() {
               </div>
 
               <div className="divide-y divide-border/60 max-h-[480px] overflow-y-auto">
+                {hasRealResults && searchStatus === "pending" && (
+                  <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    SignalHire is processing your search. Results will appear here automatically.
+                  </div>
+                )}
+                {hasRealResults && searchStatus === "completed" && filtered.length === 0 && (
+                  <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    No profiles matched. Try broadening your filters.
+                  </div>
+                )}
                 {filtered.map((lead) => (
                   <div
                     key={lead.id}
@@ -656,15 +769,20 @@ export default function SignalHire() {
                       <span className="text-sm font-medium truncate">{lead.name}</span>
                     </div>
                     <CompanyChip name={lead.company} />
-                    <EmailBar />
-                    <Badge variant="secondary" className="bg-success/10 text-success border-success/20 gap-1 w-fit">
-                      <CheckCircle2 className="h-3 w-3" /> Valid
+                    {lead.email ? (
+                      <span className="text-sm text-foreground/80 truncate">{lead.email}</span>
+                    ) : (
+                      <EmailBar />
+                    )}
+                    <Badge variant="secondary" className={cn("gap-1 w-fit", lead.email ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground")}>
+                      <CheckCircle2 className="h-3 w-3" /> {lead.email ? "Valid" : "Pending"}
                     </Badge>
                     <span className="text-sm text-foreground/80 truncate">{lead.role}</span>
                   </div>
                 ))}
               </div>
             </div>
+
 
             <p className="text-xs text-muted-foreground mt-4">
               Claim leads pulled from SignalHire's live database. Filter by role, company, or location and sync directly to your CRM.

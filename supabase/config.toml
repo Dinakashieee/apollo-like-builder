@@ -36,3 +36,7 @@ verify_jwt = true
 
 [functions.whatsapp-send]
 verify_jwt = true
+
+[functions.signalhire-callback]
+verify_jwt = false
+
