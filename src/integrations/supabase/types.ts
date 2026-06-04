@@ -562,6 +562,131 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_page_views: {
+        Row: {
+          country: string | null
+          created_at: string
+          cta_clicked: boolean
+          duration_ms: number | null
+          id: string
+          page_id: string
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          cta_clicked?: boolean
+          duration_ms?: number | null
+          id?: string
+          page_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          cta_clicked?: boolean
+          duration_ms?: number | null
+          id?: string
+          page_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_page_views_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "landing_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      landing_pages: {
+        Row: {
+          accent_color: string | null
+          body: string | null
+          created_at: string
+          created_by: string
+          cta_label: string | null
+          cta_url: string | null
+          headline: string | null
+          id: string
+          lead_id: string | null
+          logo_url: string | null
+          prospect_company: string | null
+          prospect_name: string | null
+          published: boolean
+          slug: string
+          subheadline: string | null
+          template: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          accent_color?: string | null
+          body?: string | null
+          created_at?: string
+          created_by: string
+          cta_label?: string | null
+          cta_url?: string | null
+          headline?: string | null
+          id?: string
+          lead_id?: string | null
+          logo_url?: string | null
+          prospect_company?: string | null
+          prospect_name?: string | null
+          published?: boolean
+          slug: string
+          subheadline?: string | null
+          template?: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          accent_color?: string | null
+          body?: string | null
+          created_at?: string
+          created_by?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          headline?: string | null
+          id?: string
+          lead_id?: string | null
+          logo_url?: string | null
+          prospect_company?: string | null
+          prospect_name?: string | null
+          published?: boolean
+          slug?: string
+          subheadline?: string | null
+          template?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_pages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           company_name: string
