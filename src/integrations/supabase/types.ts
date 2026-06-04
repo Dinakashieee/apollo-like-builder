@@ -567,6 +567,7 @@ export type Database = {
           country: string | null
           created_at: string
           cta_clicked: boolean
+          cta_index: number | null
           duration_ms: number | null
           id: string
           page_id: string
@@ -578,6 +579,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           cta_clicked?: boolean
+          cta_index?: number | null
           duration_ms?: number | null
           id?: string
           page_id: string
@@ -589,6 +591,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           cta_clicked?: boolean
+          cta_index?: number | null
           duration_ms?: number | null
           id?: string
           page_id?: string
@@ -614,6 +617,7 @@ export type Database = {
           created_by: string
           cta_label: string | null
           cta_url: string | null
+          ctas: Json
           headline: string | null
           id: string
           lead_id: string | null
@@ -635,6 +639,7 @@ export type Database = {
           created_by: string
           cta_label?: string | null
           cta_url?: string | null
+          ctas?: Json
           headline?: string | null
           id?: string
           lead_id?: string | null
@@ -656,6 +661,7 @@ export type Database = {
           created_by?: string
           cta_label?: string | null
           cta_url?: string | null
+          ctas?: Json
           headline?: string | null
           id?: string
           lead_id?: string | null

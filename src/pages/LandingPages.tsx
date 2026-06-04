@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { Copy, ExternalLink, Plus, Trash2, Eye, MousePointerClick, Clock, Users } from "lucide-react";
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null };
+export type CTA = { label: string; url: string; style: "primary" | "secondary" | "outline" };
 type Page = {
   id: string;
   slug: string;
@@ -29,6 +30,7 @@ type Page = {
   body: string | null;
   cta_label: string | null;
   cta_url: string | null;
+  ctas: CTA[];
   logo_url: string | null;
   accent_color: string | null;
   lead_id: string | null;
@@ -62,7 +64,7 @@ export default function LandingPages() {
       supabase.from("landing_pages").select("*").eq("workspace_id", current.id).order("created_at", { ascending: false }),
       supabase.from("leads").select("id,contact_name,company_name").eq("workspace_id", current.id).order("created_at", { ascending: false }).limit(500),
     ]);
-    setPages((ps as Page[]) || []);
+    setPages(((ps as any[]) || []).map((p) => ({ ...p, ctas: Array.isArray(p.ctas) ? p.ctas : [] })));
     setLeads((ls as Lead[]) || []);
     setLoading(false);
   };
@@ -216,8 +218,9 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
         headline: `Hi {name}, this is for {company}`,
         subheadline: `A quick look at how we can help you grow.`,
         body: `Hi {name},\n\nWe put together this page just for {company}. Let us know what you think.`,
-        cta_label: "Book a call",
-        cta_url: "https://",
+        cta_label: null,
+        cta_url: null,
+        ctas: [{ label: "Book a call", url: "https://", style: "primary" }] as any,
         accent_color: "#6366f1",
       })
       .select()
@@ -290,6 +293,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
         body: p.body,
         cta_label: p.cta_label,
         cta_url: p.cta_url,
+        ctas: p.ctas as any,
         logo_url: p.logo_url,
         accent_color: p.accent_color,
         lead_id: p.lead_id,
@@ -318,8 +322,9 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
       </SheetHeader>
 
       <Tabs defaultValue="content" className="mt-4">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="ctas">CTAs</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
           <TabsTrigger value="stats">Stats</TabsTrigger>
         </TabsList>
@@ -343,11 +348,11 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
           <Field label="Headline"><Input value={p.headline || ""} onChange={(e) => set("headline", e.target.value)} placeholder="Hi {name}, …" /></Field>
           <Field label="Subheadline"><Input value={p.subheadline || ""} onChange={(e) => set("subheadline", e.target.value)} /></Field>
           <Field label="Body"><Textarea rows={6} value={p.body || ""} onChange={(e) => set("body", e.target.value)} /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="CTA label"><Input value={p.cta_label || ""} onChange={(e) => set("cta_label", e.target.value)} /></Field>
-            <Field label="CTA URL"><Input value={p.cta_url || ""} onChange={(e) => set("cta_url", e.target.value)} placeholder="https://" /></Field>
-          </div>
           <p className="text-xs text-muted-foreground">Tip: use <code className="bg-muted px-1 rounded">{"{name}"}</code> and <code className="bg-muted px-1 rounded">{"{company}"}</code> as personalization tokens.</p>
+        </TabsContent>
+
+        <TabsContent value="ctas" className="space-y-3 mt-4">
+          <CtaBuilder ctas={p.ctas} onChange={(v) => set("ctas", v)} accent={p.accent_color || "#6366f1"} />
         </TabsContent>
 
         <TabsContent value="design" className="space-y-4 mt-4">
@@ -446,6 +451,85 @@ function StatsPanel({ pageId }: { pageId: string }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function CtaBuilder({ ctas, onChange, accent }: { ctas: CTA[]; onChange: (v: CTA[]) => void; accent: string }) {
+  const update = (i: number, patch: Partial<CTA>) => onChange(ctas.map((c, idx) => idx === i ? { ...c, ...patch } : c));
+  const remove = (i: number) => onChange(ctas.filter((_, idx) => idx !== i));
+  const add = () => onChange([...ctas, { label: "Click here", url: "https://", style: "primary" }]);
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= ctas.length) return;
+    const next = [...ctas];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+
+  const previewStyle = (s: CTA["style"]): React.CSSProperties => {
+    if (s === "primary") return { background: accent, color: "#fff", border: `1px solid ${accent}` };
+    if (s === "secondary") return { background: "#1f2937", color: "#fff", border: "1px solid #1f2937" };
+    return { background: "transparent", color: accent, border: `1px solid ${accent}` };
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label className="text-sm">Call-to-action buttons</Label>
+          <p className="text-xs text-muted-foreground">Add one or more CTAs. They appear in order at the bottom of the page.</p>
+        </div>
+        <Button size="sm" onClick={add}><Plus className="h-3.5 w-3.5" /> Add CTA</Button>
+      </div>
+
+      {ctas.length === 0 && (
+        <div className="border border-dashed rounded-md p-6 text-center text-sm text-muted-foreground">
+          No CTAs yet. Add one to drive action.
+        </div>
+      )}
+
+      {ctas.map((c, i) => (
+        <div key={i} className="border rounded-md p-3 space-y-3 bg-card">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">CTA #{i + 1}</span>
+            <div className="flex gap-1">
+              <Button size="sm" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}>↑</Button>
+              <Button size="sm" variant="ghost" onClick={() => move(i, 1)} disabled={i === ctas.length - 1}>↓</Button>
+              <Button size="sm" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-3.5 w-3.5" /></Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs">Label</Label>
+              <Input value={c.label} onChange={(e) => update(i, { label: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Style</Label>
+              <Select value={c.style} onValueChange={(v) => update(i, { style: v as CTA["style"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Primary (accent)</SelectItem>
+                  <SelectItem value="secondary">Secondary (dark)</SelectItem>
+                  <SelectItem value="outline">Outline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">URL</Label>
+            <Input value={c.url} onChange={(e) => update(i, { url: e.target.value })} placeholder="https://" />
+          </div>
+          <div className="pt-1">
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Preview</span>
+            <div className="mt-1">
+              <button type="button" className="px-4 py-2 rounded-md text-sm font-medium" style={previewStyle(c.style)}>
+                {c.label || "Button"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
