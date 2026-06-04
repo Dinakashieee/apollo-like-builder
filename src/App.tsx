@@ -33,6 +33,8 @@ import Reminders from "./pages/Reminders";
 import GettingStarted from "./pages/GettingStarted";
 import SignalHire from "./pages/SignalHire";
 import EmailHealth from "./pages/EmailHealth";
+import LandingPages from "./pages/LandingPages";
+import PublicLandingPage from "./pages/PublicLandingPage";
 
 
 const queryClient = new QueryClient();
