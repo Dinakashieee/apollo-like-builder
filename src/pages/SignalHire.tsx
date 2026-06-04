@@ -560,7 +560,7 @@ export default function SignalHire() {
                         <Filter className="h-3 w-3" /> Filters
                       </span>
                       <button
-                        onClick={() => toast({ title: "Filters reset" })}
+                        onClick={() => { setFName(""); setFJobTitle(""); setFLocation(""); setFCompany(""); setFIndustry(""); toast({ title: "Filters reset" }); }}
                         className="text-[11px] font-medium text-primary hover:underline"
                       >
                         Reset
@@ -581,39 +581,44 @@ export default function SignalHire() {
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <UserIcon className="h-3 w-3" /> Name
                           </label>
-                          <Input placeholder="John Doe" className="h-8 text-xs" />
+                          <Input value={fName} onChange={(e) => setFName(e.target.value)} placeholder="John Doe" className="h-8 text-xs" />
                         </div>
                         <div>
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <Briefcase className="h-3 w-3" /> Job Title
                           </label>
-                          <Input placeholder="Head of Product" className="h-8 text-xs" />
+                          <Input value={fJobTitle} onChange={(e) => setFJobTitle(e.target.value)} placeholder="Head of Product" className="h-8 text-xs" />
                         </div>
                         <div>
                           <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1 mb-1">
                             <MapPin className="h-3 w-3" /> Location
                           </label>
-                          <Input placeholder="Los Angeles, CA" className="h-8 text-xs" />
+                          <Input value={fLocation} onChange={(e) => setFLocation(e.target.value)} placeholder="Los Angeles, CA" className="h-8 text-xs" />
                         </div>
                       </div>
                     )}
 
                     <div className="p-2.5 border-t border-border/60 bg-muted/20 rounded-b-xl">
-                      <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
+                      <Button className="w-full" size="sm" onClick={handleSearch} disabled={searching}>
+                        {searching ? "Searching…" : "Search"}
+                      </Button>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="company" className="m-0 p-3 space-y-2.5">
                     <div>
                       <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Company Name</label>
-                      <Input placeholder="Acme Corp" className="h-8 text-xs" />
+                      <Input value={fCompany} onChange={(e) => setFCompany(e.target.value)} placeholder="Acme Corp" className="h-8 text-xs" />
                     </div>
                     <div>
                       <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Industry</label>
-                      <Input placeholder="SaaS" className="h-8 text-xs" />
+                      <Input value={fIndustry} onChange={(e) => setFIndustry(e.target.value)} placeholder="SaaS" className="h-8 text-xs" />
                     </div>
-                    <Button className="w-full" size="sm" onClick={handleSearch}>Search</Button>
+                    <Button className="w-full" size="sm" onClick={handleSearch} disabled={searching}>
+                      {searching ? "Searching…" : "Search"}
+                    </Button>
                   </TabsContent>
+
                 </Tabs>
               </div>
             )}
