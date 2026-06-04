@@ -33,6 +33,8 @@ import Reminders from "./pages/Reminders";
 import GettingStarted from "./pages/GettingStarted";
 import SignalHire from "./pages/SignalHire";
 import EmailHealth from "./pages/EmailHealth";
+import LandingPages from "./pages/LandingPages";
+import PublicLandingPage from "./pages/PublicLandingPage";
 
 
 const queryClient = new QueryClient();
@@ -54,6 +56,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/refund" element={<Refund />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/p/:slug" element={<PublicLandingPage />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/onboarding" element={<Onboarding />} />
@@ -62,6 +65,7 @@ const App = () => (
                   <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
                   <Route path="signalhire" element={<SignalHire />} />
+                  <Route path="pages" element={<LandingPages />} />
                   <Route path="email-health" element={<EmailHealth />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
