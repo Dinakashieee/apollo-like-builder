@@ -1197,6 +1197,59 @@ export type Database = {
           },
         ]
       }
+      signalhire_searches: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          filters: Json
+          id: string
+          profiles_count: number
+          request_id: string | null
+          results: Json
+          status: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          filters?: Json
+          id?: string
+          profiles_count?: number
+          request_id?: string | null
+          results?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          filters?: Json
+          id?: string
+          profiles_count?: number
+          request_id?: string | null
+          results?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signalhire_searches_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
