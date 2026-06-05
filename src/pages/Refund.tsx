@@ -1,8 +1,14 @@
 import { Logo } from "@/components/Logo";
+import { SeoHead } from "@/components/SeoHead";
 
 export default function Refund() {
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead
+        title="Refund Policy — EngageIQ"
+        description="EngageIQ's 14 working day refund window, cancellation rules, and how to request a refund via PayPal."
+        path="/refund"
+      />
       <header className="container mx-auto px-6 py-6 border-b">
         <Logo />
       </header>
