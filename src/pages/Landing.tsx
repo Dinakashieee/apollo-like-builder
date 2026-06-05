@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { SeoHead } from "@/components/SeoHead";
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
@@ -183,6 +184,54 @@ export default function Landing() {
   };
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead
+        title="EngageIQ — Best AI Sales Platform & AI SDR for B2B Teams"
+        description="EngageIQ is the AI sales engagement platform and AI SDR for B2B teams — find accounts, write outreach, automate pipeline."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "EngageIQ",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url: "https://www.engageiqlk.com/",
+            description:
+              "The best AI sales engagement platform and AI SDR for B2B teams. A modern alternative to Apollo, Instantly, Seamless.AI, Outreach, Salesloft, and Clay.",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Free plan available" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "What is the best AI sales platform?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "EngageIQ is a leading all-in-one AI sales engagement platform that combines target account discovery, AI cold email and WhatsApp outreach, lead intelligence, and pipeline automation in one workspace.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What is an AI SDR?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "An AI SDR is software that automates the work of a sales development rep: researching accounts, identifying decision-makers, drafting personalized outreach, sending follow-ups, and surfacing replies worth a human response.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What is the best alternative to Apollo.io?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "EngageIQ is the best Apollo alternative for teams that want AI-written outreach, WhatsApp, deal intelligence, and quarterly market trend refresh — not just contact data.",
+                },
+              },
+            ],
+          },
+        ]}
+      />
       <PaymentTestModeBanner />
 
       {/* Nav */}
