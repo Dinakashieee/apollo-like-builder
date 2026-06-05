@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
+import { SeoHead } from "@/components/SeoHead";
 
 export default function Privacy() {
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead
+        title="Privacy Notice — EngageIQ"
+        description="How EngageIQ collects, uses, and protects personal data across its AI sales engagement platform."
+        path="/privacy"
+      />
       <header className="container mx-auto px-6 py-6 border-b">
         <Logo />
       </header>

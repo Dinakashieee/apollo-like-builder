@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
+import { SeoHead } from "@/components/SeoHead";
 
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead
+        title="Terms of Service — EngageIQ"
+        description="The terms governing your use of EngageIQ's AI sales engagement platform, including acceptable use and account responsibilities."
+        path="/terms"
+      />
       <header className="container mx-auto px-6 py-6 border-b">
         <Logo />
       </header>
