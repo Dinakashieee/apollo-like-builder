@@ -16,7 +16,25 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const searchId = url.searchParams.get("search_id");
+    const token = url.searchParams.get("token");
     const body = await req.json().catch(() => ({}));
+
+    // Authenticate the webhook: require a search_id + matching per-search token.
+    if (!searchId || !token) {
+      return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: searchRow } = await admin
+      .from("signalhire_searches")
+      .select("id, callback_token")
+      .eq("id", searchId)
+      .maybeSingle();
+    if (!searchRow || !searchRow.callback_token || searchRow.callback_token !== token) {
+      return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Body can be: { requestId, status, candidates: [...] } OR array of items
     const requestId = body?.requestId ?? body?.id ?? null;
@@ -52,11 +70,7 @@ serve(async (req) => {
       completed_at: new Date().toISOString(),
     };
 
-    if (searchId) {
-      await admin.from("signalhire_searches").update(update).eq("id", searchId);
-    } else if (requestId) {
-      await admin.from("signalhire_searches").update(update).eq("request_id", String(requestId));
-    }
+    await admin.from("signalhire_searches").update(update).eq("id", searchId);
 
     return new Response(JSON.stringify({ ok: true, count: results.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
