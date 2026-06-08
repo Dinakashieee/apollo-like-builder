@@ -56,10 +56,11 @@ serve(async (req) => {
       });
     }
 
-    // Create the search row first
+    // Create the search row first with a per-search webhook token
+    const callbackToken = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const { data: searchRow, error: insErr } = await admin
       .from("signalhire_searches")
-      .insert({ workspace_id, user_id: user.id, filters, status: "pending" })
+      .insert({ workspace_id, user_id: user.id, filters, status: "pending", callback_token: callbackToken })
       .select("id")
       .single();
     if (insErr || !searchRow) {
@@ -68,7 +69,7 @@ serve(async (req) => {
       });
     }
 
-    const callbackUrl = `${supabaseUrl}/functions/v1/signalhire-callback?search_id=${searchRow.id}`;
+    const callbackUrl = `${supabaseUrl}/functions/v1/signalhire-callback?search_id=${searchRow.id}&token=${callbackToken}`;
 
     // Build SignalHire searchByQuery payload
     const items: string[] = [];
