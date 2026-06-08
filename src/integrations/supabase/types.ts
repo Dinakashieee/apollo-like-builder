@@ -1330,6 +1330,7 @@ export type Database = {
       }
       signalhire_searches: {
         Row: {
+          callback_token: string | null
           completed_at: string | null
           created_at: string
           error: string | null
@@ -1344,6 +1345,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          callback_token?: string | null
           completed_at?: string | null
           created_at?: string
           error?: string | null
@@ -1358,6 +1360,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          callback_token?: string | null
           completed_at?: string | null
           created_at?: string
           error?: string | null
@@ -2003,6 +2006,16 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      track_landing_view: {
+        Args: {
+          _cta_clicked?: boolean
+          _cta_index?: number
+          _duration_ms?: number
+          _view_id: string
+          _visitor_id: string
+        }
+        Returns: undefined
       }
       workspace_extra_credits: {
         Args: { _workspace_id: string }

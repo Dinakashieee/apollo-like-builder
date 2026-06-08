@@ -84,7 +84,13 @@ export default function PublicLandingPage() {
     const send = () => {
       if (!viewIdRef.current) return;
       const duration = Date.now() - startRef.current;
-      supabase.from("landing_page_views").update({ duration_ms: duration }).eq("id", viewIdRef.current);
+      supabase.rpc("track_landing_view", {
+        _view_id: viewIdRef.current,
+        _visitor_id: visitorId(),
+        _duration_ms: duration,
+        _cta_clicked: null,
+        _cta_index: null,
+      });
     };
     window.addEventListener("beforeunload", send);
     const i = setInterval(send, 15000);
@@ -97,10 +103,13 @@ export default function PublicLandingPage() {
 
   const onCta = async (cta: CTA, idx: number) => {
     if (viewIdRef.current) {
-      await supabase
-        .from("landing_page_views")
-        .update({ cta_clicked: true, cta_index: idx, duration_ms: Date.now() - startRef.current })
-        .eq("id", viewIdRef.current);
+      await supabase.rpc("track_landing_view", {
+        _view_id: viewIdRef.current,
+        _visitor_id: visitorId(),
+        _duration_ms: Date.now() - startRef.current,
+        _cta_clicked: true,
+        _cta_index: idx,
+      });
     }
     if (cta.url) window.open(cta.url, "_blank");
   };

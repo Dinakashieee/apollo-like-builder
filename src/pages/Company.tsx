@@ -47,7 +47,7 @@ export default function Company() {
         .eq("workspace_id", current.id),
       supabase
         .from("workspace_invites")
-        .select("*")
+        .select("id, workspace_id, email, role, invited_by, created_at, accepted_at")
         .eq("workspace_id", current.id)
         .is("accepted_at", null),
     ]);
