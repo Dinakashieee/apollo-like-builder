@@ -115,22 +115,6 @@ export default function Auth() {
     }
   };
 
-  const handleGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/app`,
-    });
-    if (result.error) {
-      toast({
-        title: "Google sign-in failed",
-        description:
-          (result.error as any)?.message ?? "Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (result.redirected) return;
-    navigate("/app", { replace: true });
-  };
 
   return (
     <div className="min-h-screen flex bg-gradient-soft">
