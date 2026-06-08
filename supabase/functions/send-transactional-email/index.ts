@@ -153,6 +153,94 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // Per-template recipient ownership validation for end-user callers.
+  // Service-role callers (server-to-server) bypass this since they already
+  // perform their own validation. Without this check, any authenticated user
+  // could send arbitrary emails from the platform's verified sending domain.
+  if (!isServiceRole) {
+    const callerId = claims?.sub as string | undefined
+    const callerEmail = ((claims?.email as string) || '').toLowerCase()
+    const recipientLc = effectiveRecipient.toLowerCase()
+    let allowed = false
+    let reason = 'recipient_not_owned'
+
+    if (!callerId) {
+      allowed = false
+      reason = 'missing_sub'
+    } else if (template.to) {
+      // Template enforces its own fixed recipient.
+      allowed = true
+    } else if (templateName === 'welcome' || templateName === 'lead-added') {
+      // Self-notification templates: recipient must be the caller's own email.
+      allowed = callerEmail !== '' && recipientLc === callerEmail
+    } else if (templateName === 'sender-verify') {
+      // Recipient must be a sender currently being verified inside one of the
+      // caller's workspaces.
+      const { data: ws } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', callerId)
+      const wsIds = (ws ?? []).map((r: any) => r.workspace_id)
+      if (wsIds.length) {
+        const { data: senders } = await supabase
+          .from('email_sender_settings')
+          .select('id')
+          .in('workspace_id', wsIds)
+          .ilike('from_email', recipientLc)
+          .limit(1)
+        allowed = !!(senders && senders.length)
+      }
+    } else if (templateName === 'workspace-invite') {
+      // Recipient must match an outstanding workspace invite in a workspace
+      // the caller is a member of.
+      const { data: ws } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', callerId)
+      const wsIds = (ws ?? []).map((r: any) => r.workspace_id)
+      if (wsIds.length) {
+        const { data: invites } = await supabase
+          .from('workspace_invites')
+          .select('id')
+          .in('workspace_id', wsIds)
+          .ilike('email', recipientLc)
+          .is('accepted_at', null)
+          .limit(1)
+        allowed = !!(invites && invites.length)
+      }
+    } else if (templateName === 'lead-outreach') {
+      // Recipient must match a lead in one of the caller's workspaces.
+      const { data: ws } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', callerId)
+      const wsIds = (ws ?? []).map((r: any) => r.workspace_id)
+      if (wsIds.length) {
+        const { data: leads } = await supabase
+          .from('leads')
+          .select('id')
+          .in('workspace_id', wsIds)
+          .ilike('email', recipientLc)
+          .limit(1)
+        allowed = !!(leads && leads.length)
+      }
+    } else {
+      // Unknown template: deny by default for non-service-role callers.
+      allowed = false
+      reason = 'template_not_allowed_for_user'
+    }
+
+    if (!allowed) {
+      console.warn('Blocked unauthorized send-transactional-email', {
+        templateName, recipientLc, callerId, reason,
+      })
+      return new Response(
+        JSON.stringify({ error: 'Recipient not allowed for this template' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')
