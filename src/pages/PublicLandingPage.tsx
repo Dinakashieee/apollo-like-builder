@@ -54,31 +54,24 @@ export default function PublicLandingPage() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      const { data } = await supabase
-        .from("landing_pages")
-        .select("id,template,title,prospect_name,prospect_company,headline,subheadline,body,cta_label,cta_url,ctas,logo_url,accent_color")
-        .eq("slug", slug)
-        .eq("published", true)
-        .maybeSingle();
-      const p = data ? ({ ...(data as any), ctas: Array.isArray((data as any).ctas) ? (data as any).ctas : [] } as Page) : null;
+      const { data } = await supabase.rpc("get_public_landing_page", { _slug: slug });
+      const row = Array.isArray(data) ? data[0] : null;
+      const p = row ? ({ ...(row as any), ctas: Array.isArray((row as any).ctas) ? (row as any).ctas : [] } as Page) : null;
       setPage(p);
       setLoading(false);
       if (p) {
         document.title = p.title;
-        const { data: view } = await supabase
-          .from("landing_page_views")
-          .insert({
-            page_id: p.id,
-            visitor_id: visitorId(),
-            referrer: document.referrer || null,
-            user_agent: navigator.userAgent,
-          })
-          .select("id")
-          .maybeSingle();
-        if (view) viewIdRef.current = (view as any).id;
+        const { data: viewId } = await supabase.rpc("log_landing_view", {
+          _slug: slug,
+          _visitor_id: visitorId(),
+          _referrer: document.referrer || null,
+          _user_agent: navigator.userAgent,
+        });
+        if (viewId) viewIdRef.current = viewId as unknown as string;
       }
     })();
   }, [slug]);
+
 
   useEffect(() => {
     const send = () => {
