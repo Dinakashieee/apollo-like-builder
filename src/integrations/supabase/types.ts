@@ -1947,6 +1947,24 @@ export type Database = {
         Args: { _workspace_id: string }
         Returns: number
       }
+      get_public_landing_page: {
+        Args: { _slug: string }
+        Returns: {
+          accent_color: string
+          body: string
+          cta_label: string
+          cta_url: string
+          ctas: Json
+          headline: string
+          id: string
+          logo_url: string
+          prospect_company: string
+          prospect_name: string
+          subheadline: string
+          template: string
+          title: string
+        }[]
+      }
       get_user_tier: { Args: { _user_id: string }; Returns: string }
       get_workspace_owner_tier: {
         Args: { _workspace_id: string }
@@ -1989,6 +2007,15 @@ export type Database = {
       is_workspace_owner: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
+      }
+      log_landing_view: {
+        Args: {
+          _referrer?: string
+          _slug: string
+          _user_agent?: string
+          _visitor_id: string
+        }
+        Returns: string
       }
       move_to_dlq: {
         Args: {
