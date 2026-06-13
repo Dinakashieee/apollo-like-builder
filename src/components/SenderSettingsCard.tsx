@@ -47,7 +47,6 @@ interface OAuthApp {
   id: string;
   provider: Provider;
   client_id: string;
-  client_secret: string;
   label: string | null;
 }
 
@@ -120,7 +119,7 @@ export function SenderSettingsCard() {
       const [s, a, o] = await Promise.all([
         supabase.from("email_sender_settings").select("*").eq("workspace_id", current.id).maybeSingle(),
         supabase.from("email_accounts").select("id, provider, email_address, display_name, status").eq("workspace_id", current.id),
-        supabase.from("user_oauth_apps").select("*").eq("workspace_id", current.id),
+        supabase.from("user_oauth_apps").select("id, provider, client_id, label").eq("workspace_id", current.id),
       ]);
       if (cancelled) return;
       if (s.data) {
@@ -269,7 +268,7 @@ export function SenderSettingsCard() {
     }
     toast({ title: `${provider === "google" ? "Google" : "Microsoft"} credentials saved` });
     // Refresh
-    const { data: o } = await supabase.from("user_oauth_apps").select("*").eq("workspace_id", current.id);
+    const { data: o } = await supabase.from("user_oauth_apps").select("id, provider, client_id, label").eq("workspace_id", current.id);
     const apps: Record<Provider, OAuthApp | null> = { google: null, microsoft: null };
     for (const row of (o as OAuthApp[]) ?? []) apps[row.provider] = row;
     setOauthApps(apps);
