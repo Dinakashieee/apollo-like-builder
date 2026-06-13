@@ -728,6 +728,32 @@ function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; a
             </div>
           )}
           <Input placeholder="Alt text" value={block.alt || ""} onChange={(e) => onUpdate({ alt: e.target.value } as any)} />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-[11px] text-muted-foreground">Alignment</Label>
+              <Select value={block.align ?? "center"} onValueChange={(v) => onUpdate({ align: v as any } as any)}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                  <SelectItem value="full">Full width</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground">Size</Label>
+              <Select value={block.width ?? "full"} onValueChange={(v) => onUpdate({ width: v as any } as any)}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sm">Small</SelectItem>
+                  <SelectItem value="md">Medium</SelectItem>
+                  <SelectItem value="lg">Large</SelectItem>
+                  <SelectItem value="full">Full</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <label className="flex items-center gap-2 text-xs">
             <Checkbox checked={block.rounded !== false} onCheckedChange={(v) => onUpdate({ rounded: !!v } as any)} />
             Rounded corners
