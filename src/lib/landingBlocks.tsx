@@ -83,8 +83,12 @@ export function renderBlock(
     }
     case "text":
       return <p className={`whitespace-pre-wrap leading-relaxed ${b.align === "center" ? "text-center" : ""} ${onDark ? "text-white/85" : "text-foreground/85"}`}>{interpolate(b.text, vars)}</p>;
-    case "image":
-      return b.url ? <img src={b.url} alt={b.alt || ""} className={`w-full h-auto ${b.rounded ? "rounded-lg" : ""}`} loading="lazy" /> : null;
+    case "image": {
+      if (!b.url) return null;
+      const widthCls = b.width === "sm" ? "max-w-[200px]" : b.width === "md" ? "max-w-[400px]" : b.width === "lg" ? "max-w-[640px]" : "w-full";
+      const alignCls = b.align === "left" ? "mr-auto" : b.align === "right" ? "ml-auto" : b.align === "full" ? "w-full" : "mx-auto";
+      return <img src={b.url} alt={b.alt || ""} className={`${widthCls} ${alignCls} h-auto block ${b.rounded ? "rounded-lg" : ""}`} loading="lazy" />;
+    }
     case "video":
       return b.url ? (
         <div className="relative w-full aspect-video">
