@@ -612,6 +612,7 @@ export type Database = {
       landing_pages: {
         Row: {
           accent_color: string | null
+          blocks: Json
           body: string | null
           created_at: string
           created_by: string
@@ -634,6 +635,7 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          blocks?: Json
           body?: string | null
           created_at?: string
           created_by: string
@@ -656,6 +658,7 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          blocks?: Json
           body?: string | null
           created_at?: string
           created_by?: string
@@ -1951,6 +1954,7 @@ export type Database = {
         Args: { _slug: string }
         Returns: {
           accent_color: string
+          blocks: Json
           body: string
           cta_label: string
           cta_url: string
