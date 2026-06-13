@@ -649,9 +649,9 @@ function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; 
 
   const handle = async (file: File) => {
     if (!workspaceId) { toast({ title: "No workspace", variant: "destructive" }); return; }
-    if (file.size > 5 * 1024 * 1024) { toast({ title: "Image too large", description: "Max 5MB", variant: "destructive" }); return; }
+    if (file.size > 15 * 1024 * 1024) { toast({ title: "File too large", description: "Max 15MB", variant: "destructive" }); return; }
     setUploading(true);
-    const ext = file.name.split(".").pop() || "png";
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${workspaceId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("landing-assets").upload(path, file, { contentType: file.type, upsert: false });
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); setUploading(false); return; }
@@ -665,7 +665,7 @@ function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; 
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/avif,image/apng,image/bmp"
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handle(f); e.target.value = ""; }}
       />
@@ -719,7 +719,7 @@ function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; a
       return (
         <>
           <div className="flex gap-2">
-            <Input placeholder="Image URL (https://…) or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
+            <Input placeholder="Image / GIF / SVG URL — or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
             <ImageUploadButton workspaceId={workspaceId} onUploaded={(url) => onUpdate({ url } as any)} />
           </div>
           {block.url && (
