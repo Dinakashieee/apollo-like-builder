@@ -33,6 +33,7 @@ type Page = {
   id: string;
   slug: string;
   title: string;
+  workspace_id: string;
   template: string;
   prospect_name: string | null;
   prospect_company: string | null;
