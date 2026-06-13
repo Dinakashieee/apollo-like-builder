@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Block, renderBlock, interpolate, ctaStyle } from "@/lib/landingBlocks";
 
 type CTA = { label: string; url: string; style: "primary" | "secondary" | "outline" };
 type Page = {
@@ -15,6 +16,7 @@ type Page = {
   cta_label: string | null;
   cta_url: string | null;
   ctas: CTA[];
+  blocks: Block[];
   logo_url: string | null;
   accent_color: string | null;
 };
@@ -29,21 +31,6 @@ function visitorId() {
   return v;
 }
 
-function interpolate(s: string | null, p: Page) {
-  if (!s) return "";
-  return s
-    .replace(/\{name\}/gi, p.prospect_name || "there")
-    .replace(/\{company\}/gi, p.prospect_company || "your company");
-}
-
-function ctaStyle(s: CTA["style"], accent: string, onDark = false): React.CSSProperties {
-  if (s === "primary") return { background: accent, color: "#fff", border: `1px solid ${accent}` };
-  if (s === "secondary") return onDark
-    ? { background: "#fff", color: "#0f172a", border: "1px solid #fff" }
-    : { background: "#0f172a", color: "#fff", border: "1px solid #0f172a" };
-  return { background: "transparent", color: onDark ? "#fff" : accent, border: `1px solid ${onDark ? "#fff" : accent}` };
-}
-
 export default function PublicLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState<Page | null>(null);
@@ -56,7 +43,11 @@ export default function PublicLandingPage() {
     (async () => {
       const { data } = await supabase.rpc("get_public_landing_page", { _slug: slug });
       const row = Array.isArray(data) ? data[0] : null;
-      const p = row ? ({ ...(row as any), ctas: Array.isArray((row as any).ctas) ? (row as any).ctas : [] } as Page) : null;
+      const p = row ? ({
+        ...(row as any),
+        ctas: Array.isArray((row as any).ctas) ? (row as any).ctas : [],
+        blocks: Array.isArray((row as any).blocks) ? (row as any).blocks : [],
+      } as Page) : null;
       setPage(p);
       setLoading(false);
       if (p) {
@@ -71,7 +62,6 @@ export default function PublicLandingPage() {
       }
     })();
   }, [slug]);
-
 
   useEffect(() => {
     const send = () => {
@@ -94,7 +84,7 @@ export default function PublicLandingPage() {
     };
   }, []);
 
-  const onCta = async (cta: CTA, idx: number) => {
+  const onCta = async (url: string, idx: number) => {
     if (viewIdRef.current) {
       await supabase.rpc("track_landing_view", {
         _view_id: viewIdRef.current,
@@ -104,54 +94,40 @@ export default function PublicLandingPage() {
         _cta_index: idx,
       });
     }
-    if (cta.url) window.open(cta.url, "_blank");
+    if (url) window.open(url, "_blank");
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!page) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Page not found</div>;
 
   const accent = page.accent_color || "#6366f1";
-  const headline = interpolate(page.headline, page);
-  const sub = interpolate(page.subheadline, page);
-  const body = interpolate(page.body, page);
+  const vars = { name: page.prospect_name, company: page.prospect_company };
+  const onDark = page.template === "bold";
 
-  // Backwards-compat: if no ctas array but legacy single CTA exists
-  const ctas: CTA[] = page.ctas?.length
+  // Legacy CTAs
+  const legacyCtas: CTA[] = page.ctas?.length
     ? page.ctas
     : page.cta_label && page.cta_url
     ? [{ label: page.cta_label, url: page.cta_url, style: "primary" }]
     : [];
 
-  const CtaRow = ({ onDark = false }: { onDark?: boolean }) => (
-    <div className="flex flex-wrap gap-3">
-      {ctas.map((c, i) => (
-        <button
-          key={i}
-          onClick={() => onCta(c, i)}
-          className="px-6 py-3 rounded-md text-base font-medium hover:opacity-90 transition-opacity"
-          style={ctaStyle(c.style, accent, onDark)}
-        >
-          {interpolate(c.label, page)}
-        </button>
-      ))}
-    </div>
-  );
+  // If blocks exist, render block layout. Else fallback to legacy.
+  const hasBlocks = page.blocks && page.blocks.length > 0;
 
-  if (page.template === "bold") {
-    return (
-      <div className="min-h-screen" style={{ background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)` }}>
-        <div className="max-w-3xl mx-auto px-6 py-24 text-white">
-          {page.logo_url && <img src={page.logo_url} alt="" className="h-10 mb-12" />}
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">{headline}</h1>
-          <p className="text-xl text-white/80 mb-8">{sub}</p>
-          <div className="whitespace-pre-wrap text-white/90 mb-10 leading-relaxed">{body}</div>
-          <CtaRow onDark />
-        </div>
-      </div>
-    );
-  }
+  const containerCls = page.template === "bold"
+    ? "max-w-3xl mx-auto px-6 py-20 text-white"
+    : "max-w-2xl mx-auto px-6 py-16";
+  const wrapperCls = page.template === "bold"
+    ? "min-h-screen"
+    : "min-h-screen bg-background";
+  const wrapperStyle: React.CSSProperties = page.template === "bold"
+    ? { background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)` }
+    : {};
 
-  if (page.template === "split") {
+  if (page.template === "split" && !hasBlocks) {
+    const headline = interpolate(page.headline, vars);
+    const sub = interpolate(page.subheadline, vars);
+    const body = interpolate(page.body, vars);
     return (
       <div className="min-h-screen grid md:grid-cols-2">
         <div className="p-12 flex flex-col justify-center" style={{ background: accent, color: "white" }}>
@@ -161,22 +137,44 @@ export default function PublicLandingPage() {
         </div>
         <div className="p-12 flex flex-col justify-center bg-background">
           <div className="whitespace-pre-wrap text-foreground/80 leading-relaxed mb-8">{body}</div>
-          <CtaRow />
+          <div className="flex flex-wrap gap-3">
+            {legacyCtas.map((c, i) => (
+              <button key={i} onClick={() => onCta(c.url, i)} className="px-6 py-3 rounded-md text-base font-medium hover:opacity-90" style={ctaStyle(c.style, accent, false)}>
+                {interpolate(c.label, vars)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-6 py-20">
-        {page.logo_url && <img src={page.logo_url} alt="" className="h-10 mb-10" />}
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{ color: accent }}>
-          {headline}
-        </h1>
-        <p className="text-lg text-muted-foreground mb-8">{sub}</p>
-        <div className="whitespace-pre-wrap text-foreground/85 leading-relaxed mb-10">{body}</div>
-        <CtaRow />
+    <div className={wrapperCls} style={wrapperStyle}>
+      <div className={containerCls}>
+        {page.logo_url && <img src={page.logo_url} alt="" className={`h-10 mb-10 ${onDark ? "brightness-0 invert" : ""}`} />}
+        {hasBlocks ? (
+          <div className="space-y-6">
+            {page.blocks.map((b, i) => (
+              <div key={b.id}>{renderBlock(b, { accent, onDark, vars, onCta, ctaIndex: i })}</div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: onDark ? "#fff" : accent }}>
+              {interpolate(page.headline, vars)}
+            </h1>
+            <p className={`text-lg ${onDark ? "text-white/80" : "text-muted-foreground"}`}>{interpolate(page.subheadline, vars)}</p>
+            <div className={`whitespace-pre-wrap leading-relaxed ${onDark ? "text-white/90" : "text-foreground/85"}`}>{interpolate(page.body, vars)}</div>
+            <div className="flex flex-wrap gap-3">
+              {legacyCtas.map((c, i) => (
+                <button key={i} onClick={() => onCta(c.url, i)} className="px-6 py-3 rounded-md text-base font-medium hover:opacity-90" style={ctaStyle(c.style, accent, onDark)}>
+                  {interpolate(c.label, vars)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
