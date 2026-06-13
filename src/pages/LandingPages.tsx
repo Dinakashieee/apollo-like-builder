@@ -718,7 +718,15 @@ function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; a
     case "image":
       return (
         <>
-          <Input placeholder="Image URL (https://…)" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
+          <div className="flex gap-2">
+            <Input placeholder="Image URL (https://…) or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
+            <ImageUploadButton workspaceId={workspaceId} onUploaded={(url) => onUpdate({ url } as any)} />
+          </div>
+          {block.url && (
+            <div className="rounded border bg-muted/30 p-2">
+              <img src={block.url} alt={block.alt || ""} className="max-h-32 mx-auto rounded" />
+            </div>
+          )}
           <Input placeholder="Alt text" value={block.alt || ""} onChange={(e) => onUpdate({ alt: e.target.value } as any)} />
           <label className="flex items-center gap-2 text-xs">
             <Checkbox checked={block.rounded !== false} onCheckedChange={(v) => onUpdate({ rounded: !!v } as any)} />
