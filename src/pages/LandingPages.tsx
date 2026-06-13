@@ -543,7 +543,7 @@ function StatsPanel({ pageId }: { pageId: string }) {
 
 /* ============== Block builder ============== */
 
-function BlockBuilder({ blocks, onChange, accent }: { blocks: Block[]; onChange: (v: Block[]) => void; accent: string }) {
+function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block[]; onChange: (v: Block[]) => void; accent: string; workspaceId?: string }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
