@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Mail, Phone, MessageCircle, Linkedin, Building2, MapPin, Briefcase,
   AlertTriangle, Server, Wrench, FileText, Sparkles, CheckCircle2,
+  LayoutTemplate, Eye, MousePointerClick, ExternalLink,
 } from "lucide-react";
 
 interface Lead {
