@@ -147,10 +147,9 @@ export default function LandingPages() {
               key={p.id}
               page={p}
               onOpen={() => setEditing(p)}
-              onCopy={() => copyLink(p.slug)}
+              onCopy={() => copyLink(p)}
               onDelete={() => remove(p.id)}
               onSend={() => setEnrollPage(p)}
-              baseUrl={baseUrl}
             />
           ))}
         </div>
@@ -184,7 +183,7 @@ export default function LandingPages() {
   );
 }
 
-function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: Page; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void; baseUrl: string }) {
+function PageCard({ page, onOpen, onCopy, onDelete, onSend }: { page: Page; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void }) {
   const [stats, setStats] = useState({ views: 0, unique: 0, clicks: 0 });
   useEffect(() => {
     (async () => {
@@ -203,7 +202,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: P
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <CardTitle className="text-base truncate">{page.title}</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1 truncate">/p/{page.slug}</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">{page.custom_domain ? page.custom_domain : publicPath(page)}</p>
           </div>
           <Badge variant={page.published ? "default" : "secondary"}>{page.published ? "Live" : "Draft"}</Badge>
         </div>
@@ -219,7 +218,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: P
           <Button size="sm" variant="outline" onClick={onSend} title="Send sequence to leads"><Send className="h-3.5 w-3.5" /></Button>
           <Button size="sm" variant="outline" onClick={onCopy}><Copy className="h-3.5 w-3.5" /></Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={baseUrl + page.slug} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" /></a>
+            <a href={publicUrl(page)} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" /></a>
           </Button>
           <Button size="sm" variant="outline" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
         </div>
