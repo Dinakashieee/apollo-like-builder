@@ -601,6 +601,7 @@ function BlockBuilder({ blocks, onChange, accent }: { blocks: Block[]; onChange:
                   key={b.id}
                   block={b}
                   accent={accent}
+                  workspaceId={page.workspace_id}
                   onUpdate={(patch) => updateBlock(b.id, patch)}
                   onRemove={() => removeBlock(b.id)}
                   onDuplicate={() => duplicateBlock(b.id)}
@@ -614,8 +615,8 @@ function BlockBuilder({ blocks, onChange, accent }: { blocks: Block[]; onChange:
   );
 }
 
-function SortableBlock({ block, accent, onUpdate, onRemove, onDuplicate }: {
-  block: Block; accent: string; onUpdate: (p: Partial<Block>) => void; onRemove: () => void; onDuplicate: () => void;
+function SortableBlock({ block, accent, workspaceId, onUpdate, onRemove, onDuplicate }: {
+  block: Block; accent: string; workspaceId?: string; onUpdate: (p: Partial<Block>) => void; onRemove: () => void; onDuplicate: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
@@ -635,13 +636,47 @@ function SortableBlock({ block, accent, onUpdate, onRemove, onDuplicate }: {
         </div>
       </div>
       <div className="p-3 space-y-2">
-        <BlockEditor block={block} accent={accent} onUpdate={onUpdate} />
+        <BlockEditor block={block} accent={accent} workspaceId={workspaceId} onUpdate={onUpdate} />
       </div>
     </div>
   );
 }
 
-function BlockEditor({ block, accent, onUpdate }: { block: Block; accent: string; onUpdate: (p: Partial<Block>) => void }) {
+function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; onUploaded: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handle = async (file: File) => {
+    if (!workspaceId) { toast({ title: "No workspace", variant: "destructive" }); return; }
+    if (file.size > 5 * 1024 * 1024) { toast({ title: "Image too large", description: "Max 5MB", variant: "destructive" }); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "png";
+    const path = `${workspaceId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("landing-assets").upload(path, file, { contentType: file.type, upsert: false });
+    if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); setUploading(false); return; }
+    const { data } = await supabase.storage.from("landing-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (data?.signedUrl) onUploaded(data.signedUrl);
+    setUploading(false);
+  };
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handle(f); e.target.value = ""; }}
+      />
+      <Button type="button" size="sm" variant="outline" className="h-9 text-xs" disabled={uploading} onClick={() => inputRef.current?.click()}>
+        <Upload className="h-3.5 w-3.5 mr-1.5" />
+        {uploading ? "Uploading…" : "Upload"}
+      </Button>
+    </>
+  );
+}
+
+function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; accent: string; workspaceId?: string; onUpdate: (p: Partial<Block>) => void }) {
   switch (block.type) {
     case "heading":
       return (
