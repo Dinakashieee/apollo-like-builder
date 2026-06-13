@@ -151,20 +151,17 @@ export function SenderSettingsCard() {
     return () => { cancelled = true; };
   }, [current]);
 
-  const persist = async (patch: Partial<SenderSettings> & {
-    verification_code?: string | null;
-    last_verification_sent_at?: string | null;
-  }) => {
+  const persist = async (patch: Partial<SenderSettings>) => {
     if (!current) return null;
+    // NOTE: `verified`, `verification_code`, and `last_verification_sent_at` are
+    // controlled server-side by a trigger + the `verify-sender-code` edge function.
+    // The client only writes user-editable fields.
     const payload = {
       workspace_id: current.id,
       mode: patch.mode ?? settings.mode,
       from_name: patch.from_name ?? settings.from_name,
       from_email: patch.from_email ?? settings.from_email,
       reply_to: patch.reply_to ?? settings.reply_to,
-      verified: patch.verified ?? settings.verified,
-      ...(patch.verification_code !== undefined ? { verification_code: patch.verification_code } : {}),
-      ...(patch.last_verification_sent_at !== undefined ? { last_verification_sent_at: patch.last_verification_sent_at } : {}),
     };
     const { data, error } = await supabase
       .from("email_sender_settings")
@@ -179,9 +176,9 @@ export function SenderSettingsCard() {
 
   const switchMode = async (mode: Mode) => {
     setSaving(true);
-    const data = await persist({ mode, verified: mode === "builtin" ? true : settings.verified });
+    const data = await persist({ mode });
     if (data) {
-      setSettings((s) => ({ ...s, mode, verified: mode === "builtin" ? true : s.verified }));
+      setSettings((s) => ({ ...s, mode, verified: mode === "builtin" ? true : !!data.verified }));
       toast({ title: mode === "builtin" ? "Using built-in sender" : "Custom company inbox selected" });
     }
     setSaving(false);
@@ -199,43 +196,39 @@ export function SenderSettingsCard() {
       return;
     }
     setSending(true);
-    const code6 = Math.floor(100000 + Math.random() * 900000).toString();
-    const data = await persist({
-      from_email: parsed.data, verified: false,
-      verification_code: code6, last_verification_sent_at: new Date().toISOString(),
-    });
-    if (!data) { setSending(false); return; }
-    const { error: invokeErr } = await supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "sender-verify", recipientEmail: parsed.data,
-        idempotencyKey: `sender-verify-${current.id}-${code6}`,
-        templateData: { code: code6, fromAddress: parsed.data, workspaceName: current.name },
-      },
+    const { data, error } = await supabase.functions.invoke("verify-sender-code", {
+      body: { action: "request", workspace_id: current.id, from_email: parsed.data },
     });
     setSending(false);
-    if (invokeErr) {
-      toast({ title: "Could not send code", description: invokeErr.message, variant: "destructive" });
+    if (error || !data?.ok) {
+      const msg = (data as any)?.error || error?.message || "Could not send code";
+      toast({ title: "Could not send code", description: msg, variant: "destructive" });
       return;
     }
+    setSettings((s) => ({ ...s, from_email: parsed.data, verified: false }));
     toast({ title: "Verification code sent", description: `Check ${parsed.data} for a 6-digit code.` });
   };
 
   const confirmCode = async () => {
     if (!current) return;
-    const { data } = await supabase.from("email_sender_settings").select("verification_code").eq("workspace_id", current.id).maybeSingle();
-    if (!data?.verification_code) {
-      toast({ title: "No code on file", description: "Send a new verification email.", variant: "destructive" });
+    if (!/^\d{6}$/.test(code.trim())) {
+      toast({ title: "Enter the 6-digit code", variant: "destructive" });
       return;
     }
-    if (code.trim() !== data.verification_code) {
-      toast({ title: "Code doesn't match", variant: "destructive" }); return;
+    const { data, error } = await supabase.functions.invoke("verify-sender-code", {
+      body: { action: "confirm", workspace_id: current.id, code: code.trim() },
+    });
+    if (error || !data?.ok) {
+      const errCode = (data as any)?.error;
+      const msg = errCode === "code_mismatch" ? "Code doesn't match"
+        : errCode === "no_code_on_file" ? "Send a new verification email."
+        : error?.message || "Could not verify";
+      toast({ title: "Verification failed", description: msg, variant: "destructive" });
+      return;
     }
-    const updated = await persist({ verified: true, verification_code: null });
-    if (updated) {
-      setSettings((s) => ({ ...s, verified: true }));
-      setCode("");
-      toast({ title: "Inbox verified" });
-    }
+    setSettings((s) => ({ ...s, verified: true }));
+    setCode("");
+    toast({ title: "Inbox verified" });
   };
 
   const saveDetails = async () => {
