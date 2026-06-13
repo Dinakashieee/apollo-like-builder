@@ -719,7 +719,7 @@ function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; a
       return (
         <>
           <div className="flex gap-2">
-            <Input placeholder="Image URL (https://…) or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
+            <Input placeholder="Image / GIF / SVG URL — or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
             <ImageUploadButton workspaceId={workspaceId} onUploaded={(url) => onUpdate({ url } as any)} />
           </div>
           {block.url && (
