@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
-import { Copy, ExternalLink, Plus, Trash2, Eye, MousePointerClick, Clock, Users, GripVertical, Send, Heading1, Type, Image as ImageIcon, Video, MousePointer, Code, Minus, MoveVertical } from "lucide-react";
+import { Copy, ExternalLink, Plus, Trash2, Eye, MousePointerClick, Clock, Users, GripVertical, Send, Heading1, Type, Image as ImageIcon, Video, MousePointer, Code, Minus, MoveVertical, Upload } from "lucide-react";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
 } from "@dnd-kit/core";
