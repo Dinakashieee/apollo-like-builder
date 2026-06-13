@@ -49,7 +49,18 @@ type Page = {
   lead_id: string | null;
   published: boolean;
   created_at: string;
+  custom_domain: string | null;
+  custom_path: string | null;
 };
+
+function publicUrl(p: { slug: string; custom_domain?: string | null; custom_path?: string | null }) {
+  if (p.custom_domain) return `https://${p.custom_domain}`;
+  const prefix = p.custom_path || "p";
+  return `${window.location.origin}/${prefix}/${p.slug}`;
+}
+function publicPath(p: { slug: string; custom_path?: string | null }) {
+  return `/${p.custom_path || "p"}/${p.slug}`;
+}
 
 const TEMPLATES = [
   { id: "minimal", name: "Minimal", desc: "Light, focused" },
@@ -96,10 +107,8 @@ export default function LandingPages() {
 
   useEffect(() => { load(); }, [current?.id]);
 
-  const baseUrl = `${window.location.origin}/p/`;
-
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(baseUrl + slug);
+  const copyLink = (p: { slug: string; custom_domain?: string | null; custom_path?: string | null }) => {
+    navigator.clipboard.writeText(publicUrl(p));
     toast({ title: "Link copied" });
   };
 
