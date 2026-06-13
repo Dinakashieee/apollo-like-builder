@@ -383,7 +383,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               </TabsList>
 
               <TabsContent value="blocks" className="mt-4">
-                <BlockBuilder blocks={p.blocks} onChange={(v) => set("blocks", v)} accent={p.accent_color || "#6366f1"} />
+                <BlockBuilder blocks={p.blocks} onChange={(v) => set("blocks", v)} accent={p.accent_color || "#6366f1"} workspaceId={p.workspace_id} />
               </TabsContent>
 
               <TabsContent value="content" className="space-y-4 mt-4">
