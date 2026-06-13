@@ -19,6 +19,9 @@ type Page = {
   blocks: Block[];
   logo_url: string | null;
   accent_color: string | null;
+  slug: string;
+  custom_path: string | null;
+  custom_domain: string | null;
 };
 
 function visitorId() {
@@ -31,17 +34,28 @@ function visitorId() {
   return v;
 }
 
-export default function PublicLandingPage() {
-  const { slug } = useParams<{ slug: string }>();
+interface Props {
+  byHost?: boolean;
+}
+
+export default function PublicLandingPage({ byHost = false }: Props) {
+  const params = useParams<{ slug?: string; prefix?: string }>();
+  const slug = byHost ? null : params.slug ?? null;
+  const prefix = byHost ? null : params.prefix ?? "p";
+  const host = byHost ? window.location.hostname : null;
+
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
   const viewIdRef = useRef<string | null>(null);
   const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    if (!slug) return;
     (async () => {
-      const { data } = await supabase.rpc("get_public_landing_page", { _slug: slug });
+      const { data } = await supabase.rpc("get_public_landing_page", {
+        _slug: slug,
+        _host: host,
+        _path: prefix,
+      });
       const row = Array.isArray(data) ? data[0] : null;
       const p = row ? ({
         ...(row as any),
@@ -53,7 +67,7 @@ export default function PublicLandingPage() {
       if (p) {
         document.title = p.title;
         const { data: viewId } = await supabase.rpc("log_landing_view", {
-          _slug: slug,
+          _slug: p.slug,
           _visitor_id: visitorId(),
           _referrer: document.referrer || null,
           _user_agent: navigator.userAgent,
@@ -61,7 +75,7 @@ export default function PublicLandingPage() {
         if (viewId) viewIdRef.current = viewId as unknown as string;
       }
     })();
-  }, [slug]);
+  }, [slug, host, prefix]);
 
   useEffect(() => {
     const send = () => {
@@ -104,14 +118,12 @@ export default function PublicLandingPage() {
   const vars = { name: page.prospect_name, company: page.prospect_company };
   const onDark = page.template === "bold";
 
-  // Legacy CTAs
   const legacyCtas: CTA[] = page.ctas?.length
     ? page.ctas
     : page.cta_label && page.cta_url
     ? [{ label: page.cta_label, url: page.cta_url, style: "primary" }]
     : [];
 
-  // If blocks exist, render block layout. Else fallback to legacy.
   const hasBlocks = page.blocks && page.blocks.length > 0;
 
   const containerCls = page.template === "bold"

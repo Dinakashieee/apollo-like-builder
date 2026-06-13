@@ -49,7 +49,18 @@ type Page = {
   lead_id: string | null;
   published: boolean;
   created_at: string;
+  custom_domain: string | null;
+  custom_path: string | null;
 };
+
+function publicUrl(p: { slug: string; custom_domain?: string | null; custom_path?: string | null }) {
+  if (p.custom_domain) return `https://${p.custom_domain}`;
+  const prefix = p.custom_path || "p";
+  return `${window.location.origin}/${prefix}/${p.slug}`;
+}
+function publicPath(p: { slug: string; custom_path?: string | null }) {
+  return `/${p.custom_path || "p"}/${p.slug}`;
+}
 
 const TEMPLATES = [
   { id: "minimal", name: "Minimal", desc: "Light, focused" },
@@ -96,10 +107,8 @@ export default function LandingPages() {
 
   useEffect(() => { load(); }, [current?.id]);
 
-  const baseUrl = `${window.location.origin}/p/`;
-
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(baseUrl + slug);
+  const copyLink = (p: { slug: string; custom_domain?: string | null; custom_path?: string | null }) => {
+    navigator.clipboard.writeText(publicUrl(p));
     toast({ title: "Link copied" });
   };
 
@@ -138,10 +147,9 @@ export default function LandingPages() {
               key={p.id}
               page={p}
               onOpen={() => setEditing(p)}
-              onCopy={() => copyLink(p.slug)}
+              onCopy={() => copyLink(p)}
               onDelete={() => remove(p.id)}
               onSend={() => setEnrollPage(p)}
-              baseUrl={baseUrl}
             />
           ))}
         </div>
@@ -175,7 +183,7 @@ export default function LandingPages() {
   );
 }
 
-function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: Page; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void; baseUrl: string }) {
+function PageCard({ page, onOpen, onCopy, onDelete, onSend }: { page: Page; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void }) {
   const [stats, setStats] = useState({ views: 0, unique: 0, clicks: 0 });
   useEffect(() => {
     (async () => {
@@ -194,7 +202,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: P
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <CardTitle className="text-base truncate">{page.title}</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1 truncate">/p/{page.slug}</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">{page.custom_domain ? page.custom_domain : publicPath(page)}</p>
           </div>
           <Badge variant={page.published ? "default" : "secondary"}>{page.published ? "Live" : "Draft"}</Badge>
         </div>
@@ -210,7 +218,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend, baseUrl }: { page: P
           <Button size="sm" variant="outline" onClick={onSend} title="Send sequence to leads"><Send className="h-3.5 w-3.5" /></Button>
           <Button size="sm" variant="outline" onClick={onCopy}><Copy className="h-3.5 w-3.5" /></Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={baseUrl + page.slug} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" /></a>
+            <a href={publicUrl(page)} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" /></a>
           </Button>
           <Button size="sm" variant="outline" onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
         </div>
@@ -341,6 +349,8 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
         lead_id: p.lead_id,
         published: p.published,
         slug: p.slug,
+        custom_domain: p.custom_domain ? p.custom_domain.trim().toLowerCase() : null,
+        custom_path: p.custom_path ? p.custom_path.trim().toLowerCase().replace(/^\/+|\/+$/g, "") : null,
       })
       .eq("id", p.id);
     setSaving(false);
@@ -349,7 +359,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
     onSaved();
   };
 
-  const url = `${window.location.origin}/p/${p.slug}`;
+  const url = publicUrl(p);
 
   return (
     <div className="flex h-full flex-col">
@@ -390,6 +400,31 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               <TabsContent value="content" className="space-y-4 mt-4">
                 <Field label="Title"><Input value={p.title} onChange={(e) => set("title", e.target.value)} /></Field>
                 <Field label="URL slug"><Input value={p.slug} onChange={(e) => set("slug", slugify(e.target.value))} /></Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Custom path (optional)">
+                    <Input
+                      value={p.custom_path || ""}
+                      placeholder="p"
+                      onChange={(e) => set("custom_path", e.target.value.replace(/[^a-zA-Z0-9-]/g, "").toLowerCase())}
+                    />
+                  </Field>
+                  <Field label="Custom domain (optional)">
+                    <Input
+                      value={p.custom_domain || ""}
+                      placeholder="offer.mycompany.com"
+                      onChange={(e) => set("custom_domain", e.target.value.toLowerCase())}
+                    />
+                  </Field>
+                </div>
+                <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+                  <div className="font-medium text-foreground">Use your own link or domain</div>
+                  <div>• <b>Custom path</b>: replaces <code className="bg-background px-1 rounded">/p/</code> in the URL (e.g. <code className="bg-background px-1 rounded">/go/{p.slug}</code>).</div>
+                  <div>• <b>Custom domain</b>: point your domain to us with a DNS <b>CNAME</b> record:</div>
+                  <div className="pl-3 font-mono text-[11px]">
+                    Type: CNAME &nbsp;·&nbsp; Host: <b>{p.custom_domain ? p.custom_domain.split(".")[0] : "offer"}</b> &nbsp;·&nbsp; Value: <b>{window.location.host}</b>
+                  </div>
+                  <div>After DNS propagates (up to 24h), your page will be live at <b>{p.custom_domain || "yourdomain.com"}</b>. SSL is provisioned automatically.</div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Prospect name (used by {name})"><Input value={p.prospect_name || ""} onChange={(e) => set("prospect_name", e.target.value)} /></Field>
                   <Field label="Prospect company (used by {company})"><Input value={p.prospect_company || ""} onChange={(e) => set("prospect_company", e.target.value)} /></Field>

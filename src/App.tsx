@@ -35,6 +35,7 @@ import SignalHire from "./pages/SignalHire";
 import EmailHealth from "./pages/EmailHealth";
 import LandingPages from "./pages/LandingPages";
 import PublicLandingPage from "./pages/PublicLandingPage";
+import { CustomDomainGate } from "./components/CustomDomainGate";
 
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
         <ErrorBoundary>
           <AuthProvider>
             <WorkspaceProvider>
+              <CustomDomainGate>
               <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -57,6 +59,7 @@ const App = () => (
               <Route path="/refund" element={<Refund />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/p/:slug" element={<PublicLandingPage />} />
+              <Route path="/:prefix/:slug" element={<PublicLandingPage />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/onboarding" element={<Onboarding />} />
@@ -83,6 +86,7 @@ const App = () => (
 
               <Route path="*" element={<NotFound />} />
               </Routes>
+              </CustomDomainGate>
             </WorkspaceProvider>
           </AuthProvider>
         </ErrorBoundary>
