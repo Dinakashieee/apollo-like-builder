@@ -5,7 +5,7 @@ export type BlockStyle = "primary" | "secondary" | "outline";
 export type Block =
   | { id: string; type: "heading"; text: string; level?: 1 | 2 | 3; align?: "left" | "center" }
   | { id: string; type: "text"; text: string; align?: "left" | "center" }
-  | { id: string; type: "image"; url: string; alt?: string; rounded?: boolean }
+  | { id: string; type: "image"; url: string; alt?: string; rounded?: boolean; align?: "left" | "center" | "right" | "full"; width?: "sm" | "md" | "lg" | "full" }
   | { id: string; type: "video"; url: string }
   | { id: string; type: "cta"; label: string; url: string; style: BlockStyle; align?: "left" | "center" }
   | { id: string; type: "html"; html: string }
