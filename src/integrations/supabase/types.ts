@@ -619,6 +619,8 @@ export type Database = {
           cta_label: string | null
           cta_url: string | null
           ctas: Json
+          custom_domain: string | null
+          custom_path: string | null
           headline: string | null
           id: string
           lead_id: string | null
@@ -642,6 +644,8 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           ctas?: Json
+          custom_domain?: string | null
+          custom_path?: string | null
           headline?: string | null
           id?: string
           lead_id?: string | null
@@ -665,6 +669,8 @@ export type Database = {
           cta_label?: string | null
           cta_url?: string | null
           ctas?: Json
+          custom_domain?: string | null
+          custom_path?: string | null
           headline?: string | null
           id?: string
           lead_id?: string | null
@@ -1951,7 +1957,7 @@ export type Database = {
         Returns: number
       }
       get_public_landing_page: {
-        Args: { _slug: string }
+        Args: { _host?: string; _path?: string; _slug?: string }
         Returns: {
           accent_color: string
           blocks: Json
@@ -1959,11 +1965,14 @@ export type Database = {
           cta_label: string
           cta_url: string
           ctas: Json
+          custom_domain: string
+          custom_path: string
           headline: string
           id: string
           logo_url: string
           prospect_company: string
           prospect_name: string
+          slug: string
           subheadline: string
           template: string
           title: string
