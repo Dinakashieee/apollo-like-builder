@@ -162,6 +162,9 @@ export function LeadProfilePanel({
         </Section>
       )}
 
+      {/* Landing pages linked to this lead */}
+      <LandingPagesForLead leadId={lead.id} />
+
       {/* Talking points CTA → Intelligence tab */}
       <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
         <div className="flex items-start gap-2">
