@@ -602,7 +602,7 @@ function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block
                   key={b.id}
                   block={b}
                   accent={accent}
-                  workspaceId={page.workspace_id}
+                  workspaceId={workspaceId}
                   onUpdate={(patch) => updateBlock(b.id, patch)}
                   onRemove={() => removeBlock(b.id)}
                   onDuplicate={() => duplicateBlock(b.id)}
