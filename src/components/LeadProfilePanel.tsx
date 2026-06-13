@@ -215,3 +215,79 @@ function Section({
 function Empty({ text }: { text: string }) {
   return <p className="text-xs text-muted-foreground italic">{text}</p>;
 }
+
+function LandingPagesForLead({ leadId }: { leadId: string }) {
+  const [items, setItems] = useState<Array<{ id: string; title: string; slug: string; published: boolean; views: number; clicks: number }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data: pages } = await supabase
+        .from("landing_pages")
+        .select("id,title,slug,published")
+        .eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (cancelled) return;
+      const list = pages || [];
+      if (list.length === 0) {
+        setItems([]); setLoading(false); return;
+      }
+      const ids = list.map((p: any) => p.id);
+      const { data: views } = await supabase
+        .from("landing_page_views")
+        .select("page_id,cta_clicked")
+        .in("page_id", ids);
+      const counts = new Map<string, { v: number; c: number }>();
+      (views || []).forEach((v: any) => {
+        const cur = counts.get(v.page_id) || { v: 0, c: 0 };
+        cur.v += 1;
+        if (v.cta_clicked) cur.c += 1;
+        counts.set(v.page_id, cur);
+      });
+      setItems(list.map((p: any) => ({
+        ...p,
+        views: counts.get(p.id)?.v || 0,
+        clicks: counts.get(p.id)?.c || 0,
+      })));
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [leadId]);
+
+  if (loading) return null;
+
+  return (
+    <Section icon={LayoutTemplate} title="Landing pages">
+      {items.length === 0 ? (
+        <Empty text="No personalized landing pages linked to this lead yet." />
+      ) : (
+        <div className="space-y-1.5">
+          {items.map((p) => (
+            <div key={p.id} className="flex items-center justify-between rounded-md border border-border/60 px-2.5 py-2 text-xs">
+              <div className="min-w-0 flex-1">
+                <div className="font-medium truncate">{p.title}</div>
+                <div className="text-muted-foreground truncate">/p/{p.slug}</div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Badge variant={p.published ? "default" : "secondary"} className="h-5 text-[10px]">
+                  {p.published ? "Live" : "Draft"}
+                </Badge>
+                <span className="flex items-center gap-0.5 text-muted-foreground" title="Views">
+                  <Eye className="h-3 w-3" /> {p.views}
+                </span>
+                <span className="flex items-center gap-0.5 text-muted-foreground" title="CTA clicks">
+                  <MousePointerClick className="h-3 w-3" /> {p.clicks}
+                </span>
+                <a href={`/p/${p.slug}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
+  );
+}
