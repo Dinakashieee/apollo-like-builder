@@ -17,7 +17,7 @@ export function newBlock(type: Block["type"]): Block {
   switch (type) {
     case "heading": return { id, type, text: "New heading", level: 2, align: "left" };
     case "text": return { id, type, text: "Write something compelling here.", align: "left" };
-    case "image": return { id, type, url: "", alt: "", rounded: true };
+    case "image": return { id, type, url: "", alt: "", rounded: true, align: "center", width: "full" };
     case "video": return { id, type, url: "" };
     case "cta": return { id, type, label: "Get started", url: "https://", style: "primary", align: "left" };
     case "html": return { id, type, html: "<p>Custom HTML</p>" };
