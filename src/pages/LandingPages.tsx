@@ -349,6 +349,8 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
         lead_id: p.lead_id,
         published: p.published,
         slug: p.slug,
+        custom_domain: p.custom_domain ? p.custom_domain.trim().toLowerCase() : null,
+        custom_path: p.custom_path ? p.custom_path.trim().toLowerCase().replace(/^\/+|\/+$/g, "") : null,
       })
       .eq("id", p.id);
     setSaving(false);
@@ -357,7 +359,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
     onSaved();
   };
 
-  const url = `${window.location.origin}/p/${p.slug}`;
+  const url = publicUrl(p);
 
   return (
     <div className="flex h-full flex-col">
@@ -398,6 +400,31 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               <TabsContent value="content" className="space-y-4 mt-4">
                 <Field label="Title"><Input value={p.title} onChange={(e) => set("title", e.target.value)} /></Field>
                 <Field label="URL slug"><Input value={p.slug} onChange={(e) => set("slug", slugify(e.target.value))} /></Field>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Custom path (optional)">
+                    <Input
+                      value={p.custom_path || ""}
+                      placeholder="p"
+                      onChange={(e) => set("custom_path", e.target.value.replace(/[^a-zA-Z0-9-]/g, "").toLowerCase())}
+                    />
+                  </Field>
+                  <Field label="Custom domain (optional)">
+                    <Input
+                      value={p.custom_domain || ""}
+                      placeholder="offer.mycompany.com"
+                      onChange={(e) => set("custom_domain", e.target.value.toLowerCase())}
+                    />
+                  </Field>
+                </div>
+                <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+                  <div className="font-medium text-foreground">Use your own link or domain</div>
+                  <div>• <b>Custom path</b>: replaces <code className="bg-background px-1 rounded">/p/</code> in the URL (e.g. <code className="bg-background px-1 rounded">/go/{p.slug}</code>).</div>
+                  <div>• <b>Custom domain</b>: point your domain to us with a DNS <b>CNAME</b> record:</div>
+                  <div className="pl-3 font-mono text-[11px]">
+                    Type: CNAME &nbsp;·&nbsp; Host: <b>{p.custom_domain ? p.custom_domain.split(".")[0] : "offer"}</b> &nbsp;·&nbsp; Value: <b>{window.location.host}</b>
+                  </div>
+                  <div>After DNS propagates (up to 24h), your page will be live at <b>{p.custom_domain || "yourdomain.com"}</b>. SSL is provisioned automatically.</div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Prospect name (used by {name})"><Input value={p.prospect_name || ""} onChange={(e) => set("prospect_name", e.target.value)} /></Field>
                   <Field label="Prospect company (used by {company})"><Input value={p.prospect_company || ""} onChange={(e) => set("prospect_company", e.target.value)} /></Field>
