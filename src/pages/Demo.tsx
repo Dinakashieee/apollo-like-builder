@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Calendar, Sparkles, Clock, Users, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Calendar as CalendarIcon, Sparkles, Clock, Users, ShieldCheck, Globe } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Logo } from "@/components/Logo";
 import { SeoHead } from "@/components/SeoHead";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const teamSizes = ["Just me", "2–10", "11–50", "51–200", "201–1000", "1000+"];
 
@@ -20,22 +24,77 @@ const perks = [
   { icon: ShieldCheck, title: "No hard sell", desc: "We answer questions, you decide. Simple." },
 ];
 
+// 30-min slots from 09:00 to 17:30
+const timeSlots = Array.from({ length: 18 }, (_, i) => {
+  const h = 9 + Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  return `${String(h).padStart(2, "0")}:${m}`;
+});
+
+const POPULAR_TIMEZONES = [
+  "Pacific/Honolulu",
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Chicago",
+  "America/New_York",
+  "America/Sao_Paulo",
+  "Europe/London",
+  "Europe/Berlin",
+  "Europe/Istanbul",
+  "Africa/Johannesburg",
+  "Asia/Dubai",
+  "Asia/Karachi",
+  "Asia/Kolkata",
+  "Asia/Colombo",
+  "Asia/Bangkok",
+  "Asia/Singapore",
+  "Asia/Hong_Kong",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Pacific/Auckland",
+  "UTC",
+];
+
+function getBrowserTz() {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch { return "UTC"; }
+}
+
+function formatTimeLabel(slot: string) {
+  const [h, m] = slot.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 export default function Demo() {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const browserTz = useMemo(getBrowserTz, []);
+  const tzOptions = useMemo(() => {
+    const set = new Set([browserTz, ...POPULAR_TIMEZONES]);
+    return Array.from(set);
+  }, [browserTz]);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     company: "",
     phone: "",
     team_size: "",
-    preferred_time: "",
     message: "",
   });
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState<string>("");
+  const [tz, setTz] = useState<string>(browserTz);
+  const [calOpen, setCalOpen] = useState(false);
 
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const minDate = useMemo(() => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); return d;
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +102,11 @@ export default function Demo() {
       toast({ title: "Name and email are required", variant: "destructive" });
       return;
     }
+    if (!date || !time) {
+      toast({ title: "Pick a date and time", variant: "destructive" });
+      return;
+    }
+    const preferred = `${format(date, "EEE, MMM d, yyyy")} at ${formatTimeLabel(time)} (${tz})`;
     setSubmitting(true);
     const { error } = await (supabase as any).from("demo_requests").insert({
       name: form.name.trim(),
@@ -50,7 +114,7 @@ export default function Demo() {
       company: form.company.trim() || null,
       phone: form.phone.trim() || null,
       team_size: form.team_size || null,
-      preferred_time: form.preferred_time.trim() || null,
+      preferred_time: preferred,
       message: form.message.trim() || null,
       source: "landing",
     });
@@ -61,6 +125,7 @@ export default function Demo() {
     }
     setDone(true);
   };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
