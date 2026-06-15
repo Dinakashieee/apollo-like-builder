@@ -500,7 +500,12 @@ export default function Targets() {
       persist(similar, nextTargets);
       toast({ title: "Fresh target added" });
     } catch (e: unknown) {
-      toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+      const msg = getErrorMessage(e).toLowerCase();
+      if (msg.includes("quota") || msg.includes("limit") || msg.includes("upgrade")) {
+        toast({ title: "Plan limit reached", description: getErrorMessage(e), variant: "destructive" });
+      } else {
+        toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+      }
     }
     setAddingNew(false);
   };
