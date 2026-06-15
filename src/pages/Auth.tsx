@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Logo } from "@/components/Logo";
-import { Sparkles, Mail, Lock, User as UserIcon, ShieldCheck } from "lucide-react";
+import { ShieldCheck, Mail, Lock, User as UserIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const signUpSchema = z.object({
@@ -124,7 +124,7 @@ export default function Auth() {
         </div>
         <div className="relative space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-semibold">
-            <Sparkles className="h-3 w-3" /> AI-powered revenue platform
+            <ShieldCheck className="h-3 w-3" /> AI-powered revenue platform
           </div>
           <h2 className="text-4xl font-display font-bold leading-tight">
             Find the right opportunities. <br />
