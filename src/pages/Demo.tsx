@@ -147,7 +147,7 @@ export default function Demo() {
       <main className="container mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 max-w-6xl">
         <section className="space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5" /> Free 30-minute demo
+            <CalendarIcon className="h-3.5 w-3.5" /> Free 30-minute demo
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             See EngageIQ run on <span className="bg-gradient-primary bg-clip-text text-transparent">your pipeline</span>
