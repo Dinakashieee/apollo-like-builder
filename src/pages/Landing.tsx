@@ -414,53 +414,71 @@ export default function Landing() {
               From profile upload to closed deal
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              EngageIQ replaces bulk outreach with precise, signal-driven selling — in five simple steps.
+              EngageIQ replaces bulk outreach with precise, signal-driven selling — in seven simple steps.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto relative">
-            {/* Connector line (desktop only) */}
-            <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-5 max-w-7xl mx-auto">
             {[
               {
                 step: "01",
                 icon: Upload,
                 title: "Upload your company profile",
-                desc: "Tell us your ICP, industry, geography, and pain points you solve. This becomes your targeting DNA.",
+                desc: "Upload a compressed company profile and tell us what your company sells. We build your B2B targeting DNA — ICP, industry, geography, and the pain points you solve.",
               },
               {
                 step: "02",
                 icon: Database,
                 title: "Import or claim leads",
-                desc: "Connect your CRM / CSV, or pull from the SignalHire shared pool. All data stays in your BYOD database.",
+                desc: "Import your own lead database — sourced via data-enrichment browser add-ons and scraping tools, or pull from the SignalHire shared pool using your own API key. All data stays in your BYOD database.",
               },
               {
                 step: "03",
                 icon: BrainCircuit,
-                title: "AI scores every account",
-                desc: "Fit score + intent score from 60+ sources. The top opportunities surface automatically — no guessing.",
+                title: "AI Deal Intelligence",
+                desc: "For every lead, we analyze ICP fit, what the company does, their pain points, tech stack, and how to pitch. We generate human-centric outreach emails and score each opportunity. Every audit is saved automatically.",
               },
               {
                 step: "04",
                 icon: Mail,
-                title: "Reach out at the right moment",
-                desc: "AI writes context-aware emails only when signals show real buying intent. Not spray-and-pray.",
+                title: "Smart outreach & sequences",
+                desc: "If a lead doesn't respond, send multi-step email sequences with custom day gaps. Build personalized landing pages for each lead and track engagement — all from one workspace.",
               },
               {
                 step: "05",
-                icon: TrendingUp,
-                title: "Track, follow up, close",
-                desc: "Pipeline analytics, smart follow-ups, and automation keep deals moving until they sign.",
+                icon: Shield,
+                title: "Email health check",
+                desc: "Check your email deliverability free of charge. Monitor domain reputation, warm-up status, and SPF/DKIM/DMARC health so you never land in spam.",
+              },
+              {
+                step: "06",
+                icon: BarChart3,
+                title: "Market intelligence",
+                desc: "See current market trends and shifting demand in your target sectors. Stay ahead of the curve with data that updates in real time.",
+              },
+              {
+                step: "07",
+                icon: Target,
+                title: "Competitor deep intelligence",
+                desc: "We surface your competitors, the best deals to focus on, systems in use, and the highest-value accounts to chase — all refreshed automatically every 24 hours with zero input from you.",
+                highlight: true,
               },
             ].map((s) => (
-              <div key={s.step} className="relative flex flex-col items-center text-center group">
-                <div className="relative z-10 h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow mb-5 group-hover:scale-110 transition-transform">
-                  <s.icon className="h-5 w-5 text-primary-foreground" />
+              <div
+                key={s.step}
+                className={`relative flex flex-col items-center text-center group rounded-2xl p-4 transition-all ${s.highlight ? 'bg-primary/5 ring-2 ring-primary/40 shadow-glow' : 'hover:bg-card/50'}`}
+              >
+                <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${s.highlight ? 'bg-gradient-to-r from-hot to-rose-500 shadow-glow' : 'bg-gradient-primary shadow-glow'}`}>
+                  <s.icon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">Step {s.step}</span>
-                <h3 className="font-display font-bold text-lg text-primary-deep mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                <h3 className="font-display font-bold text-[15px] text-primary-deep mb-2 leading-snug">{s.title}</h3>
+                <p className="text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                {s.highlight && (
+                  <span className="mt-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-hot/10 text-[10px] font-bold text-hot uppercase tracking-wide">
+                    Unique to EngageIQ
+                  </span>
+                )}
               </div>
             ))}
           </div>
