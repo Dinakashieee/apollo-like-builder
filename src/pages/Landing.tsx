@@ -404,6 +404,68 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section id="how-it-works" className="py-24 bg-gradient-soft">
+        <div className="container mx-auto px-6">
+          <div className="max-w-2xl mx-auto text-center mb-16">
+            <p className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">How it works</p>
+            <h2 className="text-4xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
+              From profile upload to closed deal
+            </h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              EngageIQ replaces bulk outreach with precise, signal-driven selling — in five simple steps.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto relative">
+            {/* Connector line (desktop only) */}
+            <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
+
+            {[
+              {
+                step: "01",
+                icon: Upload,
+                title: "Upload your company profile",
+                desc: "Tell us your ICP, industry, geography, and pain points you solve. This becomes your targeting DNA.",
+              },
+              {
+                step: "02",
+                icon: Database,
+                title: "Import or claim leads",
+                desc: "Connect your CRM / CSV, or pull from the SignalHire shared pool. All data stays in your BYOD database.",
+              },
+              {
+                step: "03",
+                icon: BrainCircuit,
+                title: "AI scores every account",
+                desc: "Fit score + intent score from 60+ sources. The top opportunities surface automatically — no guessing.",
+              },
+              {
+                step: "04",
+                icon: Mail,
+                title: "Reach out at the right moment",
+                desc: "AI writes context-aware emails only when signals show real buying intent. Not spray-and-pray.",
+              },
+              {
+                step: "05",
+                icon: TrendingUp,
+                title: "Track, follow up, close",
+                desc: "Pipeline analytics, smart follow-ups, and automation keep deals moving until they sign.",
+              },
+            ].map((s) => (
+              <div key={s.step} className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow mb-5 group-hover:scale-110 transition-transform">
+                  <s.icon className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">Step {s.step}</span>
+                <h3 className="font-display font-bold text-lg text-primary-deep mb-2">{s.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section id="features" className="py-24">
         <div className="container mx-auto px-6">
