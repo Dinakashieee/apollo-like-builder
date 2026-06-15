@@ -1,41 +1,53 @@
-import { Fragment, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  ShieldCheck,
-  Clock,
-  FlaskConical,
-  Building2,
-  TrendingUp,
-  TrendingDown,
+  Globe,
+  MessageCircle,
+  Brain,
+  Swords,
+  Target,
+  PenLine,
   CheckCircle2,
-  AlertTriangle,
-  Mail,
+  TrendingUp,
+  Eye,
   MousePointerClick,
-  Reply,
-  Trophy,
+  Sparkles,
+  Send,
+  Building2,
+  ArrowUpRight,
+  Zap,
+  Clock,
 } from "lucide-react";
 
 /**
  * AdvancedDashboardsPreview
- * A tabbed showcase of the deeper analytics surfaces that ship with EngageIQ:
- *  - Deliverability
- *  - Best send time heatmap
- *  - Template A/B leaderboard
- *  - Account engagement timeline
- *
- * Pure presentational — designed for the landing page.
+ * Live, tabbed preview of EngageIQ surfaces shown on the landing page.
+ *  - Landing Pages
+ *  - WhatsApp
+ *  - AI Deal Intelligence
+ *  - Competitors
+ *  - New Targets
+ *  - Email Composer
  */
 
-type TabKey = "deliverability" | "sendtime" | "templates" | "accounts";
+type TabKey =
+  | "landing"
+  | "whatsapp"
+  | "ai"
+  | "competitors"
+  | "targets"
+  | "composer";
 
-const TABS: { key: TabKey; label: string; icon: typeof ShieldCheck; sub: string }[] = [
-  { key: "deliverability", label: "Deliverability", icon: ShieldCheck, sub: "Inbox placement, bounces, complaints" },
-  { key: "sendtime",       label: "Send-time heatmap", icon: Clock,    sub: "When your prospects actually open" },
-  { key: "templates",      label: "Template A/B",     icon: FlaskConical, sub: "Winning subject lines & copy" },
-  { key: "accounts",       label: "Account engagement", icon: Building2, sub: "Multi-thread account intent" },
+const TABS: { key: TabKey; label: string; icon: typeof Globe; sub: string }[] = [
+  { key: "landing",     label: "Landing pages",     icon: Globe,         sub: "Personalized micro-sites per prospect — live views" },
+  { key: "whatsapp",    label: "WhatsApp",          icon: MessageCircle, sub: "Connect WhatsApp & reply from one inbox" },
+  { key: "ai",          label: "AI deal intel",     icon: Brain,         sub: "Real-time intent scoring & next-best action" },
+  { key: "competitors", label: "Competitors",       icon: Swords,        sub: "Who your prospects are evaluating right now" },
+  { key: "targets",     label: "New targets",       icon: Target,        sub: "Freshly-matched accounts from your profile" },
+  { key: "composer",    label: "Email composer",    icon: PenLine,       sub: "AI drafts grounded in real account signals" },
 ];
 
 export function AdvancedDashboardsPreview() {
-  const [tab, setTab] = useState<TabKey>("deliverability");
+  const [tab, setTab] = useState<TabKey>("landing");
 
   return (
     <div className="relative card-elevated overflow-hidden border border-border/60 shadow-elevated">
@@ -45,10 +57,14 @@ export function AdvancedDashboardsPreview() {
         <div className="h-2.5 w-2.5 rounded-full bg-hot/60" />
         <div className="h-2.5 w-2.5 rounded-full bg-success/60" />
         <span className="ml-3 text-[11px] text-muted-foreground font-medium">
-          app.engageiq.com / analytics
+          app.engageiq.com / workspace
         </span>
-        <span className="ml-auto text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-md">
-          ADVANCED
+        <span className="ml-auto flex items-center gap-1.5 text-[10px] font-bold bg-success/10 text-success px-2 py-1 rounded-md">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
+          </span>
+          LIVE
         </span>
       </div>
 
@@ -79,121 +95,55 @@ export function AdvancedDashboardsPreview() {
           {TABS.find((t) => t.key === tab)?.sub}
         </p>
 
-        {tab === "deliverability" && <DeliverabilityPanel />}
-        {tab === "sendtime" && <SendTimePanel />}
-        {tab === "templates" && <TemplatesPanel />}
-        {tab === "accounts" && <AccountsPanel />}
+        {tab === "landing"     && <LandingPagesPanel />}
+        {tab === "whatsapp"    && <WhatsAppPanel />}
+        {tab === "ai"          && <AIDealIntelPanel />}
+        {tab === "competitors" && <CompetitorsPanel />}
+        {tab === "targets"     && <NewTargetsPanel />}
+        {tab === "composer"    && <ComposerPanel />}
       </div>
     </div>
   );
 }
 
-/* ---------------- Deliverability ---------------- */
+/* ---------------- helpers ---------------- */
 
-function DeliverabilityPanel() {
-  const kpis = [
-    { label: "Inbox placement", value: "97.4%", delta: "+1.8pt", icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
-    { label: "Bounce rate",     value: "0.6%",  delta: "−0.3pt", icon: AlertTriangle, color: "text-warm",    bg: "bg-warm/10" },
-    { label: "Spam complaints", value: "0.02%", delta: "−0.01pt",icon: ShieldCheck,   color: "text-primary", bg: "bg-primary/10" },
-    { label: "Sender score",    value: "94",    delta: "+3",     icon: TrendingUp,    color: "text-success", bg: "bg-success/10" },
-  ];
-  const mailboxes = [
-    { provider: "Google Workspace", inbox: 98, spam: 1, missing: 1, color: "bg-success" },
-    { provider: "Microsoft 365",    inbox: 96, spam: 2, missing: 2, color: "bg-primary" },
-    { provider: "Yahoo",            inbox: 94, spam: 4, missing: 2, color: "bg-amber-500" },
-    { provider: "Apple iCloud",     inbox: 99, spam: 1, missing: 0, color: "bg-violet-500" },
-  ];
+function useTicker(initial: number, step = 1, intervalMs = 1800) {
+  const [v, setV] = useState(initial);
+  useEffect(() => {
+    const id = setInterval(() => setV((x) => x + step), intervalMs);
+    return () => clearInterval(id);
+  }, [step, intervalMs]);
+  return v;
+}
+
+function LivePulse() {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k) => {
-          const Icon = k.icon;
-          return (
-            <div key={k.label} className="bg-card border border-border/60 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[10px] text-muted-foreground font-medium">{k.label}</p>
-                <span className={`h-6 w-6 rounded-md ${k.bg} flex items-center justify-center`}>
-                  <Icon className={`h-3 w-3 ${k.color}`} />
-                </span>
-              </div>
-              <p className="text-lg sm:text-xl font-display font-bold text-primary-deep tabular-nums">{k.value}</p>
-              <p className="text-[10px] font-semibold text-success mt-0.5">{k.delta} vs last 30d</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="bg-card border border-border/60 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-primary-deep">Placement by mailbox provider</p>
-          <span className="text-[10px] text-muted-foreground">Last 7 days</span>
-        </div>
-        <div className="space-y-3">
-          {mailboxes.map((m) => (
-            <div key={m.provider}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] font-medium text-primary-deep">{m.provider}</span>
-                <span className="text-[10px] text-muted-foreground tabular-nums">
-                  Inbox {m.inbox}% · Spam {m.spam}% · Missing {m.missing}%
-                </span>
-              </div>
-              <div className="flex h-2 rounded-full overflow-hidden bg-muted/60">
-                <div className={`${m.color}`} style={{ width: `${m.inbox}%` }} />
-                <div className="bg-destructive/70" style={{ width: `${m.spam}%` }} />
-                <div className="bg-muted-foreground/30" style={{ width: `${m.missing}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { l: "SPF", s: "Aligned",     ok: true },
-          { l: "DKIM", s: "All keys valid", ok: true },
-          { l: "DMARC", s: "p=quarantine", ok: true },
-        ].map((r) => (
-          <div key={r.l} className="bg-card border border-border/60 rounded-xl p-3 flex items-center gap-3">
-            <span className={`h-8 w-8 rounded-md ${r.ok ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"} flex items-center justify-center`}>
-              <CheckCircle2 className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-[11px] font-bold text-primary-deep">{r.l}</p>
-              <p className="text-[10px] text-muted-foreground">{r.s}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+    </span>
   );
 }
 
-/* ---------------- Send time heatmap ---------------- */
+/* ---------------- Landing pages ---------------- */
 
-function SendTimePanel() {
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  const hours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-  // Deterministic intensity map (0..100) for replies
-  const cell = (d: number, h: number) => {
-    const peak = (h === 9 || h === 10 || h === 15) ? 30 : 0;
-    const base = ((d * 13 + h * 7) % 55) + 10;
-    return Math.min(100, base + peak + (d === 1 || d === 2 ? 10 : 0));
-  };
-  const intensity = (v: number) => {
-    if (v >= 80) return "bg-primary text-primary-foreground";
-    if (v >= 60) return "bg-primary/70 text-primary-foreground";
-    if (v >= 40) return "bg-primary/40 text-primary-deep";
-    if (v >= 20) return "bg-primary/20 text-primary-deep";
-    return "bg-primary/5 text-muted-foreground";
-  };
+function LandingPagesPanel() {
+  const views = useTicker(1284, 1, 1600);
+  const pages = [
+    { name: "northwind.engageiq.com/welcome", co: "Northwind Co.",   views: 142, ctr: 38, color: "from-emerald-400 to-teal-500", live: 3 },
+    { name: "acme.engageiq.com/intro",        co: "Acme Robotics",   views: 98,  ctr: 31, color: "from-violet-400 to-purple-500", live: 2 },
+    { name: "bluebird.engageiq.com/demo",     co: "Bluebird Labs",   views: 76,  ctr: 27, color: "from-amber-400 to-orange-500", live: 1 },
+    { name: "lumen.engageiq.com/pricing",     co: "Lumen Health",    views: 54,  ctr: 22, color: "from-pink-400 to-rose-500",    live: 0 },
+  ];
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { l: "Best window",      v: "Tue 9-10a",  d: "+38% reply rate", icon: Clock },
-          { l: "Worst window",     v: "Fri 4-5p",   d: "−52% reply rate", icon: TrendingDown },
-          { l: "Avg time-to-open", v: "1h 12m",     d: "−18m vs last wk", icon: Mail },
-          { l: "Avg time-to-reply",v: "3h 41m",     d: "−42m vs last wk", icon: Reply },
+          { l: "Live visitors now", v: "6",       d: "across 4 pages", icon: Eye },
+          { l: "Total views today", v: views.toLocaleString(), d: "+12% vs yest.", icon: TrendingUp },
+          { l: "CTA click rate",    v: "29.4%",   d: "industry avg 6%", icon: MousePointerClick },
+          { l: "Demos booked",      v: "11",      d: "from landing pages", icon: CheckCircle2 },
         ].map((k) => {
           const Icon = k.icon;
           return (
@@ -202,45 +152,38 @@ function SendTimePanel() {
                 <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
                 <Icon className="h-3 w-3 text-primary" />
               </div>
-              <p className="text-lg font-display font-bold text-primary-deep">{k.v}</p>
+              <p className="text-lg sm:text-xl font-display font-bold text-primary-deep tabular-nums">{k.v}</p>
               <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
             </div>
           );
         })}
       </div>
 
-      <div className="bg-card border border-border/60 rounded-xl p-4 overflow-x-auto">
+      <div className="bg-card border border-border/60 rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-primary-deep">Reply rate by send hour (prospect local time)</p>
-          <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
-            <span className="h-2 w-2 rounded-sm bg-primary/10" />
-            <span className="h-2 w-2 rounded-sm bg-primary/40" />
-            <span className="h-2 w-2 rounded-sm bg-primary/70" />
-            <span className="h-2 w-2 rounded-sm bg-primary" />
-            <span className="ml-1">low → high</span>
-          </div>
+          <p className="text-xs font-semibold text-primary-deep">Personalized landing pages</p>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5"><LivePulse /> Updating</span>
         </div>
-        <div className="inline-grid gap-1" style={{ gridTemplateColumns: `48px repeat(${hours.length}, minmax(28px, 1fr))` }}>
-          <div />
-          {hours.map((h) => (
-            <div key={h} className="text-[9px] text-muted-foreground text-center tabular-nums">{h}{h < 12 ? "a" : "p"}</div>
-          ))}
-          {days.map((d, di) => (
-            <Fragment key={d}>
-              <div className="text-[10px] font-semibold text-primary-deep flex items-center">{d}</div>
-              {hours.map((h) => {
-                const v = cell(di, h);
-                return (
-                  <div
-                    key={`${d}-${h}`}
-                    className={`h-7 rounded-md flex items-center justify-center text-[9px] font-bold transition-transform hover:scale-110 ${intensity(v)}`}
-                    title={`${d} ${h}:00 · ${v}% reply intensity`}
-                  >
-                    {v >= 60 ? v : ""}
-                  </div>
-                );
-              })}
-            </Fragment>
+        <div className="space-y-2.5">
+          {pages.map((p) => (
+            <div key={p.name} className="flex items-center gap-3">
+              <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${p.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+                {p.co.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-primary-deep truncate">{p.name}</p>
+                <p className="text-[10px] text-muted-foreground tabular-nums">
+                  {p.co} · {p.views} views · {p.ctr}% CTR
+                </p>
+              </div>
+              {p.live > 0 ? (
+                <span className="flex items-center gap-1.5 text-[10px] font-bold bg-success/10 text-success px-2 py-1 rounded-md">
+                  <LivePulse /> {p.live} on page
+                </span>
+              ) : (
+                <span className="text-[10px] text-muted-foreground">idle</span>
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -248,70 +191,80 @@ function SendTimePanel() {
   );
 }
 
-/* ---------------- Template A/B leaderboard ---------------- */
+/* ---------------- WhatsApp ---------------- */
 
-function TemplatesPanel() {
-  const templates = [
-    { name: "RevOps benchmarks · v3",    sent: 412, open: 71, reply: 18.4, win: true, color: "from-emerald-400 to-teal-500" },
-    { name: "Hiring signal · short",     sent: 298, open: 64, reply: 14.1, win: false, color: "from-primary to-primary-glow" },
-    { name: "Series B congrats",         sent: 256, open: 68, reply: 12.7, win: false, color: "from-amber-400 to-orange-500" },
-    { name: "Switched off Salesforce",   sent: 184, open: 59, reply: 11.2, win: false, color: "from-violet-400 to-purple-500" },
-    { name: "Product page revisit",      sent: 142, open: 52, reply: 8.6,  win: false, color: "from-pink-400 to-rose-500" },
+function WhatsAppPanel() {
+  const msgs = useTicker(347, 1, 2000);
+  const threads = [
+    { who: "Sarah Chen",   co: "Northwind Co.",  last: "Great — let's do Thursday 2pm 👍", t: "now",   unread: 1, online: true },
+    { who: "Marcus Patel", co: "Acme Robotics",  last: "Sending the deck to our CTO now",  t: "2m",    unread: 2, online: true },
+    { who: "Jules Romero", co: "Bluebird Labs",  last: "Pricing looks fair, one Q…",        t: "11m",   unread: 0, online: false },
+    { who: "Ava Lindgren", co: "Lumen Health",   last: "Yes please send the case study",    t: "1h",    unread: 0, online: false },
   ];
-  const maxReply = Math.max(...templates.map((t) => t.reply));
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="lg:col-span-2 bg-card border border-border/60 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-primary-deep flex items-center gap-1.5">
-              <Trophy className="h-3.5 w-3.5 text-primary" /> Template leaderboard
-            </p>
-            <span className="text-[10px] text-muted-foreground">Sorted by reply rate</span>
-          </div>
-          <div className="space-y-2.5">
-            {templates.map((t) => (
-              <div key={t.name} className="flex items-center gap-3">
-                <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${t.color} flex items-center justify-center text-[10px] font-bold text-white`}>
-                  {t.name.slice(0, 2).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] font-semibold text-primary-deep truncate">{t.name}</p>
-                    {t.win && (
-                      <span className="text-[9px] font-bold bg-success/15 text-success px-1.5 py-0.5 rounded shrink-0">WINNING</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1.5 bg-muted/60 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all"
-                        style={{ width: `${(t.reply / maxReply) * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-bold text-primary-deep tabular-nums w-12 text-right">{t.reply}%</span>
-                  </div>
-                  <p className="text-[9px] text-muted-foreground mt-0.5 tabular-nums">
-                    {t.sent} sent · {t.open}% opened
-                  </p>
-                </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { l: "Connected number", v: "+1 (415) ···", d: "Verified", icon: CheckCircle2 },
+          { l: "Messages today",   v: msgs.toString(), d: "+24% vs yest.", icon: Send },
+          { l: "Reply rate",       v: "61%",          d: "vs 9% email",   icon: TrendingUp },
+          { l: "Avg response",     v: "4m 12s",       d: "−3m vs last wk", icon: Clock },
+        ].map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
+                <Icon className="h-3 w-3 text-primary" />
               </div>
-            ))}
-          </div>
-        </div>
+              <p className="text-base sm:text-lg font-display font-bold text-primary-deep tabular-nums">{k.v}</p>
+              <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
+            </div>
+          );
+        })}
+      </div>
 
-        <div className="bg-card border border-border/60 rounded-xl p-4 flex flex-col">
-          <p className="text-xs font-semibold text-primary-deep mb-3 flex items-center gap-1.5">
-            <FlaskConical className="h-3.5 w-3.5 text-primary" /> Active A/B test
-          </p>
-          <div className="space-y-3 flex-1">
-            <ABRow label="A" subject={`"Quick RevOps idea?"`} reply={11.8} winning={false} />
-            <ABRow label="B" subject={`"3 RevOps benchmarks"`} reply={18.4} winning={true} />
-          </div>
-          <div className="mt-3 p-2 rounded-md bg-primary/5 border border-primary/15">
-            <p className="text-[10px] text-primary-deep">
-              <span className="font-bold">Variant B</span> is winning with 97% confidence. Auto-promote in 6 hours.
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div className="lg:col-span-2 bg-card border border-border/60 rounded-xl p-3 space-y-1.5">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-primary-deep flex items-center gap-1.5">
+              <MessageCircle className="h-3.5 w-3.5 text-success" /> Inbox
             </p>
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1.5"><LivePulse /> live</span>
+          </div>
+          {threads.map((th, i) => (
+            <div key={th.who} className={`p-2 rounded-lg flex items-center gap-2 cursor-pointer ${i === 0 ? "bg-primary/5 border border-primary/20" : "hover:bg-muted/40"}`}>
+              <div className="relative h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-white">
+                {th.who.split(" ").map(n => n[0]).join("")}
+                {th.online && <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-[11px] font-bold text-primary-deep truncate">{th.who}</p>
+                  <span className="text-[9px] text-muted-foreground shrink-0">{th.t}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground truncate">{th.last}</p>
+              </div>
+              {th.unread > 0 && (
+                <span className="h-4 min-w-4 px-1 rounded-full bg-success text-white text-[9px] font-bold flex items-center justify-center">{th.unread}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="lg:col-span-3 bg-card border border-border/60 rounded-xl p-4 flex flex-col">
+          <div className="flex items-center gap-2 pb-3 border-b border-border/60 mb-3">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-white">SC</div>
+            <div>
+              <p className="text-[11px] font-bold text-primary-deep">Sarah Chen · Northwind Co.</p>
+              <p className="text-[9px] text-success flex items-center gap-1"><LivePulse />typing…</p>
+            </div>
+          </div>
+          <div className="space-y-2 flex-1">
+            <Bubble side="them">Hey! Saw your note about RevOps benchmarks — interesting.</Bubble>
+            <Bubble side="me">Glad it landed 🙌 Want me to walk you through it Thursday?</Bubble>
+            <Bubble side="them">Great — let&apos;s do Thursday 2pm 👍</Bubble>
+            <Bubble side="me" ai>Auto-draft: "Perfect, sending a calendar invite now."</Bubble>
           </div>
         </div>
       </div>
@@ -319,97 +272,307 @@ function TemplatesPanel() {
   );
 }
 
-function ABRow({ label, subject, reply, winning }: { label: string; subject: string; reply: number; winning: boolean }) {
+function Bubble({ side, children, ai }: { side: "me" | "them"; children: React.ReactNode; ai?: boolean }) {
+  const me = side === "me";
   return (
-    <div className={`p-2.5 rounded-lg border ${winning ? "border-success/40 bg-success/5" : "border-border/60 bg-muted/30"}`}>
-      <div className="flex items-center justify-between mb-1">
-        <span className={`h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-bold ${winning ? "bg-success text-white" : "bg-muted text-primary-deep"}`}>
-          {label}
-        </span>
-        <span className={`text-[10px] font-bold tabular-nums ${winning ? "text-success" : "text-muted-foreground"}`}>{reply}% reply</span>
+    <div className={`flex ${me ? "justify-end" : "justify-start"}`}>
+      <div className={`max-w-[80%] px-3 py-1.5 rounded-2xl text-[11px] ${
+        me
+          ? ai
+            ? "bg-primary/10 text-primary-deep border border-dashed border-primary/40"
+            : "bg-success text-white"
+          : "bg-muted text-primary-deep"
+      }`}>
+        {ai && <span className="flex items-center gap-1 text-[9px] font-bold text-primary mb-0.5"><Sparkles className="h-2.5 w-2.5" /> AI suggestion</span>}
+        {children}
       </div>
-      <p className="text-[11px] text-primary-deep truncate">{subject}</p>
     </div>
   );
 }
 
-/* ---------------- Account engagement ---------------- */
+/* ---------------- AI deal intelligence ---------------- */
 
-function AccountsPanel() {
-  const accounts = [
-    {
-      co: "Northwind Co.",
-      score: 94,
-      color: "from-emerald-400 to-teal-500",
-      trail: [
-        { who: "CEO",  open: 4, click: 2, reply: 1 },
-        { who: "VP RevOps", open: 6, click: 3, reply: 0 },
-        { who: "Director Sales Ops", open: 3, click: 1, reply: 0 },
-      ],
-      sig: "12 site visits today · pricing page 3×",
-    },
-    {
-      co: "Acme Robotics",
-      score: 88,
-      color: "from-violet-400 to-purple-500",
-      trail: [
-        { who: "CTO", open: 7, click: 4, reply: 1 },
-        { who: "Head of Eng", open: 2, click: 1, reply: 0 },
-      ],
-      sig: "Deck opened 3× by CTO · Series B closed",
-    },
-    {
-      co: "Bluebird Labs",
-      score: 81,
-      color: "from-amber-400 to-orange-500",
-      trail: [
-        { who: "Founder", open: 5, click: 2, reply: 1 },
-        { who: "Ops Lead", open: 3, click: 0, reply: 0 },
-      ],
-      sig: "Switched off Salesforce · evaluating",
-    },
+function AIDealIntelPanel() {
+  const deals = [
+    { co: "Northwind Co.",  stage: "Demo booked",   score: 94, delta: "+8", next: "Send pricing PDF before Thu call", urgent: true,  color: "from-emerald-400 to-teal-500" },
+    { co: "Acme Robotics",  stage: "Evaluating",    score: 88, delta: "+6", next: "Loop in CFO — Series B just closed", urgent: true, color: "from-violet-400 to-purple-500" },
+    { co: "Bluebird Labs",  stage: "Champion",      score: 81, delta: "+3", next: "Reply within 4h — pricing question",  urgent: false, color: "from-amber-400 to-orange-500" },
+    { co: "Lumen Health",   stage: "Nurture",       score: 64, delta: "−2", next: "Hold — wait for Q1 budget signal",   urgent: false, color: "from-pink-400 to-rose-500" },
   ];
   return (
-    <div className="space-y-3">
-      {accounts.map((a) => (
-        <div key={a.co} className="bg-card border border-border/60 rounded-xl p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${a.color} flex items-center justify-center text-[11px] font-bold text-white`}>
-              {a.co.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-primary-deep">{a.co}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{a.sig}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-display font-bold text-success leading-none">{a.score}</p>
-              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">intent</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {a.trail.map((p) => (
-              <div key={p.who} className="grid grid-cols-12 gap-2 items-center">
-                <span className="col-span-3 text-[10px] font-semibold text-primary-deep truncate">{p.who}</span>
-                <PersonBar icon={Mail} value={p.open} max={8} color="bg-primary/70" />
-                <PersonBar icon={MousePointerClick} value={p.click} max={5} color="bg-amber-500" />
-                <PersonBar icon={Reply} value={p.reply} max={2} color="bg-success" />
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { l: "Pipeline value",  v: "$1.84M",  d: "+$220k this week", icon: TrendingUp },
+          { l: "Hot deals",       v: "12",      d: "score ≥ 80",       icon: Zap },
+          { l: "AI suggestions",  v: "27",      d: "ready to action",  icon: Sparkles },
+          { l: "Forecast accuracy", v: "92%",   d: "last 90 days",     icon: CheckCircle2 },
+        ].map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
+                <Icon className="h-3 w-3 text-primary" />
               </div>
-            ))}
-          </div>
+              <p className="text-lg sm:text-xl font-display font-bold text-primary-deep tabular-nums">{k.v}</p>
+              <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-card border border-border/60 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-primary-deep flex items-center gap-1.5">
+            <Brain className="h-3.5 w-3.5 text-primary" /> Next-best action queue
+          </p>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5"><LivePulse /> re-scored 2s ago</span>
         </div>
-      ))}
+        <div className="space-y-2.5">
+          {deals.map((d) => (
+            <div key={d.co} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${d.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+                {d.co.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[11px] font-bold text-primary-deep truncate">{d.co}</p>
+                  <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">{d.stage}</span>
+                  {d.urgent && <span className="text-[9px] font-bold bg-hot/15 text-hot px-1.5 py-0.5 rounded">ACT NOW</span>}
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                  <Sparkles className="h-2.5 w-2.5 text-primary" /> {d.next}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-base font-display font-bold text-success leading-none tabular-nums">{d.score}</p>
+                <p className="text-[9px] font-semibold text-success">{d.delta}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function PersonBar({ icon: Icon, value, max, color }: { icon: typeof Mail; value: number; max: number; color: string }) {
+/* ---------------- Competitors ---------------- */
+
+function CompetitorsPanel() {
+  const comps = [
+    { name: "Outreach.io",   share: 38, trend: "+4",  color: "bg-rose-500",    accounts: ["Acme Robotics", "Lumen Health"] },
+    { name: "Apollo.io",     share: 27, trend: "+2",  color: "bg-violet-500",  accounts: ["Bluebird Labs"] },
+    { name: "Salesloft",     share: 18, trend: "−1",  color: "bg-amber-500",   accounts: ["Northwind Co."] },
+    { name: "Clay",          share: 11, trend: "+6",  color: "bg-emerald-500", accounts: ["Vertex AI Co."] },
+    { name: "HubSpot Seq.",  share: 6,  trend: "−3",  color: "bg-sky-500",     accounts: [] },
+  ];
   return (
-    <div className="col-span-3 flex items-center gap-1.5">
-      <Icon className="h-3 w-3 text-muted-foreground shrink-0" />
-      <div className="flex-1 h-1.5 bg-muted/60 rounded-full overflow-hidden">
-        <div className={`${color} h-full rounded-full transition-all`} style={{ width: `${(value / max) * 100}%` }} />
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {[
+          { l: "Accounts evaluating alternates", v: "47", d: "9 ready to switch", icon: Swords },
+          { l: "Won vs competitors (90d)",       v: "31",  d: "68% win rate",      icon: CheckCircle2 },
+          { l: "Top displacement target",        v: "Outreach.io", d: "12 deals open", icon: ArrowUpRight },
+        ].map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
+                <Icon className="h-3 w-3 text-primary" />
+              </div>
+              <p className="text-base sm:text-lg font-display font-bold text-primary-deep">{k.v}</p>
+              <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
+            </div>
+          );
+        })}
       </div>
-      <span className="text-[9px] font-bold text-primary-deep tabular-nums w-3 text-right">{value}</span>
+
+      <div className="bg-card border border-border/60 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-primary-deep">Tools your prospects use today</p>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5"><LivePulse /> from tech signals</span>
+        </div>
+        <div className="space-y-2.5">
+          {comps.map((c) => (
+            <div key={c.name}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold text-primary-deep">{c.name}</span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">
+                  {c.share}% share · <span className={c.trend.startsWith("+") ? "text-success font-bold" : "text-destructive font-bold"}>{c.trend}</span>
+                </span>
+              </div>
+              <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
+                <div className={`${c.color} h-full transition-all`} style={{ width: `${c.share * 2.2}%` }} />
+              </div>
+              {c.accounts.length > 0 && (
+                <p className="text-[9px] text-muted-foreground mt-1">
+                  Open opportunities: {c.accounts.join(" · ")}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- New targets ---------------- */
+
+function NewTargetsPanel() {
+  const matched = useTicker(238, 1, 1500);
+  const targets = [
+    { co: "Vertex AI Co.",     why: "Hiring 4 AEs + RevOps lead",          fit: 96, color: "from-emerald-400 to-teal-500" },
+    { co: "Helios Robotics",   why: "Series B closed last week",           fit: 92, color: "from-violet-400 to-purple-500" },
+    { co: "Tidewater Health",  why: "Switched off legacy CRM (signal)",    fit: 89, color: "from-amber-400 to-orange-500" },
+    { co: "Nimbus Logistics",  why: "Mentioned 'lead quality' on G2 review", fit: 84, color: "from-pink-400 to-rose-500" },
+    { co: "Quartz Analytics",  why: "Opened pricing page 3× this week",    fit: 81, color: "from-sky-400 to-blue-500" },
+  ];
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { l: "New matches today",   v: matched.toString(), d: "from your profile", icon: Target },
+          { l: "Avg fit score",       v: "87",               d: "+5 vs last month",  icon: TrendingUp },
+          { l: "With buying signal",  v: "62",               d: "act this week",     icon: Zap },
+          { l: "Already enriched",    v: "100%",             d: "contacts + email",  icon: CheckCircle2 },
+        ].map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
+                <Icon className="h-3 w-3 text-primary" />
+              </div>
+              <p className="text-lg sm:text-xl font-display font-bold text-primary-deep tabular-nums">{k.v}</p>
+              <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bg-card border border-border/60 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-primary-deep flex items-center gap-1.5">
+            <Target className="h-3.5 w-3.5 text-primary" /> Just matched · ready to reach out
+          </p>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5"><LivePulse /> streaming</span>
+        </div>
+        <div className="space-y-2">
+          {targets.map((t) => (
+            <div key={t.co} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${t.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+                {t.co.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-primary-deep flex items-center gap-1.5">
+                  <Building2 className="h-3 w-3 text-muted-foreground" /> {t.co}
+                </p>
+                <p className="text-[10px] text-muted-foreground truncate">{t.why}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-base font-display font-bold text-primary leading-none tabular-nums">{t.fit}</p>
+                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">fit</p>
+              </div>
+              <button className="text-[10px] font-bold bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:bg-primary/90 transition-colors">
+                Reach out
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Email composer ---------------- */
+
+function ComposerPanel() {
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setPhase((p) => (p + 1) % 4), 2200);
+    return () => clearInterval(id);
+  }, []);
+  const draftFull = `Hi Sarah,
+
+Congrats on the Series B — saw Northwind is hiring 4 AEs. Most RevOps teams we work with at that stage hit a wall around lead quality (your G2 review hinted at the same).
+
+A quick idea: we can show you how Lumen cut their pipeline ramp by 38% in 6 weeks using the exact same signals you're already tracking.
+
+Worth a 15-min look Thursday?
+
+— Alex`;
+  const shown = phase === 0 ? "" : phase === 1 ? draftFull.slice(0, 90) : phase === 2 ? draftFull.slice(0, 220) : draftFull;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { l: "Personalization", v: "11 signals", d: "used in this draft", icon: Sparkles },
+          { l: "Predicted reply", v: "22%",         d: "+3.7× your avg",    icon: TrendingUp },
+          { l: "Tone match",      v: "Friendly",    d: "matches Sarah's LI", icon: CheckCircle2 },
+          { l: "Spam score",      v: "0.4 / 10",    d: "inbox safe",        icon: CheckCircle2 },
+        ].map((k) => {
+          const Icon = k.icon;
+          return (
+            <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] text-muted-foreground font-medium">{k.l}</p>
+                <Icon className="h-3 w-3 text-primary" />
+              </div>
+              <p className="text-base font-display font-bold text-primary-deep">{k.v}</p>
+              <p className="text-[10px] text-success font-semibold mt-0.5">{k.d}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div className="lg:col-span-3 bg-card border border-border/60 rounded-xl overflow-hidden">
+          <div className="px-4 py-2 border-b border-border/60 bg-muted/30 flex items-center justify-between">
+            <p className="text-[10px] text-muted-foreground">To: sarah@northwind.co · Subject: 3 RevOps benchmarks</p>
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-primary">
+              <Sparkles className="h-3 w-3 animate-pulse" /> AI drafting
+            </span>
+          </div>
+          <pre className="whitespace-pre-wrap font-sans text-[11px] text-primary-deep p-4 min-h-[180px] leading-relaxed">
+{shown}
+            <span className="inline-block w-1.5 h-3 bg-primary align-middle animate-pulse ml-0.5" />
+          </pre>
+          <div className="px-4 py-2 border-t border-border/60 flex items-center justify-between bg-muted/20">
+            <div className="flex gap-1.5">
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Series B</span>
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Hiring AEs</span>
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">G2 review</span>
+            </div>
+            <button className="text-[10px] font-bold bg-primary text-primary-foreground px-3 py-1.5 rounded-md flex items-center gap-1">
+              <Send className="h-3 w-3" /> Send
+            </button>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 bg-card border border-border/60 rounded-xl p-4">
+          <p className="text-xs font-semibold text-primary-deep mb-3 flex items-center gap-1.5">
+            <Brain className="h-3.5 w-3.5 text-primary" /> Why this draft
+          </p>
+          <ul className="space-y-2 text-[10.5px] text-primary-deep">
+            {[
+              "Series B announced 6 days ago (Crunchbase)",
+              "4 AE roles open on LinkedIn",
+              "Sarah's last 3 posts: hiring + RevOps",
+              "G2 review mentioned 'lead quality'",
+              "Similar customer (Lumen): 38% faster ramp",
+            ].map((s) => (
+              <li key={s} className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-success mt-0.5 shrink-0" />
+                <span>{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
