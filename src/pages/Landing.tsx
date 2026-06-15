@@ -243,6 +243,7 @@ export default function Landing() {
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
+            <Link to="/demo" className="hover:text-primary transition-colors">Book a demo</Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
             <Link to="/demo" className="hidden sm:inline-flex">
@@ -321,6 +322,11 @@ export default function Landing() {
             >
               Get started free <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="h-12 px-7 text-base">
+                Book a free demo
+              </Button>
+            </Link>
           </div>
 
           <div
