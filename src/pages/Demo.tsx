@@ -44,7 +44,7 @@ export default function Demo() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("demo_requests").insert({
+    const { error } = await (supabase as any).from("demo_requests").insert({
       name: form.name.trim(),
       email: form.email.trim(),
       company: form.company.trim() || null,
@@ -67,7 +67,7 @@ export default function Demo() {
       <SeoHead
         title="Book a Free Demo — EngageIQ"
         description="See EngageIQ in action. Book a free 30-minute walkthrough tailored to your outbound workflow."
-        canonicalPath="/demo"
+        path="/demo"
       />
 
       <header className="border-b border-border/40 bg-background/70 backdrop-blur-xl sticky top-0 z-40">

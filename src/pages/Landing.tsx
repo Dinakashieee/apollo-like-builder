@@ -245,6 +245,9 @@ export default function Landing() {
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
+            <Link to="/demo" className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" className="text-sm px-2 sm:px-3">Book a demo</Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="text-sm px-2 sm:px-3">Sign in</Button>
             </Link>
