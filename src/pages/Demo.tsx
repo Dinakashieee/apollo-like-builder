@@ -211,25 +211,74 @@ export default function Demo() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="team_size">Team size</Label>
-                  <Select value={form.team_size} onValueChange={(v) => setForm((f) => ({ ...f, team_size: v }))}>
-                    <SelectTrigger id="team_size"><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>
-                      {teamSizes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+              <div>
+                <Label htmlFor="team_size">Team size</Label>
+                <Select value={form.team_size} onValueChange={(v) => setForm((f) => ({ ...f, team_size: v }))}>
+                  <SelectTrigger id="team_size"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    {teamSizes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3 rounded-lg border border-border/60 bg-background/40 p-4">
+                <Label className="text-sm font-semibold">Pick a date & time *</Label>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="date" className="text-xs text-muted-foreground">Date</Label>
+                    <Popover open={calOpen} onOpenChange={setCalOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="date"
+                          type="button"
+                          variant="outline"
+                          className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "EEE, MMM d, yyyy") : "Select a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={(d) => { setDate(d); setCalOpen(false); }}
+                          disabled={(d) => d < minDate || d.getDay() === 0 || d.getDay() === 6}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <Label htmlFor="time" className="text-xs text-muted-foreground">Time</Label>
+                    <Select value={time} onValueChange={setTime}>
+                      <SelectTrigger id="time">
+                        <Clock className="mr-2 h-4 w-4 opacity-60" />
+                        <SelectValue placeholder="Select a time" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {timeSlots.map((s) => (
+                          <SelectItem key={s} value={s}>{formatTimeLabel(s)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="preferred_time">Preferred time</Label>
-                  <Input
-                    id="preferred_time"
-                    placeholder="e.g. Weekdays 2–5pm PST"
-                    value={form.preferred_time}
-                    onChange={update("preferred_time")}
-                    maxLength={200}
-                  />
+                  <Label htmlFor="tz" className="text-xs text-muted-foreground">Time zone</Label>
+                  <Select value={tz} onValueChange={setTz}>
+                    <SelectTrigger id="tz">
+                      <Globe className="mr-2 h-4 w-4 opacity-60" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {tzOptions.map((z) => (
+                        <SelectItem key={z} value={z}>{z.replace(/_/g, " ")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Detected: {browserTz}</p>
                 </div>
               </div>
 
