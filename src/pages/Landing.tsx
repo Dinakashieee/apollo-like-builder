@@ -17,8 +17,10 @@ import {
   BrainCircuit,
   TrendingUp,
   MousePointerClick,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { SeoHead } from "@/components/SeoHead";
 
