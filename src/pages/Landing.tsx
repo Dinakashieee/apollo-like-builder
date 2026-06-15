@@ -288,18 +288,18 @@ export default function Landing() {
             <ArrowRight className="h-3 w-3" />
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight text-primary-deep leading-[1.05] animate-fade-up">
-            The revenue platform for{" "}
-            <span className="gradient-text">modern sales teams</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold tracking-tight text-primary-deep leading-[1.08] animate-fade-up max-w-3xl mx-auto">
+            Upload your company profile.{" "}
+            <span className="gradient-text">We find the deals worth chasing.</span>
           </h1>
 
           <p
             className="mt-6 text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-up"
             style={{ animationDelay: "120ms" }}
           >
-            Stop sending bulk emails without context. EngageIQ tells you exactly which
-            accounts match your company — and only prompts you to reach out when there's
-            a real opportunity worth your time.
+            Stop sending bulk emails without context. Just upload your company profile —
+            EngageIQ tells you exactly which accounts match your business and only prompts
+            you to reach out when there's a real opportunity worth your time.
           </p>
 
           {/* BYOD highlight */}

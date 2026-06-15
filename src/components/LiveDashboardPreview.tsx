@@ -58,7 +58,7 @@ export function LiveDashboardPreview() {
         { ...seed, id: idRef.current, time: formatTime(new Date()) },
         ...prev,
       ].slice(0, 5));
-    }, 2600);
+    }, 1600);
     return () => clearInterval(interval);
   }, []);
 
@@ -67,6 +67,7 @@ export function LiveDashboardPreview() {
   const [opens, setOpens] = useState(642);
   const [replies, setReplies] = useState(217);
   const [pipeline, setPipeline] = useState(214);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -74,7 +75,8 @@ export function LiveDashboardPreview() {
       setOpens((o) => o + Math.floor(Math.random() * 3));
       setReplies((r) => r + (Math.random() > 0.55 ? 1 : 0));
       setPipeline((p) => p + (Math.random() > 0.6 ? Math.floor(Math.random() * 5) + 1 : 0));
-    }, 2200);
+      setTick((n) => n + 1);
+    }, 1200);
     return () => clearInterval(t);
   }, []);
 
@@ -146,23 +148,29 @@ export function LiveDashboardPreview() {
             { l: "Open rate",       v: `${Math.round((opens / sent) * 100)}%`, d: "+6pt",          icon: TrendingUp,  spark: [3,4,4,5,6,6,7,8],  color: "text-amber-600", bar: "from-amber-300 to-amber-500" },
             { l: "Reply rate",      v: `${((replies / sent) * 100).toFixed(1)}%`, d: "+2.4pt",     icon: Reply,       spark: [2,3,3,4,4,5,5,6],  color: "text-success",  bar: "from-emerald-300 to-emerald-500" },
             { l: "Pipeline added",  v: `$${pipeline}k`,            d: "+22%",            icon: DollarSign,  spark: [5,7,6,8,9,10,12,14], color: "text-violet-600", bar: "from-violet-300 to-violet-500" },
-          ].map((k) => {
+          ].map((k, kIdx) => {
             const Icon = k.icon;
-            const sMax = Math.max(...k.spark);
+            // Rotate sparkline based on tick so each KPI looks like a live stream
+            const rotated = k.spark.map((_, i) => {
+              const base = k.spark[(i + tick + kIdx) % k.spark.length];
+              const jitter = ((tick * 37 + i * 13 + kIdx * 7) % 5) - 2;
+              return Math.max(1, base + jitter);
+            });
+            const sMax = Math.max(...rotated);
             return (
               <div key={k.l} className="bg-card border border-border/60 rounded-xl p-3 group hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-[10px] text-muted-foreground font-medium truncate">{k.l}</p>
                   <Icon className={`h-3 w-3 ${k.color}`} />
                 </div>
-                <p className="text-lg sm:text-xl font-display font-bold text-primary-deep leading-tight tabular-nums">{k.v}</p>
+                <p className="text-lg sm:text-xl font-display font-bold text-primary-deep leading-tight tabular-nums transition-all duration-300">{k.v}</p>
                 <div className="flex items-end justify-between gap-2 mt-1">
                   <p className="text-[10px] font-semibold text-success">{k.d}</p>
                   <div className="flex items-end gap-[2px] h-5">
-                    {k.spark.map((v, i) => (
+                    {rotated.map((v, i) => (
                       <div
                         key={i}
-                        className={`w-[3px] rounded-sm bg-gradient-to-t ${k.bar} opacity-80`}
+                        className={`w-[3px] rounded-sm bg-gradient-to-t ${k.bar} opacity-80 transition-all duration-500 ease-out`}
                         style={{ height: `${(v / sMax) * 100}%` }}
                       />
                     ))}
