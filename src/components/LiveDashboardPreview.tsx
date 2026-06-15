@@ -58,7 +58,7 @@ export function LiveDashboardPreview() {
         { ...seed, id: idRef.current, time: formatTime(new Date()) },
         ...prev,
       ].slice(0, 5));
-    }, 2600);
+    }, 1600);
     return () => clearInterval(interval);
   }, []);
 
@@ -67,6 +67,7 @@ export function LiveDashboardPreview() {
   const [opens, setOpens] = useState(642);
   const [replies, setReplies] = useState(217);
   const [pipeline, setPipeline] = useState(214);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -74,7 +75,8 @@ export function LiveDashboardPreview() {
       setOpens((o) => o + Math.floor(Math.random() * 3));
       setReplies((r) => r + (Math.random() > 0.55 ? 1 : 0));
       setPipeline((p) => p + (Math.random() > 0.6 ? Math.floor(Math.random() * 5) + 1 : 0));
-    }, 2200);
+      setTick((n) => n + 1);
+    }, 1200);
     return () => clearInterval(t);
   }, []);
 
