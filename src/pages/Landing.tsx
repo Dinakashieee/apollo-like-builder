@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Sparkles,
-  Zap,
   Target,
   Mail,
   BarChart3,
@@ -34,7 +32,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 const features = [
   {
-    icon: Sparkles,
+    icon: TrendingUp,
     title: "AI Deal Intelligence",
     desc: "Score every account on intent, fit, and timing — automatically enriched from 60+ data sources.",
   },
@@ -44,7 +42,7 @@ const features = [
     desc: "Generate personalized outreach in seconds with brand voice and context-aware suggestions.",
   },
   {
-    icon: Zap,
+    icon: MousePointerClick,
     title: "Multi-Step Automation",
     desc: "Build sequences that adapt to replies, opens, and signals — without lifting a finger.",
   },
@@ -266,10 +264,10 @@ export default function Landing() {
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
-            <Link to="/demo" className="hover:text-primary transition-colors animate-pulse">Book a demo</Link>
+            <Link to="/demo" className="hover:text-primary transition-colors animate-pulse text-hot font-semibold">Book a demo</Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Link to="/demo" className="hidden sm:inline-flex animate-pulse">
+            <Link to="/demo" className="hidden sm:inline-flex animate-pulse text-hot font-semibold">
               <Button variant="ghost" size="sm" className="text-sm px-2 sm:px-3">Book a demo</Button>
             </Link>
             <Link to="/auth">
@@ -310,7 +308,7 @@ export default function Landing() {
 
         <div className="container relative mx-auto px-6 text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-6 animate-fade-in">
-            <Sparkles className="h-3 w-3" />
+            <TrendingUp className="h-3 w-3" />
             New · AI Deal Intelligence is now live
             <ArrowRight className="h-3 w-3" />
           </div>
@@ -668,8 +666,8 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { icon: UserPlus, name: "Additional User Seat", price: "$8", unit: "/seat/mo", desc: "Add another teammate to your workspace. Cancel anytime." },
-                { icon: Zap, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
-                { icon: Sparkles, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
+                { icon: MousePointerClick, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
+                { icon: TrendingUp, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
               ].map((a) => (
                 <div
                   key={a.name}

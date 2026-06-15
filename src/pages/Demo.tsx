@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Calendar as CalendarIcon, Sparkles, Clock, Users, ShieldCheck, Globe } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Calendar as CalendarIcon, Target, Clock, Users, ShieldCheck, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const teamSizes = ["Just me", "2–10", "11–50", "51–200", "201–1000", "1000+"];
 
 const perks = [
-  { icon: Sparkles, title: "Tailored walkthrough", desc: "We'll show how EngageIQ fits your exact outbound motion." },
+  { icon: Target, title: "Tailored walkthrough", desc: "We'll show how EngageIQ fits your exact outbound motion." },
   { icon: Clock, title: "30 minutes, zero fluff", desc: "Live product tour with real data, no slideware." },
   { icon: Users, title: "Bring your team", desc: "Invite ops, SDRs, and leadership — we cover every angle." },
   { icon: ShieldCheck, title: "No hard sell", desc: "We answer questions, you decide. Simple." },
