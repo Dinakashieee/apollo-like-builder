@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Sparkles,
-  Zap,
   Target,
   Mail,
   BarChart3,
@@ -34,7 +32,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 const features = [
   {
-    icon: Sparkles,
+    icon: TrendingUp,
     title: "AI Deal Intelligence",
     desc: "Score every account on intent, fit, and timing — automatically enriched from 60+ data sources.",
   },
@@ -44,7 +42,7 @@ const features = [
     desc: "Generate personalized outreach in seconds with brand voice and context-aware suggestions.",
   },
   {
-    icon: Zap,
+    icon: MousePointerClick,
     title: "Multi-Step Automation",
     desc: "Build sequences that adapt to replies, opens, and signals — without lifting a finger.",
   },
@@ -266,10 +264,10 @@ export default function Landing() {
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
-            <Link to="/demo" className="hover:text-primary transition-colors animate-pulse">Book a demo</Link>
+            <Link to="/demo" className="hover:text-primary transition-colors animate-pulse text-hot font-semibold">Book a demo</Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Link to="/demo" className="hidden sm:inline-flex animate-pulse">
+            <Link to="/demo" className="hidden sm:inline-flex animate-pulse text-hot font-semibold">
               <Button variant="ghost" size="sm" className="text-sm px-2 sm:px-3">Book a demo</Button>
             </Link>
             <Link to="/auth">
