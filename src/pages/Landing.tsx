@@ -262,6 +262,7 @@ export default function Landing() {
           <Logo />
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-foreground/80">
             <a href="#features" className="hover:text-primary transition-colors">Features</a>
+            <a href="#how-it-works" className="hover:text-primary transition-colors">How it works</a>
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
