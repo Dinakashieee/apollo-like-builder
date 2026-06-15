@@ -293,15 +293,19 @@ export default function Landing() {
           aria-hidden
         />
         <div className="absolute inset-0 grid-pattern opacity-40" aria-hidden />
-        <div
-          className="absolute top-0 right-0 w-[600px] h-[600px] opacity-30 mix-blend-multiply pointer-events-none"
-          style={{
-            backgroundImage: `url(${heroBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            maskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
-          }}
+        <img
+          src={heroBg}
+          alt=""
+          width={600}
+          height={600}
+          fetchPriority="high"
+          decoding="async"
           aria-hidden
+          className="absolute top-0 right-0 w-[600px] h-[600px] object-cover opacity-30 mix-blend-multiply pointer-events-none"
+          style={{
+            maskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
+            WebkitMaskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
+          }}
         />
 
         <div className="container relative mx-auto px-6 text-center max-w-4xl">
