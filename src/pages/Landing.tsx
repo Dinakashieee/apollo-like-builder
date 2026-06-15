@@ -16,7 +16,7 @@ import {
   Search,
   BrainCircuit,
   TrendingUp,
-  MousePointerClick,
+  Workflow,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
