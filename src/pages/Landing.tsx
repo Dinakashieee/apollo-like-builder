@@ -445,6 +445,22 @@ export default function Landing() {
             <div className="absolute -inset-x-8 -top-8 h-40 bg-gradient-primary opacity-20 blur-3xl rounded-full" aria-hidden />
             <LiveDashboardPreview />
           </div>
+
+          <div className="relative max-w-5xl mx-auto mt-10 sm:mt-14">
+            <div className="text-center mb-6">
+              <p className="text-[11px] font-bold tracking-[0.18em] text-primary uppercase mb-2">
+                Go deeper · Advanced dashboards
+              </p>
+              <h3 className="font-display font-bold text-2xl sm:text-3xl text-primary-deep">
+                Every signal that drives a reply, in one place
+              </h3>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
+                Deliverability, best send times, template A/B winners, and account-level engagement —
+                live in your workspace from day one.
+              </p>
+            </div>
+            <AdvancedDashboardsPreview />
+          </div>
         </div>
       </section>
 
