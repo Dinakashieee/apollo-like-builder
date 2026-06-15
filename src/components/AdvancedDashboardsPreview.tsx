@@ -226,7 +226,7 @@ function SendTimePanel() {
             <div key={h} className="text-[9px] text-muted-foreground text-center tabular-nums">{h}{h < 12 ? "a" : "p"}</div>
           ))}
           {days.map((d, di) => (
-            <FragmentRow key={d}>
+            <Fragment key={d}>
               <div className="text-[10px] font-semibold text-primary-deep flex items-center">{d}</div>
               {hours.map((h) => {
                 const v = cell(di, h);
@@ -240,7 +240,7 @@ function SendTimePanel() {
                   </div>
                 );
               })}
-            </FragmentRow>
+            </Fragment>
           ))}
         </div>
       </div>
