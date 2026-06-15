@@ -369,7 +369,20 @@ export default function Targets() {
       }),
       "Replacement target took too long to load."
     );
-    if (error) throw error;
+    if (error) {
+      // Supabase FunctionsHttpError wraps the edge-function response body.
+      // Try to surface the real error message (e.g. quota_exceeded) instead of a generic HTTP status text.
+      const errAny = error as any;
+      const payload =
+        errAny.context?.responseBody ??
+        errAny.responseBody ??
+        errAny.data ??
+        errAny.json?.() ??
+        null;
+      if (payload?.reason) throw new Error(payload.reason);
+      if (payload?.error) throw new Error(payload.error);
+      throw error;
+    }
     if (data?.error) throw new Error(data.error);
     const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, similar);
     return safeTargets[0] as TargetCompany | undefined;
@@ -487,7 +500,12 @@ export default function Targets() {
       persist(similar, nextTargets);
       toast({ title: "Fresh target added" });
     } catch (e: unknown) {
-      toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+      const msg = getErrorMessage(e).toLowerCase();
+      if (msg.includes("quota") || msg.includes("limit") || msg.includes("upgrade")) {
+        toast({ title: "Plan limit reached", description: getErrorMessage(e), variant: "destructive" });
+      } else {
+        toast({ title: "Couldn't load a fresh target", description: getErrorMessage(e), variant: "destructive" });
+      }
     }
     setAddingNew(false);
   };
@@ -744,9 +762,9 @@ export default function Targets() {
             </Button>
           </div>
         </div>
-        <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 border border-border/60 rounded-lg px-3 py-2 mt-2">
+        <div className="flex items-start gap-2 text-xs bg-primary/10 text-primary border border-primary/30 rounded-lg px-3 py-2 mt-2 animate-pulse">
           <Clock className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-          <span>Targets usually refresh every 24 hours — patience is much appreciated due to high deep research.</span>
+          <span className="font-semibold">Targets usually refresh every 24 hours — patience is much appreciated due to high deep research.</span>
         </div>
         {!loading && targets.length === 0 && hasCompany && (
           <p className="text-sm text-muted-foreground card-elevated p-6 text-center">
