@@ -500,15 +500,15 @@ export default function Landing() {
               and your pipeline together.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <div
                 key={f.title}
-                className="card-elevated p-6 hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 group"
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div className="h-11 w-11 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow mb-4 group-hover:scale-110 transition-transform">
-                  <f.icon className="h-5 w-5 text-primary-foreground" />
+                <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <f.icon className="h-5 w-5 text-white" />
                 </div>
                 <h3 className="font-display font-bold text-lg text-primary-deep mb-2">{f.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
