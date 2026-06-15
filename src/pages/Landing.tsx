@@ -308,7 +308,7 @@ export default function Landing() {
 
         <div className="container relative mx-auto px-6 text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-6 animate-fade-in">
-            <Sparkles className="h-3 w-3" />
+            <TrendingUp className="h-3 w-3" />
             New · AI Deal Intelligence is now live
             <ArrowRight className="h-3 w-3" />
           </div>
@@ -666,8 +666,8 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { icon: UserPlus, name: "Additional User Seat", price: "$8", unit: "/seat/mo", desc: "Add another teammate to your workspace. Cancel anytime." },
-                { icon: Zap, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
-                { icon: Sparkles, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
+                { icon: MousePointerClick, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
+                { icon: TrendingUp, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
               ].map((a) => (
                 <div
                   key={a.name}
