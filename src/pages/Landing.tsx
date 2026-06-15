@@ -266,6 +266,7 @@ export default function Landing() {
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
+            <a href="#why-us" className="hover:text-primary transition-colors">Why us</a>
             <Link to="/demo" className="hover:text-primary transition-colors animate-pulse text-hot font-semibold">Book a demo</Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
