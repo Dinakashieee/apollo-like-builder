@@ -14,6 +14,11 @@ import {
   Database,
   Lock,
   UserPlus,
+  Upload,
+  Search,
+  BrainCircuit,
+  TrendingUp,
+  MousePointerClick,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
