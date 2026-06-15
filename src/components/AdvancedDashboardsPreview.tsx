@@ -495,25 +495,30 @@ function ComposerPanel() {
     const id = setInterval(() => setPhase((p) => (p + 1) % 4), 2200);
     return () => clearInterval(id);
   }, []);
-  const draftFull = `Hi Sarah,
+  const draftFull = `Hi Farah,
 
-Congrats on the Series B — saw Northwind is hiring 4 AEs. Most RevOps teams we work with at that stage hit a wall around lead quality (your G2 review hinted at the same).
+As the CFO of Zenith Manufacturing, you're one of the key decision-makers shaping how the business runs — and we noticed your team is currently using SAP ECC for finance, procurement and inventory.
 
-A quick idea: we can show you how Lumen cut their pipeline ramp by 38% in 6 weeks using the exact same signals you're already tracking.
+Out of curiosity, just wondered if your team still spends days on month-end close, struggles with real-time inventory visibility across plants, or wrestles with custom reports every time the board asks a new question.
 
-Worth a 15-min look Thursday?
+In the real world no single system covers 100% of a company's needs — so without replacing your SAP core, would it be worth trying BCD ERP alongside it? Our customers typically see a 42% faster close, 28% lower inventory carrying cost, and live dashboards their CFO actually trusts.
 
-— Alex`;
-  const shown = phase === 0 ? "" : phase === 1 ? draftFull.slice(0, 90) : phase === 2 ? draftFull.slice(0, 220) : draftFull;
+Would you be free next week for a no-cost, no-commitment call with our team?
+
+For context, BCD ERP was ranked #1 in Gartner's 2025 Mid-Market ERP Magic Quadrant and is trusted by 1,200+ manufacturers worldwide.
+
+— Alex
+BCD ERP`;
+  const shown = phase === 0 ? "" : phase === 1 ? draftFull.slice(0, 180) : phase === 2 ? draftFull.slice(0, 520) : draftFull;
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { l: "Personalization", v: "11 signals", d: "used in this draft", icon: Sparkles },
-          { l: "Predicted reply", v: "22%",         d: "+3.7× your avg",    icon: TrendingUp },
-          { l: "Tone match",      v: "Friendly",    d: "matches Sarah's LI", icon: CheckCircle2 },
-          { l: "Spam score",      v: "0.4 / 10",    d: "inbox safe",        icon: CheckCircle2 },
+          { l: "Predicted reply", v: "24%",         d: "+3.9× your avg",    icon: TrendingUp },
+          { l: "Tone match",      v: "Consultative", d: "matches Farah's LI", icon: CheckCircle2 },
+          { l: "Spam score",      v: "0.3 / 10",    d: "inbox safe",        icon: CheckCircle2 },
         ].map((k) => {
           const Icon = k.icon;
           return (
@@ -532,20 +537,21 @@ Worth a 15-min look Thursday?
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
         <div className="lg:col-span-3 bg-card border border-border/60 rounded-xl overflow-hidden">
           <div className="px-4 py-2 border-b border-border/60 bg-muted/30 flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground">To: sarah@northwind.co · Subject: 3 RevOps benchmarks</p>
+            <p className="text-[10px] text-muted-foreground">To: farah@zenithmfg.com · Subject: A faster close — without replacing SAP</p>
             <span className="flex items-center gap-1.5 text-[10px] font-bold text-primary">
               <Sparkles className="h-3 w-3 animate-pulse" /> AI drafting
             </span>
           </div>
-          <pre className="whitespace-pre-wrap font-sans text-[11px] text-primary-deep p-4 min-h-[180px] leading-relaxed">
+          <pre className="whitespace-pre-wrap font-sans text-[11px] text-primary-deep p-4 min-h-[260px] leading-relaxed">
 {shown}
             <span className="inline-block w-1.5 h-3 bg-primary align-middle animate-pulse ml-0.5" />
           </pre>
           <div className="px-4 py-2 border-t border-border/60 flex items-center justify-between bg-muted/20">
-            <div className="flex gap-1.5">
-              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Series B</span>
-              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Hiring AEs</span>
-              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">G2 review</span>
+            <div className="flex gap-1.5 flex-wrap">
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Role: CFO</span>
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Stack: SAP ECC</span>
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Pain: month-end close</span>
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">ROI proof</span>
             </div>
             <button className="text-[10px] font-bold bg-primary text-primary-foreground px-3 py-1.5 rounded-md flex items-center gap-1">
               <Send className="h-3 w-3" /> Send
@@ -559,11 +565,13 @@ Worth a 15-min look Thursday?
           </p>
           <ul className="space-y-2 text-[10.5px] text-primary-deep">
             {[
-              "Series B announced 6 days ago (Crunchbase)",
-              "4 AE roles open on LinkedIn",
-              "Sarah's last 3 posts: hiring + RevOps",
-              "G2 review mentioned 'lead quality'",
-              "Similar customer (Lumen): 38% faster ramp",
+              "Decision-maker: Farah is CFO at Zenith Manufacturing",
+              "Current stack: SAP ECC (finance, procurement, inventory)",
+              "Pain points: slow month-end close, low inventory visibility",
+              "Positioned as additive — no core replacement risk",
+              "ROI quoted: 42% faster close, 28% lower carrying cost",
+              "Soft CTA: no-cost, no-commitment 15-min call",
+              "Credibility: Gartner 2025 MQ #1, 1,200+ manufacturers",
             ].map((s) => (
               <li key={s} className="flex items-start gap-2">
                 <CheckCircle2 className="h-3 w-3 text-success mt-0.5 shrink-0" />
