@@ -16,7 +16,7 @@ import {
   Search,
   BrainCircuit,
   TrendingUp,
-  MousePointerClick,
+  Workflow,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ const features = [
     desc: "Generate personalized outreach in seconds with brand voice and context-aware suggestions.",
   },
   {
-    icon: MousePointerClick,
+    icon: Workflow,
     title: "Multi-Step Automation",
     desc: "Build sequences that adapt to replies, opens, and signals — without lifting a finger.",
   },
@@ -817,7 +817,7 @@ export default function Landing() {
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 { icon: UserPlus, name: "Additional User Seat", price: "$8", unit: "/seat/mo", desc: "Add another teammate to your workspace. Cancel anytime." },
-                { icon: MousePointerClick, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
+                { icon: Workflow, name: "+1,000 AI Credits", price: "$15", unit: "/mo", desc: "Extra AI email + enrichment credits added each month." },
                 { icon: TrendingUp, name: "+5,000 AI Credits", price: "$59", unit: "/mo", desc: "Best value for power users running large outreach campaigns.", highlight: true },
               ].map((a) => (
                 <div
