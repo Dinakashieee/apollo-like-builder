@@ -35,6 +35,7 @@ import SignalHire from "./pages/SignalHire";
 import EmailHealth from "./pages/EmailHealth";
 import LandingPages from "./pages/LandingPages";
 import PublicLandingPage from "./pages/PublicLandingPage";
+import Demo from "./pages/Demo";
 import { CustomDomainGate } from "./components/CustomDomainGate";
 
 
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/refund" element={<Refund />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
+              <Route path="/demo" element={<Demo />} />
               <Route path="/p/:slug" element={<PublicLandingPage />} />
               <Route path="/:prefix/:slug" element={<PublicLandingPage />} />
 
