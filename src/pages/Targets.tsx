@@ -369,7 +369,20 @@ export default function Targets() {
       }),
       "Replacement target took too long to load."
     );
-    if (error) throw error;
+    if (error) {
+      // Supabase FunctionsHttpError wraps the edge-function response body.
+      // Try to surface the real error message (e.g. quota_exceeded) instead of a generic HTTP status text.
+      const errAny = error as any;
+      const payload =
+        errAny.context?.responseBody ??
+        errAny.responseBody ??
+        errAny.data ??
+        errAny.json?.() ??
+        null;
+      if (payload?.reason) throw new Error(payload.reason);
+      if (payload?.error) throw new Error(payload.error);
+      throw error;
+    }
     if (data?.error) throw new Error(data.error);
     const safeTargets = filterTargetCompanies(data.targets ?? [], marketContext, similar);
     return safeTargets[0] as TargetCompany | undefined;
