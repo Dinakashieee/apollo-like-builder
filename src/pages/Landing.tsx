@@ -65,6 +65,73 @@ const features = [
   },
 ];
 
+const comparisons = [
+  {
+    id: "hubspot",
+    competitor: "HubSpot",
+    tagline: "vs. EngageIQ",
+    headline: "Why teams pick EngageIQ over HubSpot",
+    summary:
+      "HubSpot is a powerful all-in-one CRM, but most sales teams use only 20% of its surface area — and pay for the other 80%. EngageIQ is purpose-built for the outbound motion: signal, message, reply.",
+    points: [
+      { engage: "AI scoring tuned to your ICP out of the box", other: "Manual lead scoring rules to maintain" },
+      { engage: "Flat per-seat pricing with no contact tiers", other: "Contact-based pricing that balloons fast" },
+      { engage: "Bring your own Postgres / Supabase — zero lock-in", other: "Data lives inside the HubSpot graph" },
+      { engage: "Outbound-first inbox and sequences", other: "Marketing-first workflows bolted onto sales" },
+    ],
+    verdict:
+      "If you're a revenue team that lives in outbound, EngageIQ ships the 20% you actually use — without the enterprise sticker shock.",
+  },
+  {
+    id: "apollo",
+    competitor: "Apollo.io",
+    tagline: "vs. EngageIQ",
+    headline: "Why teams pick EngageIQ over Apollo",
+    summary:
+      "Apollo is great at one thing: a big B2B contact database. But buying lists and blasting sequences is exactly the noise modern buyers tune out. EngageIQ flips the model — wait for real signal, then reach out.",
+    points: [
+      { engage: "Triggers outreach only when intent is detected", other: "Sequences run regardless of buyer signal" },
+      { engage: "Context-aware messages from your own data", other: "Generic templates with {first_name} merges" },
+      { engage: "Reply-quality optimized, not volume optimized", other: "Optimized for send volume and seat count" },
+      { engage: "Own your contact data in your database", other: "Data tied to Apollo's contact credits" },
+    ],
+    verdict:
+      "Stop spraying. EngageIQ tells you when an account is actually worth a touch — and drafts the message that fits the moment.",
+  },
+  {
+    id: "salesforce",
+    competitor: "Salesforce",
+    tagline: "vs. EngageIQ",
+    headline: "Why teams pick EngageIQ over Salesforce",
+    summary:
+      "Salesforce is the system of record for the Fortune 500 — and it shows in setup time, admin cost, and consultant invoices. EngageIQ is the system of action for teams that need to move this quarter.",
+    points: [
+      { engage: "Live in 10 minutes — connect data, start selling", other: "Months of implementation and admin overhead" },
+      { engage: "AI signals and replies included in every plan", other: "Einstein and Sales Cloud sold as add-ons" },
+      { engage: "Transparent flat per-seat pricing", other: "Per-seat + per-feature + per-edition pricing" },
+      { engage: "Built for SMB and mid-market velocity", other: "Optimized for large enterprise governance" },
+    ],
+    verdict:
+      "Salesforce reports on what already happened. EngageIQ helps you make this week's number.",
+  },
+  {
+    id: "outreach",
+    competitor: "Outreach / Salesloft",
+    tagline: "vs. EngageIQ",
+    headline: "Why teams pick EngageIQ over Outreach & Salesloft",
+    summary:
+      "Sequencers were built for the spray-and-pray era. EngageIQ uses AI to suppress low-intent accounts and surface the ones that are actually buying — so reps spend their day on the right 10%.",
+    points: [
+      { engage: "Suggests reach-outs only when signal is real", other: "Reps responsible for picking the right accounts" },
+      { engage: "One workspace for signals, messaging, replies", other: "Separate tools for intent, sequencing, and inbox" },
+      { engage: "AI replies that match your brand voice", other: "Templates and snippets with limited personalization" },
+      { engage: "No long-term contracts, monthly or annual", other: "Annual contracts with seat minimums" },
+    ],
+    verdict:
+      "EngageIQ doesn't help you send more — it helps you send better, to the accounts that will actually reply.",
+  },
+];
+
 const trustedAvatars = [
   { initials: "AR", from: "from-rose-400", to: "to-pink-500" },
   { initials: "JM", from: "from-amber-400", to: "to-orange-500" },
