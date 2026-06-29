@@ -64,7 +64,7 @@ export default function Unsubscribe() {
         {state === "valid" && (
           <>
             <p className="text-muted-foreground">
-              Click below to unsubscribe from EngageIQ emails. You'll stop receiving
+              Click below to unsubscribe from LeadGen emails. You'll stop receiving
               non-essential messages immediately.
             </p>
             <Button onClick={confirm} className="w-full">Confirm unsubscribe</Button>

@@ -43,7 +43,7 @@ export function Logo({
   return (
     <Link
       to={to}
-      aria-label="EngageIQ — Home"
+      aria-label="LeadGen — Home"
       className="inline-flex outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl transition-opacity hover:opacity-90"
     >
       {content}

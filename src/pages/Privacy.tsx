@@ -6,8 +6,8 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Privacy Notice — EngageIQ"
-        description="How EngageIQ collects, uses, and protects personal data across its AI sales engagement platform."
+        title="Privacy Notice — LeadGen"
+        description="How LeadGen collects, uses, and protects personal data across its AI sales engagement platform."
         path="/privacy"
       />
       <header className="container mx-auto px-6 py-6 border-b">
@@ -18,7 +18,7 @@ export default function Privacy() {
         <p className="text-muted-foreground">Last updated: April 2026</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-8">1. Who we are</h2>
-        <p>This service ("EngageIQ", "we", "us") is operated by <strong>EngageIQ</strong>, the legal entity providing the EngageIQ platform. EngageIQ acts as the <strong>data controller</strong> for personal data processed through the service. For privacy questions, contact us through in-app support.</p>
+        <p>This service ("LeadGen", "we", "us") is operated by <strong>LeadGen</strong>, the legal entity providing the LeadGen platform. LeadGen acts as the <strong>data controller</strong> for personal data processed through the service. For privacy questions, contact us through in-app support.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">2. Personal data we collect</h2>
         <ul className="list-disc pl-6 space-y-1">
@@ -87,9 +87,9 @@ export default function Privacy() {
         <p>We may update this notice from time to time. Material changes will be communicated through the app or by email.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">12. Contact</h2>
-        <p>For privacy questions or to exercise your rights, contact EngageIQ at <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or by post:</p>
+        <p>For privacy questions or to exercise your rights, contact LeadGen at <a className="underline" href="mailto:support@engageiqlk.com">support@engageiqlk.com</a> or by post:</p>
         <address className="not-italic mt-2 leading-relaxed">
-          <strong>EngageIQ</strong><br />
+          <strong>LeadGen</strong><br />
           HQ: 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
           R&amp;D: Colombo 10350, Sri Lanka
         </address>

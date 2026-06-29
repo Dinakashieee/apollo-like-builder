@@ -251,7 +251,7 @@ export default function Settings() {
             onChange={(e) => setEmailSignature(e.target.value)}
             placeholder={`Best regards,
 John Farrell
-Director, EngageIQ
+Director, LeadGen
 john@engageiq.com  ·  +1 555 123 4567`}
             className="mt-1 font-mono text-sm"
           />
@@ -291,7 +291,7 @@ john@engageiq.com  ·  +1 555 123 4567`}
           </span>
         </div>
         <p className="text-sm text-muted-foreground">
-          EngageIQ lets you connect your own SignalHire account — you keep full control of your credits, billing, and data.
+          LeadGen lets you connect your own SignalHire account — you keep full control of your credits, billing, and data.
           Grab your API key from{" "}
           <a
             href="https://www.signalhire.com/settings/api"

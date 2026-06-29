@@ -20,7 +20,7 @@ import {
 
 /**
  * AdvancedDashboardsPreview
- * Live, tabbed preview of EngageIQ surfaces shown on the landing page.
+ * Live, tabbed preview of LeadGen surfaces shown on the landing page.
  *  - Landing Pages
  *  - WhatsApp
  *  - AI Deal Intelligence

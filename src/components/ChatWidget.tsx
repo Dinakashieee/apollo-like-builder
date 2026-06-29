@@ -35,9 +35,9 @@ const greeting = (mode: Props["mode"], visitor?: VisitorInfo) => {
     return "👋 Hey! I can help you prioritize leads, draft outreach ideas, and reason about your pipeline. What's on your mind?";
   }
   if (visitor) {
-    return `👋 Hi ${visitor.name}! Thanks for reaching out from ${visitor.business}. Ask me anything about EngageIQ — features, pricing, or getting started.`;
+    return `👋 Hi ${visitor.name}! Thanks for reaching out from ${visitor.business}. Ask me anything about LeadGen — features, pricing, or getting started.`;
   }
-  return "👋 Hi! I'm EngageIQ's assistant. Ask me about features, pricing, or how to get started.";
+  return "👋 Hi! I'm LeadGen's assistant. Ask me about features, pricing, or how to get started.";
 };
 
 export function ChatWidget({ mode }: Props) {

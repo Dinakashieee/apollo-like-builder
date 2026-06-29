@@ -66,7 +66,7 @@ export default function Auth() {
         if (!complianceAck) {
           toast({
             title: "Please acknowledge the compliance terms",
-            description: "You must agree to follow anti-spam and data-protection laws to use EngageIQ.",
+            description: "You must agree to follow anti-spam and data-protection laws to use LeadGen.",
             variant: "destructive",
           });
           return;
@@ -90,7 +90,7 @@ export default function Auth() {
             templateData: { name: parsed.data.fullName },
           },
         }).catch(() => {});
-        toast({ title: "Welcome to EngageIQ!", description: "Account created." });
+        toast({ title: "Welcome to LeadGen!", description: "Account created." });
       } else {
         const parsed = signInSchema.safeParse({ email, password });
         if (!parsed.success) {
@@ -131,10 +131,10 @@ export default function Auth() {
             <span className="text-primary-glow">Engage with precision.</span>
           </h2>
           <p className="text-primary-foreground/70 max-w-md">
-            EngageIQ unifies prospecting, AI-powered outreach, and pipeline intelligence into one workflow.
+            LeadGen unifies prospecting, AI-powered outreach, and pipeline intelligence into one workflow.
           </p>
         </div>
-        <p className="relative text-xs text-primary-foreground/50">© 2026 EngageIQ</p>
+        <p className="relative text-xs text-primary-foreground/50">© 2026 LeadGen</p>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
@@ -147,7 +147,7 @@ export default function Auth() {
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
-          ? "Sign in to your EngageIQ workspace."
+          ? "Sign in to your LeadGen workspace."
               : mode === "signup"
               ? "Use any email — business or personal — to create an account."
               : "Enter your email and we'll send you a reset link."}
@@ -226,7 +226,7 @@ export default function Auth() {
                   Email compliance acknowledgement
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  EngageIQ is a B2B sales-enablement tool — not a bulk-mail platform. By creating an account you confirm that, when sending outreach, you will:
+                  LeadGen is a B2B sales-enablement tool — not a bulk-mail platform. By creating an account you confirm that, when sending outreach, you will:
                 </p>
                 <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-0.5">
                   <li>Have a lawful basis (consent, legitimate interest, or existing relationship) for every contact</li>
