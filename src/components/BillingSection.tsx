@@ -31,6 +31,7 @@ export function BillingSection() {
   const { openCheckout } = usePaddleCheckout();
   const [busy, setBusy] = useState<string | null>(null);
   const [billing, setBilling] = useState<"month" | "year">("month");
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   // After checkout success, poll for the subscription to appear (webhook
   // typically lands within a few seconds).
