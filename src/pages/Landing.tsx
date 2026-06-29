@@ -791,21 +791,15 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {user && tier.monthly && tier.monthly > 0 && tier.priceMonthly && tier.priceYearly ? (
-                  <div className="mb-6">
-                    <PayPalSmartButtons planId={annual ? tier.priceYearly : tier.priceMonthly} />
-                  </div>
-                ) : (
-                  <Button
-                    className={`w-full mb-6 ${
-                      tier.highlight ? "bg-gradient-primary shadow-glow" : ""
-                    }`}
-                    variant={tier.highlight ? "default" : "outline"}
-                    onClick={() => handleTierCta(tier)}
-                  >
-                    {tier.cta}
-                  </Button>
-                )}
+                <Button
+                  className={`w-full mb-6 ${
+                    tier.highlight ? "bg-gradient-primary shadow-glow" : ""
+                  }`}
+                  variant={tier.highlight ? "default" : "outline"}
+                  onClick={() => handleTierCta(tier)}
+                >
+                  {tier.monthly && tier.monthly > 0 ? "Join the waitlist" : tier.cta}
+                </Button>
 
                 <ul className="space-y-2.5 text-sm">
                   {tier.features.map((f) => (
