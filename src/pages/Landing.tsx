@@ -921,6 +921,7 @@ export default function Landing() {
         </div>
       </footer>
       <ChatWidget mode="support" />
+      <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel={waitlistPlan} />
     </div>
   );
 }
