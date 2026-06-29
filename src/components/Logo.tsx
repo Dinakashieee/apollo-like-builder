@@ -32,7 +32,7 @@ export function Logo({
             variant === "light" ? "text-sidebar-foreground" : "text-foreground"
           )}
         >
-          Engage<span className="text-primary">IQ</span>
+          Lead<span className="text-primary">Gen</span>
         </span>
       )}
     </div>
