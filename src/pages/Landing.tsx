@@ -247,6 +247,8 @@ const tiers: Tier[] = [
 
 export default function Landing() {
   const [annual, setAnnual] = useState(true);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistPlan, setWaitlistPlan] = useState<string | undefined>(undefined);
   const { user } = useAuth();
   const navigate = useNavigate();
 
