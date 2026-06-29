@@ -116,7 +116,7 @@ Products: ${products?.map((p: any) => `${p.name}: ${p.description ?? ""}`).join(
 TOP LEADS (${leads?.length ?? 0} shown):
 ${leads?.map((l: any) => `- ${l.company_name} | ${l.contact_name ?? "?"} (${l.role ?? "?"}) | status=${l.status} | score=${l.score ?? 0}`).join("\n") || "(no leads yet)"}`;
 
-    const systemPrompt = `You are EngageIQ's in-app sales assistant. You help the user prioritize leads, draft outreach ideas, and reason about their pipeline. Use the workspace context below. If the user asks to change a lead's status (e.g. "mark Acme as contacted", "move Globex to won", "set lead X to qualified"), call the update_lead_status tool. Valid statuses: ${LEAD_STATUSES.join(", ")}. Never invent lead names — only act on leads visible in the context. After a successful tool call, confirm what changed in one short sentence. Be concise, action-oriented, and use markdown.
+    const systemPrompt = `You are LeadGen's in-app sales assistant. You help the user prioritize leads, draft outreach ideas, and reason about their pipeline. Use the workspace context below. If the user asks to change a lead's status (e.g. "mark Acme as contacted", "move Globex to won", "set lead X to qualified"), call the update_lead_status tool. Valid statuses: ${LEAD_STATUSES.join(", ")}. Never invent lead names — only act on leads visible in the context. After a successful tool call, confirm what changed in one short sentence. Be concise, action-oriented, and use markdown.
 
 ${context}`;
 

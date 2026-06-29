@@ -5,8 +5,8 @@ export default function Refund() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Refund Policy — EngageIQ"
-        description="EngageIQ's 14 working day refund window, cancellation rules, and how to request a refund via PayPal."
+        title="Refund Policy — LeadGen"
+        description="LeadGen's 14 working day refund window, cancellation rules, and how to request a refund via PayPal."
         path="/refund"
       />
       <header className="container mx-auto px-6 py-6 border-b">
@@ -17,12 +17,12 @@ export default function Refund() {
         <p className="text-muted-foreground">Last updated: May 2026</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-8">14 working day refund window</h2>
-        <p><strong>EngageIQ</strong> offers a refund window of <strong>14 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>14 working days</strong> of placing your order.</p>
+        <p><strong>LeadGen</strong> offers a refund window of <strong>14 working days</strong> from your initial order date. If you are not satisfied with your purchase, you may request a full refund within <strong>14 working days</strong> of placing your order.</p>
 
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">How to request a refund</h2>
-        <p>Payments for EngageIQ are processed securely through <strong>PayPal</strong>. To request a refund:</p>
+        <p>Payments for LeadGen are processed securely through <strong>PayPal</strong>. To request a refund:</p>
         <ul className="list-disc pl-6 space-y-1">
-          <li>Contact EngageIQ through in-app support or email <a href="mailto:support@engageiqlk.com" className="underline">support@engageiqlk.com</a> with your PayPal transaction ID and the email address used at checkout.</li>
+          <li>Contact LeadGen through in-app support or email <a href="mailto:support@engageiqlk.com" className="underline">support@engageiqlk.com</a> with your PayPal transaction ID and the email address used at checkout.</li>
           <li>Once approved, we will issue the refund through PayPal back to your original payment method.</li>
         </ul>
         <p>Refunds typically appear within 3–5 business days for PayPal balance refunds, or 5–10 business days when returned to a linked card or bank account, depending on your bank or card issuer.</p>
@@ -39,7 +39,7 @@ export default function Refund() {
         <h2 className="text-xl font-display font-bold text-primary-deep mt-6">Questions</h2>
         <p>If you have questions about this policy or a specific charge, email support@engageiqlk.com.</p>
         <address className="not-italic mt-4 leading-relaxed text-sm">
-          <strong>EngageIQ</strong><br />
+          <strong>LeadGen</strong><br />
           HQ: 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
           R&amp;D: Colombo 10350, Sri Lanka
         </address>

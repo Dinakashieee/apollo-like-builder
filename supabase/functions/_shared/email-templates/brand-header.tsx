@@ -4,7 +4,7 @@ import * as React from 'npm:react@18.3.1'
 import { Section } from 'npm:@react-email/components@0.0.22'
 
 /**
- * EngageIQ branded email header.
+ * LeadGen branded email header.
  * Uses inline styles + table-friendly markup so it renders consistently
  * across Gmail, Outlook, Apple Mail, etc.
  */
@@ -34,7 +34,7 @@ export const BrandHeader = () => (
           </td>
           <td style={{ verticalAlign: 'middle' }}>
             <span style={wordmark}>
-              Engage<span style={{ color: '#1d4ed8' }}>IQ</span>
+              Lead<span style={{ color: '#1d4ed8' }}>Gen</span>
             </span>
           </td>
         </tr>
