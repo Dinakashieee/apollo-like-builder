@@ -251,6 +251,7 @@ export function BillingSection() {
       <p className="text-xs text-muted-foreground">
         Upgrades are prorated immediately; downgrades take effect at your next renewal. Local taxes added at checkout where required.
       </p>
+      <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel="Paid plan" />
     </section>
   );
 }
