@@ -10,6 +10,7 @@ import {
   CreditCard, ArrowUpRight, ArrowDownRight, Loader2, RotateCcw, Wallet, RefreshCw, AlertTriangle,
 } from "lucide-react";
 import { PayPalSmartButtons } from "./PayPalSmartButtons";
+import { JoinWaitlistDialog } from "./JoinWaitlistDialog";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
@@ -30,6 +31,7 @@ export function BillingSection() {
   const { openCheckout } = usePaddleCheckout();
   const [busy, setBusy] = useState<string | null>(null);
   const [billing, setBilling] = useState<"month" | "year">("month");
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   // After checkout success, poll for the subscription to appear (webhook
   // typically lands within a few seconds).
@@ -181,31 +183,15 @@ export function BillingSection() {
       </div>
 
       {!isActive && (
-        <div>
-          <p className="text-sm text-muted-foreground mb-3">
-            Choose a plan — all subscriptions are processed securely via PayPal.
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-5 text-center space-y-3">
+          <p className="text-sm font-semibold text-primary-deep">Subscriptions are temporarily invite-only</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            We're onboarding new customers in small batches to keep onboarding white-glove. Join the waitlist and
+            we'll reach out as soon as a spot opens.
           </p>
-          <div className="flex items-center gap-1 mb-4 p-1 rounded-full border border-border/60 bg-muted/30 w-fit">
-            <Button size="sm" variant={billing === "month" ? "default" : "ghost"} onClick={() => setBilling("month")}>Monthly</Button>
-            <Button size="sm" variant={billing === "year" ? "default" : "ghost"} onClick={() => setBilling("year")}>Annual -20%</Button>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {PAYPAL_PLANS.map((plan) => (
-              <div key={plan.label} className="rounded-lg border border-border/60 bg-background p-4 space-y-3">
-                <div>
-                  <p className="font-semibold text-primary-deep">{plan.label}</p>
-                  <p className="text-xs text-muted-foreground">From {plan.price}</p>
-                </div>
-                <PayPalSmartButtons
-                  planId={billing === "year" ? plan.yearly : plan.monthly}
-                  onSuccess={() => setTimeout(refetch, 1500)}
-                />
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Pay securely with PayPal, debit, or credit card. Your plan activates automatically after successful payment.
-          </p>
+          <Button onClick={() => setWaitlistOpen(true)} className="bg-gradient-primary">
+            Join the waitlist
+          </Button>
         </div>
       )}
 
@@ -265,6 +251,7 @@ export function BillingSection() {
       <p className="text-xs text-muted-foreground">
         Upgrades are prorated immediately; downgrades take effect at your next renewal. Local taxes added at checkout where required.
       </p>
+      <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel="Paid plan" />
     </section>
   );
 }

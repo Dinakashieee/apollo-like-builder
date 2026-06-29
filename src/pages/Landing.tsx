@@ -28,7 +28,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
-import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
+import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -247,6 +247,8 @@ const tiers: Tier[] = [
 
 export default function Landing() {
   const [annual, setAnnual] = useState(true);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistPlan, setWaitlistPlan] = useState<string | undefined>(undefined);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -259,11 +261,8 @@ export default function Landing() {
       navigate(user ? "/app" : "/auth");
       return;
     }
-    if (!user) {
-      navigate("/auth?next=/#pricing");
-      return;
-    }
-    navigate("/app/settings");
+    setWaitlistPlan(tier.name);
+    setWaitlistOpen(true);
   };
 
   const formatPrice = (monthly: number | null) => {
@@ -792,21 +791,15 @@ export default function Landing() {
                   </p>
                 </div>
 
-                {user && tier.monthly && tier.monthly > 0 && tier.priceMonthly && tier.priceYearly ? (
-                  <div className="mb-6">
-                    <PayPalSmartButtons planId={annual ? tier.priceYearly : tier.priceMonthly} />
-                  </div>
-                ) : (
-                  <Button
-                    className={`w-full mb-6 ${
-                      tier.highlight ? "bg-gradient-primary shadow-glow" : ""
-                    }`}
-                    variant={tier.highlight ? "default" : "outline"}
-                    onClick={() => handleTierCta(tier)}
-                  >
-                    {tier.cta}
-                  </Button>
-                )}
+                <Button
+                  className={`w-full mb-6 ${
+                    tier.highlight ? "bg-gradient-primary shadow-glow" : ""
+                  }`}
+                  variant={tier.highlight ? "default" : "outline"}
+                  onClick={() => handleTierCta(tier)}
+                >
+                  {tier.monthly && tier.monthly > 0 ? "Join the waitlist" : tier.cta}
+                </Button>
 
                 <ul className="space-y-2.5 text-sm">
                   {tier.features.map((f) => (
@@ -928,6 +921,7 @@ export default function Landing() {
         </div>
       </footer>
       <ChatWidget mode="support" />
+      <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel={waitlistPlan} />
     </div>
   );
 }
