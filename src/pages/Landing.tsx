@@ -261,11 +261,8 @@ export default function Landing() {
       navigate(user ? "/app" : "/auth");
       return;
     }
-    if (!user) {
-      navigate("/auth?next=/#pricing");
-      return;
-    }
-    navigate("/app/settings");
+    setWaitlistPlan(tier.name);
+    setWaitlistOpen(true);
   };
 
   const formatPrice = (monthly: number | null) => {
