@@ -10,6 +10,7 @@ import {
   CreditCard, ArrowUpRight, ArrowDownRight, Loader2, RotateCcw, Wallet, RefreshCw, AlertTriangle,
 } from "lucide-react";
 import { PayPalSmartButtons } from "./PayPalSmartButtons";
+import { JoinWaitlistDialog } from "./JoinWaitlistDialog";
 
 const TIER_LABELS: Record<string, string> = {
   starter_plan: "Starter",
