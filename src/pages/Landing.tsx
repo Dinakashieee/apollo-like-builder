@@ -28,7 +28,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
-import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
+import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
