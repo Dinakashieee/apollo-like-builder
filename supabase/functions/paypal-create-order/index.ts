@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         intent: 'CAPTURE',
         application_context: {
-          brand_name: 'LeadGen',
+          brand_name: 'LeadengageIQ',
           shipping_preference: 'NO_SHIPPING',
           user_action: 'PAY_NOW',
         },

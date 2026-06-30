@@ -62,7 +62,7 @@ export default function ResetPassword() {
         <h1 className="text-3xl font-display font-bold text-primary-deep mb-2">Set a new password</h1>
         <p className="text-muted-foreground mb-8">
           {ready
-            ? "Choose a strong password for your LeadGen account."
+            ? "Choose a strong password for your LeadengageIQ account."
             : "Open this page from the password reset email to continue."}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
