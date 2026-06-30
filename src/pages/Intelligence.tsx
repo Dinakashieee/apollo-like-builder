@@ -192,7 +192,7 @@ export default function Intelligence() {
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <p className="text-sm text-primary font-medium mb-1 flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> Powered by LeadGen AI
+            <Sparkles className="h-3.5 w-3.5" /> Powered by LeadengageIQ AI
           </p>
           <h1 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep">
             AI Deal Intelligence

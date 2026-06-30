@@ -70,7 +70,7 @@ export function EmailBestPracticesDialog({ open: controlledOpen, onOpenChange }:
     },
     {
       title: "Send one-to-one, not bulk blasts",
-      body: "LeadGen is a sales-enablement tool. Review and personalise every email — do not use it for unsolicited mass mailing.",
+      body: "LeadengageIQ is a sales-enablement tool. Review and personalise every email — do not use it for unsolicited mass mailing.",
     },
     {
       title: "Keep your contact data accurate",
@@ -92,7 +92,7 @@ export function EmailBestPracticesDialog({ open: controlledOpen, onOpenChange }:
           </div>
           <DialogDescription>
             Before you send, please follow these essentials. <strong>You</strong> are the data
-            controller and are legally responsible for the messages you send through LeadGen —
+            controller and are legally responsible for the messages you send through LeadengageIQ —
             see{" "}
             <Link to="/terms" className="underline" target="_blank" rel="noopener noreferrer">
               Terms §5

@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const teamSizes = ["Just me", "2–10", "11–50", "51–200", "201–1000", "1000+"];
 
 const perks = [
-  { icon: Target, title: "Tailored walkthrough", desc: "We'll show how LeadGen fits your exact outbound motion." },
+  { icon: Target, title: "Tailored walkthrough", desc: "We'll show how LeadengageIQ fits your exact outbound motion." },
   { icon: Clock, title: "30 minutes, zero fluff", desc: "Live product tour with real data, no slideware." },
   { icon: Users, title: "Bring your team", desc: "Invite ops, SDRs, and leadership — we cover every angle." },
   { icon: ShieldCheck, title: "No hard sell", desc: "We answer questions, you decide. Simple." },
@@ -130,8 +130,8 @@ export default function Demo() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
-        title="Book a Free Demo — LeadGen"
-        description="See LeadGen in action. Book a free 30-minute walkthrough tailored to your outbound workflow."
+        title="Book a Free Demo — LeadengageIQ"
+        description="See LeadengageIQ in action. Book a free 30-minute walkthrough tailored to your outbound workflow."
         path="/demo"
       />
 
@@ -150,7 +150,7 @@ export default function Demo() {
             <CalendarIcon className="h-3.5 w-3.5" /> Free 30-minute demo
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            See LeadGen run on <span className="bg-gradient-primary bg-clip-text text-transparent">your pipeline</span>
+            See LeadengageIQ run on <span className="bg-gradient-primary bg-clip-text text-transparent">your pipeline</span>
           </h1>
           <p className="text-lg text-muted-foreground">
             Walk through AI lead scoring, multi-step automation, and real-time pipeline analytics with one of our specialists. Bring questions — we'll bring answers.
@@ -299,7 +299,7 @@ export default function Demo() {
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">
-                By submitting, you agree to be contacted about LeadGen. We never share your info.
+                By submitting, you agree to be contacted about LeadengageIQ. We never share your info.
               </p>
             </form>
           )}

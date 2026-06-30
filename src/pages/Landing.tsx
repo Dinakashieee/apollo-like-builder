@@ -70,10 +70,10 @@ const comparisons = [
   {
     id: "hubspot",
     competitor: "HubSpot",
-    tagline: "vs. LeadGen",
-    headline: "Why teams pick LeadGen over HubSpot",
+    tagline: "vs. LeadengageIQ",
+    headline: "Why teams pick LeadengageIQ over HubSpot",
     summary:
-      "HubSpot is a powerful all-in-one CRM, but most sales teams use only 20% of its surface area — and pay for the other 80%. LeadGen is purpose-built for the outbound motion: signal, message, reply.",
+      "HubSpot is a powerful all-in-one CRM, but most sales teams use only 20% of its surface area — and pay for the other 80%. LeadengageIQ is purpose-built for the outbound motion: signal, message, reply.",
     points: [
       { engage: "AI scoring tuned to your ICP out of the box", other: "Manual lead scoring rules to maintain" },
       { engage: "Flat per-seat pricing with no contact tiers", other: "Contact-based pricing that balloons fast" },
@@ -81,15 +81,15 @@ const comparisons = [
       { engage: "Outbound-first inbox and sequences", other: "Marketing-first workflows bolted onto sales" },
     ],
     verdict:
-      "If you're a revenue team that lives in outbound, LeadGen ships the 20% you actually use — without the enterprise sticker shock.",
+      "If you're a revenue team that lives in outbound, LeadengageIQ ships the 20% you actually use — without the enterprise sticker shock.",
   },
   {
     id: "apollo",
     competitor: "Apollo.io",
-    tagline: "vs. LeadGen",
-    headline: "Why teams pick LeadGen over Apollo",
+    tagline: "vs. LeadengageIQ",
+    headline: "Why teams pick LeadengageIQ over Apollo",
     summary:
-      "Apollo is great at one thing: a big B2B contact database. But buying lists and blasting sequences is exactly the noise modern buyers tune out. LeadGen flips the model — wait for real signal, then reach out.",
+      "Apollo is great at one thing: a big B2B contact database. But buying lists and blasting sequences is exactly the noise modern buyers tune out. LeadengageIQ flips the model — wait for real signal, then reach out.",
     points: [
       { engage: "Triggers outreach only when intent is detected", other: "Sequences run regardless of buyer signal" },
       { engage: "Context-aware messages from your own data", other: "Generic templates with {first_name} merges" },
@@ -97,15 +97,15 @@ const comparisons = [
       { engage: "Own your contact data in your database", other: "Data tied to Apollo's contact credits" },
     ],
     verdict:
-      "Stop spraying. LeadGen tells you when an account is actually worth a touch — and drafts the message that fits the moment.",
+      "Stop spraying. LeadengageIQ tells you when an account is actually worth a touch — and drafts the message that fits the moment.",
   },
   {
     id: "salesforce",
     competitor: "Salesforce",
-    tagline: "vs. LeadGen",
-    headline: "Why teams pick LeadGen over Salesforce",
+    tagline: "vs. LeadengageIQ",
+    headline: "Why teams pick LeadengageIQ over Salesforce",
     summary:
-      "Salesforce is the system of record for the Fortune 500 — and it shows in setup time, admin cost, and consultant invoices. LeadGen is the system of action for teams that need to move this quarter.",
+      "Salesforce is the system of record for the Fortune 500 — and it shows in setup time, admin cost, and consultant invoices. LeadengageIQ is the system of action for teams that need to move this quarter.",
     points: [
       { engage: "Live in 10 minutes — connect data, start selling", other: "Months of implementation and admin overhead" },
       { engage: "AI signals and replies included in every plan", other: "Einstein and Sales Cloud sold as add-ons" },
@@ -113,15 +113,15 @@ const comparisons = [
       { engage: "Built for SMB and mid-market velocity", other: "Optimized for large enterprise governance" },
     ],
     verdict:
-      "Salesforce reports on what already happened. LeadGen helps you make this week's number.",
+      "Salesforce reports on what already happened. LeadengageIQ helps you make this week's number.",
   },
   {
     id: "outreach",
     competitor: "Outreach / Salesloft",
-    tagline: "vs. LeadGen",
-    headline: "Why teams pick LeadGen over Outreach & Salesloft",
+    tagline: "vs. LeadengageIQ",
+    headline: "Why teams pick LeadengageIQ over Outreach & Salesloft",
     summary:
-      "Sequencers were built for the spray-and-pray era. LeadGen uses AI to suppress low-intent accounts and surface the ones that are actually buying — so reps spend their day on the right 10%.",
+      "Sequencers were built for the spray-and-pray era. LeadengageIQ uses AI to suppress low-intent accounts and surface the ones that are actually buying — so reps spend their day on the right 10%.",
     points: [
       { engage: "Suggests reach-outs only when signal is real", other: "Reps responsible for picking the right accounts" },
       { engage: "One workspace for signals, messaging, replies", other: "Separate tools for intent, sequencing, and inbox" },
@@ -129,7 +129,7 @@ const comparisons = [
       { engage: "No long-term contracts, monthly or annual", other: "Annual contracts with seat minimums" },
     ],
     verdict:
-      "LeadGen doesn't help you send more — it helps you send better, to the accounts that will actually reply.",
+      "LeadengageIQ doesn't help you send more — it helps you send better, to the accounts that will actually reply.",
   },
 ];
 
@@ -158,7 +158,7 @@ type Tier = {
 const tiers: Tier[] = [
   {
     name: "Free",
-    tagline: "Try LeadGen — no commitment",
+    tagline: "Try LeadengageIQ — no commitment",
     monthly: 0,
     cta: "Get started free",
     highlight: false,
@@ -274,14 +274,14 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="LeadGen — Best AI Sales Platform & AI SDR for B2B Teams"
-        description="LeadGen is the AI sales engagement platform and AI SDR for B2B teams — find accounts, write outreach, automate pipeline."
+        title="LeadengageIQ — Best AI Sales Platform & AI SDR for B2B Teams"
+        description="LeadengageIQ is the AI sales engagement platform and AI SDR for B2B teams — find accounts, write outreach, automate pipeline."
         path="/"
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            name: "LeadGen",
+            name: "LeadengageIQ",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
             url: "https://www.engageiqlk.com/",
@@ -298,7 +298,7 @@ export default function Landing() {
                 name: "What is the best AI sales platform?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "LeadGen is a leading all-in-one AI sales engagement platform that combines target account discovery, AI cold email and WhatsApp outreach, lead intelligence, and pipeline automation in one workspace.",
+                  text: "LeadengageIQ is a leading all-in-one AI sales engagement platform that combines target account discovery, AI cold email and WhatsApp outreach, lead intelligence, and pipeline automation in one workspace.",
                 },
               },
               {
@@ -314,7 +314,7 @@ export default function Landing() {
                 name: "What is the best alternative to Apollo.io?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "LeadGen is the best Apollo alternative for teams that want AI-written outreach, WhatsApp, deal intelligence, and quarterly market trend refresh — not just contact data.",
+                  text: "LeadengageIQ is the best Apollo alternative for teams that want AI-written outreach, WhatsApp, deal intelligence, and quarterly market trend refresh — not just contact data.",
                 },
               },
             ],
@@ -393,7 +393,7 @@ export default function Landing() {
             style={{ animationDelay: "120ms" }}
           >
             Stop sending bulk emails without context. Just upload your company profile —
-            LeadGen tells you exactly which accounts match your business and only prompts
+            LeadengageIQ tells you exactly which accounts match your business and only prompts
             you to reach out when there's a real opportunity worth your time.
           </p>
 
@@ -502,7 +502,7 @@ export default function Landing() {
               From profile upload to closed deal
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              LeadGen replaces bulk outreach with precise, signal-driven selling — in seven simple steps.
+              LeadengageIQ replaces bulk outreach with precise, signal-driven selling — in seven simple steps.
             </p>
           </div>
 
@@ -564,7 +564,7 @@ export default function Landing() {
                 <p className="text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
                 {s.highlight && (
                   <span className="mt-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-hot/10 text-[10px] font-bold text-hot uppercase tracking-wide">
-                    Unique to LeadGen
+                    Unique to LeadengageIQ
                   </span>
                 )}
               </div>
@@ -582,7 +582,7 @@ export default function Landing() {
               One platform for the entire revenue motion
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              Replace 6 tools with one. LeadGen brings your data, your messaging,
+              Replace 6 tools with one. LeadengageIQ brings your data, your messaging,
               and your pipeline together.
             </p>
           </div>
@@ -610,10 +610,10 @@ export default function Landing() {
           <div className="max-w-2xl mx-auto text-center mb-12">
             <p className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">Why us</p>
             <h2 className="text-4xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
-              LeadGen vs. the rest
+              LeadengageIQ vs. the rest
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              Honest, head-to-head breakdowns of how LeadGen stacks up against the tools your team is probably already paying for.
+              Honest, head-to-head breakdowns of how LeadengageIQ stacks up against the tools your team is probably already paying for.
             </p>
           </div>
 
@@ -625,7 +625,7 @@ export default function Landing() {
                   value={c.id}
                   className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-foreground/70 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
                 >
-                  LeadGen vs {c.competitor}
+                  LeadengageIQ vs {c.competitor}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -643,7 +643,7 @@ export default function Landing() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     <div className="hidden md:flex items-center gap-2 text-sm font-semibold text-primary-deep">
-                      <CheckCircle2 className="h-4 w-4 text-primary" /> LeadGen
+                      <CheckCircle2 className="h-4 w-4 text-primary" /> LeadengageIQ
                     </div>
                     <div className="hidden md:flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                       <X className="h-4 w-4 text-rose-500" /> {c.competitor}
@@ -672,7 +672,7 @@ export default function Landing() {
                       onClick={() => navigate(user ? "/app" : "/auth")}
                       className="bg-primary hover:bg-primary/90 text-white"
                     >
-                      Try LeadGen free <ArrowRight className="ml-2 h-4 w-4" />
+                      Try LeadengageIQ free <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                     <Link to="/demo">
                       <Button variant="outline">Book a demo</Button>
@@ -695,7 +695,7 @@ export default function Landing() {
             ))}
           </div>
           <blockquote className="text-2xl lg:text-3xl font-display font-medium leading-relaxed">
-            "LeadGen tells me <span className="text-primary-glow">exactly which 5 leads</span> to
+            "LeadengageIQ tells me <span className="text-primary-glow">exactly which 5 leads</span> to
             focus on each week. I stopped guessing — and started closing."
           </blockquote>
           <div className="mt-8 flex items-center justify-center gap-3">
@@ -874,7 +874,7 @@ export default function Landing() {
               Start closing more deals today
             </h2>
             <p className="relative mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Join early adopters using LeadGen to power their revenue engine — with full control of their data.
+              Join early adopters using LeadengageIQ to power their revenue engine — with full control of their data.
             </p>
             <div className="relative mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Button
@@ -911,12 +911,12 @@ export default function Landing() {
           </div>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 text-xs text-muted-foreground border-t border-border/40 pt-6">
             <address className="not-italic leading-relaxed">
-              <span className="font-semibold text-foreground">LeadGen</span><br />
+              <span className="font-semibold text-foreground">LeadengageIQ</span><br />
               <span className="font-medium text-foreground/90">HQ:</span> 275 New North Road, Islington #1772, London, N1 7AA, United Kingdom<br />
               <span className="font-medium text-foreground/90">R&amp;D:</span> Colombo 10350, Sri Lanka<br />
               <a href="mailto:support@engageiqlk.com" className="hover:text-foreground underline-offset-2 hover:underline">support@engageiqlk.com</a>
             </address>
-            <p>© 2026 LeadGen. Built for revenue teams who refuse to settle.</p>
+            <p>© 2026 LeadengageIQ. Built for revenue teams who refuse to settle.</p>
           </div>
         </div>
       </footer>
