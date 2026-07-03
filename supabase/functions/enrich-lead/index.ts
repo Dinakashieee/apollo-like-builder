@@ -259,7 +259,7 @@ Return the structured enrichment.`;
     const json = await aiResp.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
-    if (workspace_id) await incrementAiEmails(admin, workspace_id);
+    await incrementAiEmails(admin, workspace_id);
 
     return new Response(
       JSON.stringify({
