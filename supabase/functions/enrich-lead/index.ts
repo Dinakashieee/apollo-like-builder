@@ -94,6 +94,12 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (!workspace_id || typeof workspace_id !== "string") {
+      return new Response(JSON.stringify({ error: "workspace_id required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized");
@@ -109,7 +115,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    if (workspace_id) {
+    {
       const { data: membership } = await admin
         .from("workspace_members").select("user_id")
         .eq("workspace_id", workspace_id).eq("user_id", user.id).maybeSingle();
@@ -125,6 +131,7 @@ serve(async (req) => {
         });
       }
     }
+
 
     // Pull seller context so the inference is tailored to THIS seller's category.
     let sellerContext = "";
@@ -252,7 +259,7 @@ Return the structured enrichment.`;
     const json = await aiResp.json();
     const args = JSON.parse(json.choices[0].message.tool_calls[0].function.arguments);
 
-    if (workspace_id) await incrementAiEmails(admin, workspace_id);
+    await incrementAiEmails(admin, workspace_id);
 
     return new Response(
       JSON.stringify({
