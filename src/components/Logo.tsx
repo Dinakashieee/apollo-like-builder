@@ -32,7 +32,7 @@ export function Logo({
             variant === "light" ? "text-sidebar-foreground" : "text-foreground"
           )}
         >
-          Lead<span className="text-primary">engageIQ</span>
+          Scale<span className="text-primary">Biz</span>
         </span>
       )}
     </div>
@@ -43,7 +43,7 @@ export function Logo({
   return (
     <Link
       to={to}
-      aria-label="LeadengageIQ — Home"
+      aria-label="ScaleBiz — Home"
       className="inline-flex outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl transition-opacity hover:opacity-90"
     >
       {content}

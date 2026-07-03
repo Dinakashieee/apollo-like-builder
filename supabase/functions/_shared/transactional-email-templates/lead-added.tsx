@@ -6,7 +6,7 @@ import {
 import { BrandHeader } from '../email-templates/brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = 'LeadengageIQ'
+const SITE_NAME = 'ScaleBiz'
 const SITE_URL = 'https://engageiqlk.com'
 
 interface LeadAddedProps {

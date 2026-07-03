@@ -800,7 +800,7 @@ export default function SignalHire() {
             </div>
             <DialogTitle className="text-xl">Connect your live SignalHire account</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              We support the SignalHire API directly inside LeadengageIQ. Connect your live account
+              We support the SignalHire API directly inside ScaleBiz. Connect your live account
               to claim leads, pull verified emails, and sync them to your CRM — all without leaving the platform.
             </DialogDescription>
           </DialogHeader>
@@ -809,7 +809,7 @@ export default function SignalHire() {
             <div className="rounded-lg bg-muted/40 border border-border/60 p-3 space-y-2 text-xs">
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
-                <span>Reuse your existing SignalHire credits in LeadengageIQ.</span>
+                <span>Reuse your existing SignalHire credits in ScaleBiz.</span>
               </div>
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
@@ -853,7 +853,7 @@ export default function SignalHire() {
         </DialogContent>
       </Dialog>
 
-      {/* Buy Credits Modal — powered by LeadengageIQ's managed SignalHire account */}
+      {/* Buy Credits Modal — powered by ScaleBiz's managed SignalHire account */}
       <Dialog open={showUpgradeModal} onOpenChange={(o) => { setShowUpgradeModal(o); if (!o) setSelectedPack(null); }}>
         <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -862,8 +862,8 @@ export default function SignalHire() {
             </div>
             <DialogTitle className="text-xl">Buy SignalHire reveal credits</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              Billed through LeadengageIQ at <span className="font-semibold text-foreground">$0.25 / credit</span>.
-              Powered by LeadengageIQ's managed SignalHire account — no key needed. 1 credit = 1 verified email reveal.
+              Billed through ScaleBiz at <span className="font-semibold text-foreground">$0.25 / credit</span>.
+              Powered by ScaleBiz's managed SignalHire account — no key needed. 1 credit = 1 verified email reveal.
             </DialogDescription>
           </DialogHeader>
 
@@ -912,7 +912,7 @@ export default function SignalHire() {
                     <div className="rounded-xl border border-border/60 p-4 bg-muted/20 space-y-3">
                       <p className="text-xs text-muted-foreground">
                         {mode === "once"
-                          ? "One-time purchase. Credits never expire and sit in your LeadengageIQ wallet until used."
+                          ? "One-time purchase. Credits never expire and sit in your ScaleBiz wallet until used."
                           : "Charged monthly via PayPal. Credits added to your wallet on every renewal. Cancel anytime."}
                       </p>
                       <PayPalSmartButtons
