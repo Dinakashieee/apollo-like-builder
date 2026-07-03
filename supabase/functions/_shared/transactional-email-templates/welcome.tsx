@@ -6,7 +6,7 @@ import {
 import { BrandHeader } from '../email-templates/brand-header.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = 'LeadengageIQ'
+const SITE_NAME = 'ScaleBiz'
 const SITE_URL = 'https://engageiqlk.com'
 
 interface WelcomeProps {
@@ -34,7 +34,7 @@ const WelcomeEmail = ({ name }: WelcomeProps) => (
           2. Save your email signature in Settings<br />
           3. Add a lead and generate your first AI draft
         </Text>
-        <Button style={button} href={`${SITE_URL}/app`}>Open LeadengageIQ</Button>
+        <Button style={button} href={`${SITE_URL}/app`}>Open ScaleBiz</Button>
         <Text style={footer}>
           Need help? Just reply to this email — a human reads every message.
         </Text>

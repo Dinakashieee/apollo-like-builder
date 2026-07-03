@@ -116,7 +116,7 @@ export default function GettingStarted() {
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
           <Rocket className="h-3.5 w-3.5" /> Getting Started
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold">How LeadengageIQ works</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">How ScaleBiz works</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           A seven-step workflow from defining your offer to closing follow-ups — built for B2B sales teams running personalised outbound at scale.
         </p>
