@@ -34,7 +34,7 @@ export const BrandHeader = () => (
           </td>
           <td style={{ verticalAlign: 'middle' }}>
             <span style={wordmark}>
-              Lead<span style={{ color: '#1d4ed8' }}>engageIQ</span>
+              Scale<span style={{ color: '#1d4ed8' }}>Biz</span>
             </span>
           </td>
         </tr>
