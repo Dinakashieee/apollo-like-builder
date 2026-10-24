@@ -105,6 +105,69 @@ export type Database = {
           },
         ]
       }
+      company_divisions: {
+        Row: {
+          buying_stage: number
+          company_id: string
+          created_at: string
+          description: string | null
+          fit_grade: string
+          id: string
+          intent_level: string
+          kind: string
+          name: string
+          notes: string | null
+          signal_strength: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          buying_stage?: number
+          company_id: string
+          created_at?: string
+          description?: string | null
+          fit_grade?: string
+          id?: string
+          intent_level?: string
+          kind?: string
+          name: string
+          notes?: string | null
+          signal_strength?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          buying_stage?: number
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          fit_grade?: string
+          id?: string
+          intent_level?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          signal_strength?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_divisions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "account_intelligence"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_divisions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_profiles: {
         Row: {
           company_name: string
