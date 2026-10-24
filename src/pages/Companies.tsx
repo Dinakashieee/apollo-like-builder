@@ -13,6 +13,8 @@ import {
   Loader2,
   ChevronDown,
   Layers,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +53,8 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { researchCompany, downloadCompanyCsv } from "@/lib/companySignals";
+import { CompanyImportDialog } from "@/components/CompanyImportDialog";
 
 type Level = "high" | "medium" | "low";
 type FitGrade = "A" | "B" | "C";
@@ -66,6 +70,10 @@ interface Account {
   signal_strength: Level;
   buying_stage: number;
   notes: string | null;
+  signals_status: string;
+  signals_error: string | null;
+  signals_generated_at: string | null;
+  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; sources?: { title: string; url: string; evidence: string }[] };
 }
 
 interface Division {
@@ -80,6 +88,10 @@ interface Division {
   signal_strength: Level;
   buying_stage: number;
   notes: string | null;
+  signals_status: string;
+  signals_error: string | null;
+  signals_generated_at: string | null;
+  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; sources?: { title: string; url: string; evidence: string }[] };
 }
 
 const STAGE_LABELS = ["Research", "Awareness", "Consideration", "Evaluation", "Purchase", "Closed Won"];
@@ -260,6 +272,8 @@ export default function Companies() {
   const { current } = useWorkspace();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
+  const [researching, setResearching] = useState<string | null>(null);
+  const [evidence, setEvidence] = useState<Account | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -368,10 +382,7 @@ export default function Companies() {
       workspace_id: current.id,
       company_name: form.company_name.trim(),
       domain: form.domain.trim() || null,
-      fit_grade: form.fit_grade,
-      intent_level: form.intent_level,
-      signal_strength: form.signal_strength,
-      buying_stage: Number(form.buying_stage),
+      signals_status: "pending",
       notes: form.notes.trim() || null,
     };
     const { error } = editing
@@ -384,7 +395,9 @@ export default function Companies() {
     }
     toast({ title: editing ? "Company updated" : "Company added" });
     setDialogOpen(false);
-    load();
+    await load();
+    const { data: saved } = await supabase.from("account_intelligence").select("id").eq("workspace_id", current.id).eq("company_name", payload.company_name).maybeSingle();
+    if (saved) { try { await researchCompany(saved.id); } catch (e) { toast({ title: "Company saved; research unavailable", description: e instanceof Error ? e.message : "Try refreshing signals", variant: "destructive" }); } await load(); }
   };
 
   const remove = async (a: Account) => {
@@ -434,10 +447,7 @@ export default function Companies() {
       name: divForm.name.trim(),
       kind: divForm.kind,
       description: divForm.description.trim() || null,
-      fit_grade: divForm.fit_grade,
-      intent_level: divForm.intent_level,
-      signal_strength: divForm.signal_strength,
-      buying_stage: Number(divForm.buying_stage),
+      signals_status: "pending",
       notes: divForm.notes.trim() || null,
     };
     const { error } = divEditing
@@ -451,7 +461,9 @@ export default function Companies() {
     toast({ title: divEditing ? "Division updated" : "Division added" });
     setDivDialogOpen(false);
     setExpanded((prev) => new Set(prev).add(divCompany.id));
-    load();
+    await load();
+    const { data: saved } = await supabase.from("company_divisions").select("id").eq("company_id", divCompany.id).eq("name", payload.name).maybeSingle();
+    if (saved) { try { await researchCompany(divCompany.id, saved.id); } catch (e) { toast({ title: "Division saved; research unavailable", description: e instanceof Error ? e.message : "Try again later", variant: "destructive" }); } await load(); }
   };
 
   const removeDivision = async (d: Division) => {
@@ -533,6 +545,13 @@ export default function Companies() {
         </Button>
       </div>
 
+      <Dialog open={!!evidence} onOpenChange={(open) => { if (!open) setEvidence(null); }}>
+        <DialogContent><DialogHeader><DialogTitle>{evidence?.company_name} — Signals</DialogTitle><DialogDescription>{evidence?.signals_status === "ready" ? "Research complete" : evidence?.signals_status === "insufficient" ? "Limited evidence" : evidence?.signals_status}</DialogDescription></DialogHeader>
+          <p className="text-sm">{evidence?.signals_evidence?.reasoning ?? evidence?.signals_error ?? "Research pending"}</p>
+          {evidence?.signals_generated_at && <p className="text-xs text-muted-foreground">Updated {new Date(evidence.signals_generated_at).toLocaleString()}</p>}
+          {evidence?.signals_evidence?.sources?.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{source.title || source.url}</a>)}
+        </DialogContent>
+      </Dialog>
       {/* Toolbar */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[240px] max-w-md">
@@ -544,6 +563,11 @@ export default function Companies() {
             className="pl-9 h-11 bg-muted/40 border-border/60"
           />
         </div>
+        <CompanyImportDialog onImported={load} />
+        <Button variant="outline" className="gap-2 h-11" disabled={!filtered.length} onClick={() => downloadCompanyCsv([
+          ["Company", "Website", "Division", "Type", "Fit", "Intent Level", "Signal Strength", "Buying stage", "Status", "Reasoning", "Sources", "Updated", "Notes"],
+          ...filtered.flatMap((a) => [a, ...(divisionsByCompany.get(a.id) ?? [])].map((item) => [a.company_name, a.domain, "name" in item ? item.name : "", "kind" in item ? item.kind : "company", item.signals_evidence?.fit_grade ?? "", item.signals_evidence?.intent_level ?? "", item.signals_evidence?.signal_strength ?? "", item.signals_evidence?.buying_stage ?? "", item.signals_status, item.signals_evidence?.reasoning, item.signals_evidence?.sources?.map((source) => source.url).join("; "), item.signals_generated_at, item.notes]))
+        ])}><Download className="h-4 w-4" /> Export CSV</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2 h-11">
@@ -700,6 +724,7 @@ export default function Companies() {
                               {initials(a.company_name)}
                             </span>
                             <div className="min-w-0">
+                              <p className="text-xs text-muted-foreground">{a.signals_status === "ready" ? "Researched" : a.signals_status === "insufficient" ? "Limited evidence" : a.signals_status === "failed" ? "Research failed" : "Research pending"}</p>
                               <p className="text-[14px] font-medium text-foreground truncate">
                                 {a.company_name}
                               </p>
@@ -719,7 +744,7 @@ export default function Companies() {
                         </td>
                         {visibleCols.fit && (
                           <td className="px-5 py-3">
-                            <div className="text-[14px] font-semibold text-foreground">{eff.fit_grade}</div>
+                            <div className="text-[14px] font-semibold text-foreground">{eff.signals_evidence?.fit_grade ?? "—"}</div>
                             {hasDivs && best && (
                               <div className="text-[11px] text-muted-foreground truncate max-w-[130px]">
                                 best: {best.name}
@@ -729,21 +754,23 @@ export default function Companies() {
                         )}
                         {visibleCols.intent && (
                           <td className="px-5 py-3">
-                            <IntentPill level={eff.intent_level} />
+                            {eff.signals_evidence?.intent_level ? <IntentPill level={eff.signals_evidence.intent_level} /> : <span className="text-muted-foreground">—</span>}
                           </td>
                         )}
                         {visibleCols.signal && (
                           <td className="px-5 py-3">
-                            <SignalStrength level={eff.signal_strength} />
+                            {eff.signals_evidence?.signal_strength ? <SignalStrength level={eff.signals_evidence.signal_strength} /> : <span className="text-muted-foreground">—</span>}
                           </td>
                         )}
                         {visibleCols.stage && (
                           <td className="px-5 py-3">
-                            <BuyingStage stage={eff.buying_stage} />
+                            {eff.signals_evidence?.buying_stage != null ? <BuyingStage stage={eff.signals_evidence.buying_stage} /> : <span className="text-muted-foreground">—</span>}
                           </td>
                         )}
                         <td className="px-5 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" aria-label={`View signals for ${a.company_name}`} onClick={() => setEvidence(a)}><Info className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" disabled={researching === a.id} aria-label={`Refresh signals for ${a.company_name}`} onClick={async () => { setResearching(a.id); try { await researchCompany(a.id, undefined, true); await Promise.all((divisionsByCompany.get(a.id) ?? []).map((d) => researchCompany(a.id, d.id, true))); } catch (e) { toast({ title: "Research failed", description: e instanceof Error ? e.message : "Try again later", variant: "destructive" }); } finally { setResearching(null); await load(); } }}><RefreshCw className={cn("h-4 w-4", researching === a.id && "animate-spin")} /></Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -804,16 +831,16 @@ export default function Companies() {
                                           )}
                                         </td>
                                         <td className="px-4 py-2.5 text-[13px] font-semibold text-foreground w-12">
-                                          {d.fit_grade}
+                                          {d.signals_evidence?.fit_grade ?? "—"}
                                         </td>
                                         <td className="px-4 py-2.5">
-                                          <IntentPill level={d.intent_level} />
+                                          {d.signals_evidence?.intent_level ? <IntentPill level={d.signals_evidence.intent_level} /> : "—"}
                                         </td>
                                         <td className="px-4 py-2.5">
-                                          <SignalStrength level={d.signal_strength} />
+                                          {d.signals_evidence?.signal_strength ? <SignalStrength level={d.signals_evidence.signal_strength} /> : "—"}
                                         </td>
                                         <td className="px-4 py-2.5">
-                                          <BuyingStage stage={d.buying_stage} />
+                                          {d.signals_evidence?.buying_stage != null ? <BuyingStage stage={d.signals_evidence.buying_stage} /> : "—"}
                                         </td>
                                         <td className="px-4 py-2.5">
                                           <div className="flex items-center justify-end gap-1">
@@ -882,74 +909,6 @@ export default function Companies() {
                 placeholder="acme.com"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Fit</label>
-                <Select
-                  value={form.fit_grade}
-                  onValueChange={(v) => setForm((f) => ({ ...f, fit_grade: v as FitGrade }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="A">A — Best fit</SelectItem>
-                    <SelectItem value="B">B — Good fit</SelectItem>
-                    <SelectItem value="C">C — Weak fit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Buying stage</label>
-                <Select
-                  value={form.buying_stage}
-                  onValueChange={(v) => setForm((f) => ({ ...f, buying_stage: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STAGE_LABELS.slice(0, TOTAL_STAGES).map((s, i) => (
-                      <SelectItem key={i} value={String(i)}>
-                        {i} — {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Intent level</label>
-                <Select
-                  value={form.intent_level}
-                  onValueChange={(v) => setForm((f) => ({ ...f, intent_level: v as Level }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Signal strength</label>
-                <Select
-                  value={form.signal_strength}
-                  onValueChange={(v) => setForm((f) => ({ ...f, signal_strength: v as Level }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Notes</label>
               <Textarea
@@ -1015,72 +974,6 @@ export default function Companies() {
                   placeholder="Products, services, or focus of this division…"
                   rows={2}
                 />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Fit</label>
-                <Select
-                  value={divForm.fit_grade}
-                  onValueChange={(v) => setDivForm((f) => ({ ...f, fit_grade: v as FitGrade }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="A">A — Best fit</SelectItem>
-                    <SelectItem value="B">B — Good fit</SelectItem>
-                    <SelectItem value="C">C — Weak fit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Buying stage</label>
-                <Select
-                  value={divForm.buying_stage}
-                  onValueChange={(v) => setDivForm((f) => ({ ...f, buying_stage: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STAGE_LABELS.slice(0, TOTAL_STAGES).map((s, i) => (
-                      <SelectItem key={i} value={String(i)}>
-                        {i} — {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Intent level</label>
-                <Select
-                  value={divForm.intent_level}
-                  onValueChange={(v) => setDivForm((f) => ({ ...f, intent_level: v as Level }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Signal strength</label>
-                <Select
-                  value={divForm.signal_strength}
-                  onValueChange={(v) => setDivForm((f) => ({ ...f, signal_strength: v as Level }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
             <div className="space-y-1.5">
