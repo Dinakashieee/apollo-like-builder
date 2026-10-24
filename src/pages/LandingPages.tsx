@@ -94,6 +94,15 @@ export default function LandingPages() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Page | null>(null);
   const [enrollPage, setEnrollPage] = useState<Page | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const samplePage = useMemo<Page>(() => ({
+    id: "theme-preview", slug: "your-next-partnership", title: "Your company",
+    workspace_id: "", template: "ocean", prospect_name: "Alex", prospect_company: "your business",
+    headline: null, subheadline: null, body: null, cta_label: null, cta_url: null,
+    ctas: [], blocks: themeStarterBlocks(), logo_url: null, accent_color: THEME_ACCENT,
+    lead_id: null, published: false, created_at: "", custom_domain: null, custom_path: null,
+  }), []);
+  const previewPage = pages.find((page) => page.id === previewId) || pages[0] || samplePage;
 
   const load = async () => {
     if (!current) return;
@@ -128,8 +137,8 @@ export default function LandingPages() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
-      <div className="flex items-start justify-between mb-8">
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Personalized Landing Pages</h1>
           <p className="text-muted-foreground mt-1">Build custom pages for prospects, send sequences, and track engagement.</p>
@@ -139,29 +148,57 @@ export default function LandingPages() {
         </Button>
       </div>
 
-      {loading ? (
-        <div className="text-muted-foreground">Loading…</div>
-      ) : pages.length === 0 ? (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <p className="text-muted-foreground mb-4">No landing pages yet. Create your first personalized page.</p>
-            <Button onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" /> Create page</Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pages.map((p) => (
-            <PageCard
-              key={p.id}
-              page={p}
-              onOpen={() => setEditing(p)}
-              onCopy={() => copyLink(p)}
-              onDelete={() => remove(p.id)}
-              onSend={() => setEnrollPage(p)}
-            />
-          ))}
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="min-w-0">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold">Your pages</h2>
+            {!loading && <span className="text-xs text-muted-foreground">{pages.length} {pages.length === 1 ? "page" : "pages"}</span>}
+          </div>
+          {loading ? (
+            <div className="text-muted-foreground py-8">Loading…</div>
+          ) : pages.length === 0 ? (
+            <div className="py-12 border-y space-y-4">
+              <h3 className="text-xl font-semibold">Your next partnership starts here</h3>
+              <p className="text-muted-foreground">No landing pages yet.</p>
+              <Button onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" /> Create page</Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
+              {pages.map((p) => (
+                <PageCard
+                  key={p.id}
+                  page={p}
+                  selected={previewPage.id === p.id}
+                  onPreview={() => setPreviewId(p.id)}
+                  onOpen={() => setEditing(p)}
+                  onCopy={() => copyLink(p)}
+                  onDelete={() => remove(p.id)}
+                  onSend={() => setEnrollPage(p)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+        <aside aria-label="Landing page preview" className="min-w-0 xl:sticky xl:top-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-sm font-semibold flex items-center gap-2"><Eye className="h-4 w-4 text-primary" /> Preview</h2>
+            {previewPage.id === samplePage.id ? <Badge variant="secondary">Sample design</Badge> :
+              <Button size="sm" variant="outline" onClick={() => setEditing(previewPage)}>Edit page</Button>}
+          </div>
+          <div className="overflow-hidden rounded-lg border bg-card shadow-lg">
+            <div className="flex items-center gap-3 border-b px-4 py-3 bg-muted/40">
+              <div className="flex gap-1.5 shrink-0" aria-hidden="true">
+                {[0, 1, 2].map((dot) => <span key={dot} className="h-2 w-2 rounded-full bg-muted-foreground/30" />)}
+              </div>
+              <span className="truncate text-xs text-muted-foreground">{previewPage.id === samplePage.id ? "Your landing page" : publicPath(previewPage)}</span>
+            </div>
+            <div className="h-[600px] max-h-[75dvh] overflow-y-auto overflow-x-hidden pointer-events-none" inert="" {...{} as any}>
+              <LivePreview key={previewPage.id} page={previewPage} />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 truncate">{previewPage.id === samplePage.id ? "Ocean Studio" : previewPage.title}</p>
+        </aside>
+      </div>
 
       <CreateDialog
         open={createOpen}
@@ -191,7 +228,7 @@ export default function LandingPages() {
   );
 }
 
-function PageCard({ page, onOpen, onCopy, onDelete, onSend }: { page: Page; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void }) {
+function PageCard({ page, selected, onPreview, onOpen, onCopy, onDelete, onSend }: { page: Page; selected: boolean; onPreview: () => void; onOpen: () => void; onCopy: () => void; onDelete: () => void; onSend: () => void }) {
   const [stats, setStats] = useState({ views: 0, unique: 0, clicks: 0 });
   useEffect(() => {
     (async () => {
@@ -205,7 +242,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend }: { page: Page; onOp
     })();
   }, [page.id]);
   return (
-    <Card className="hover:border-primary/50 transition-colors">
+    <Card className={`hover:border-primary/50 transition-colors ${selected ? "border-primary ring-1 ring-primary/20" : ""}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -222,6 +259,7 @@ function PageCard({ page, onOpen, onCopy, onDelete, onSend }: { page: Page; onOp
           <Stat icon={MousePointerClick} label="Clicks" value={stats.clicks} />
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant={selected ? "secondary" : "outline"} onClick={onPreview} aria-label={`Preview ${page.title}`} aria-pressed={selected}><Eye className="h-3.5 w-3.5" /> Preview</Button>
           <Button size="sm" variant="outline" className="flex-1" onClick={onOpen}>Edit</Button>
           <Button size="sm" variant="outline" onClick={onSend} title="Send sequence to leads"><Send className="h-3.5 w-3.5" /></Button>
           <Button size="sm" variant="outline" onClick={onCopy}><Copy className="h-3.5 w-3.5" /></Button>
