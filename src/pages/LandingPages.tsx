@@ -34,6 +34,7 @@ import { useLandingDesignAccess } from '@/hooks/useLandingDesignAccess';
 import { BrandColors, validateLandingImage } from '@/lib/landingCampaignDesign';
 import { LandingCampaignPicker } from '@/components/LandingCampaignPicker';
 import { LandingImageCreator } from '@/components/LandingImageCreator';
+import { LandingPalettePicker } from '@/components/LandingPalettePicker';
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null; email: string | null };
 type Sequence = { id: string; name: string };
@@ -453,6 +454,7 @@ function EditorPanel({ page, leads, sequences, onSaved, onClose }: { page: Page;
                 </Field>
                 <Field label="Logo"><div className="flex gap-2"><Input value={p.logo_url || ""} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('logo_url', url)} /></div></Field>
                 <Field label="Cover image"><div className="flex flex-wrap gap-2"><Input className="min-w-0 flex-1" value={p.hero_image_url || ''} onChange={e => set('hero_image_url', e.target.value)} placeholder="https://…/cover.jpg" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('hero_image_url', url)} /><LandingImageCreator workspaceId={p.workspace_id} onCreated={url => set('hero_image_url', url)} /></div>{p.hero_image_url && <img src={p.hero_image_url} alt="Cover" className="mt-2 h-28 w-full object-cover rounded" />}</Field>
+                <LandingPalettePicker accent={p.accent_color} colors={p.brand_colors} allowed={allowed} onChange={(accent, colors) => setP(value => ({ ...value, accent_color: accent, brand_colors: colors }))} />
                 <Field label="Accent color">
                   <div className="flex gap-2 items-center">
                     <Input aria-label="Accent color" disabled={!allowed} type="color" value={p.accent_color || THEME_ACCENT} onChange={(e) => set("accent_color", e.target.value)} className="w-16 h-10 p-1" />
