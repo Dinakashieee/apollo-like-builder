@@ -25,6 +25,10 @@ export type Database = {
           intent_level: string
           notes: string | null
           signal_strength: string
+          signals_error: string | null
+          signals_evidence: Json
+          signals_generated_at: string | null
+          signals_status: string
           updated_at: string
           workspace_id: string
         }
@@ -38,6 +42,10 @@ export type Database = {
           intent_level?: string
           notes?: string | null
           signal_strength?: string
+          signals_error?: string | null
+          signals_evidence?: Json
+          signals_generated_at?: string | null
+          signals_status?: string
           updated_at?: string
           workspace_id: string
         }
@@ -51,6 +59,10 @@ export type Database = {
           intent_level?: string
           notes?: string | null
           signal_strength?: string
+          signals_error?: string | null
+          signals_evidence?: Json
+          signals_generated_at?: string | null
+          signals_status?: string
           updated_at?: string
           workspace_id?: string
         }
@@ -118,6 +130,10 @@ export type Database = {
           name: string
           notes: string | null
           signal_strength: string
+          signals_error: string | null
+          signals_evidence: Json
+          signals_generated_at: string | null
+          signals_status: string
           updated_at: string
           workspace_id: string
         }
@@ -133,6 +149,10 @@ export type Database = {
           name: string
           notes?: string | null
           signal_strength?: string
+          signals_error?: string | null
+          signals_evidence?: Json
+          signals_generated_at?: string | null
+          signals_status?: string
           updated_at?: string
           workspace_id: string
         }
@@ -148,6 +168,10 @@ export type Database = {
           name?: string
           notes?: string | null
           signal_strength?: string
+          signals_error?: string | null
+          signals_evidence?: Json
+          signals_generated_at?: string | null
+          signals_status?: string
           updated_at?: string
           workspace_id?: string
         }
