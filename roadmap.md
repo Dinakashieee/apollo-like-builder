@@ -14,3 +14,8 @@
 - [x] Enable paid-plan colors, drag-and-drop, and image/logo uploads with enforced access.
 - [x] Verify free-plan saving, public output, and rejected unauthorized colors, ordering, and uploads.
 - [ ] Verify paid campaign import, custom-color save, drag-and-drop, and successful upload end-to-end — blocked: current account has no paid subscription.
+
+# Landing-page images for all users
+- [ ] Allow free-user uploads and saved cover images while retaining paid color/order restrictions.
+- [ ] Add OpenAI image creation with workspace access and AI allowance checks.
+- [ ] Verify free-user upload, generation, saving, and public image output.
