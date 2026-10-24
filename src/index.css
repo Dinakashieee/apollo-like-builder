@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 /* Scoped prospect-page themes; isolated from the application theme. */
+.landing-palette-ocean { --palette-background: #f5fafa; --palette-text: #0c2340; --palette-surface: #1a4a6e; --palette-accent: #2d8a9e; }
+.landing-palette-tidal { --palette-background: #e6f5f4; --palette-text: #0c2340; --palette-surface: #2d8a9e; --palette-accent: #1a4a6e; }
+.landing-palette-deep { --palette-background: #0c2340; --palette-text: #f5fafa; --palette-surface: #1a4a6e; --palette-accent: #5cbdb9; }
+.landing-palette-coastal { --palette-background: #ffffff; --palette-text: #1a4a6e; --palette-surface: #5cbdb9; --palette-accent: #2d8a9e; }
+.landing-palette-background { background: var(--palette-background); }
+.landing-palette-text { background: var(--palette-text); }
+.landing-palette-surface { background: var(--palette-surface); }
+.landing-palette-accent { background: var(--palette-accent); }
 .landing-theme {
   --theme-ocean: 210 68% 15%;
   --theme-mid: 206 62% 27%;
