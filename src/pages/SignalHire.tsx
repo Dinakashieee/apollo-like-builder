@@ -51,6 +51,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { researchLeadCompanies } from "@/lib/companySignals";
 
 type Lead = {
   id: string;
@@ -350,6 +351,8 @@ export default function SignalHire() {
         break;
       }
       claimed += 1;
+      const failed = await researchLeadCompanies(workspace.id, [lead.company]).catch(() => 1);
+      if (failed) toast({ title: "Claim saved; company research unavailable", description: "Refresh signals in Companies." });
       void first; void rest;
     }
     setClaiming(false);

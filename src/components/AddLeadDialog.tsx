@@ -5,6 +5,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activities";
+import { researchLeadCompanies } from "@/lib/companySignals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -203,6 +204,8 @@ export function AddLeadDialog({ onCreated }: { onCreated?: () => void }) {
       return;
     }
     await logActivity(current.id, user?.id, "lead_added", `Lead added: ${parsed.data.company_name}`);
+    const failed = await researchLeadCompanies(current.id, [parsed.data.company_name]).catch(() => 1);
+    if (failed) toast({ title: "Lead saved; company research unavailable", description: "Refresh signals in Companies." });
     // Notify the workspace user that a lead was added
     if (user?.email) {
       supabase.functions.invoke("send-transactional-email", {
