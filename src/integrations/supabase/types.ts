@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_intelligence: {
+        Row: {
+          buying_stage: number
+          company_name: string
+          created_at: string
+          domain: string | null
+          fit_grade: string
+          id: string
+          intent_level: string
+          notes: string | null
+          signal_strength: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          buying_stage?: number
+          company_name: string
+          created_at?: string
+          domain?: string | null
+          fit_grade?: string
+          id?: string
+          intent_level?: string
+          notes?: string | null
+          signal_strength?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          buying_stage?: number
+          company_name?: string
+          created_at?: string
+          domain?: string | null
+          fit_grade?: string
+          id?: string
+          intent_level?: string
+          notes?: string | null
+          signal_strength?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_intelligence_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
           created_at: string
