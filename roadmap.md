@@ -8,3 +8,8 @@
 - [x] Add Ocean & Teal theme collection and visual selection.
 - [x] Share themed rendering between preview and public pages.
 - [x] Verify theme selection, saving, and public rendering.
+
+# Campaign landing-page customization
+- [ ] Add campaign-matched starter themes and branding.
+- [ ] Enable paid-plan colors, drag-and-drop, and image/logo uploads with enforced access.
+- [ ] Verify saving, public output, uploads, and access rules.
