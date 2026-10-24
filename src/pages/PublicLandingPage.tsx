@@ -3,6 +3,9 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Block, renderBlock, interpolate, ctaStyle } from "@/lib/landingBlocks";
 
+import { isLandingTheme } from "@/lib/landingThemes";
+import { ThemedLandingPage } from "@/components/ThemedLandingPage";
+
 type CTA = { label: string; url: string; style: "primary" | "secondary" | "outline" };
 type Page = {
   id: string;
@@ -113,6 +116,8 @@ export default function PublicLandingPage({ byHost = false }: Props) {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!page) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Page not found</div>;
+
+  if (isLandingTheme(page.template)) return <ThemedLandingPage page={page} onCta={onCta} />;
 
   const accent = page.accent_color || "#6366f1";
   const vars = { name: page.prospect_name, company: page.prospect_company };

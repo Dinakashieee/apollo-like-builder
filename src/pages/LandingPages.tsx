@@ -24,7 +24,12 @@ import {
   SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Block, BLOCK_LABELS, newBlock, renderBlock, interpolate, ctaStyle } from "@/lib/landingBlocks";
+import { Block, BLOCK_LABELS, newBlock, ctaStyle } from "@/lib/landingBlocks";
+
+import { THEME_ACCENT, isLandingTheme, themeStarterBlocks } from "@/lib/landingThemes";
+import { LandingThemePicker } from "@/components/LandingThemePicker";
+import { ThemedLandingPage } from "@/components/ThemedLandingPage";
+import { renderBlock } from "@/lib/landingBlocks";
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null; email: string | null };
 type Sequence = { id: string; name: string };
@@ -62,11 +67,6 @@ function publicPath(p: { slug: string; custom_path?: string | null }) {
   return `/${p.custom_path || "p"}/${p.slug}`;
 }
 
-const TEMPLATES = [
-  { id: "minimal", name: "Minimal", desc: "Light, focused" },
-  { id: "bold", name: "Bold Gradient", desc: "Dark, dramatic" },
-  { id: "split", name: "Split (legacy)", desc: "Two-column" },
-];
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 40);
@@ -239,18 +239,18 @@ function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: n
 
 function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreated }: any) {
   const [title, setTitle] = useState("");
-  const [template, setTemplate] = useState("minimal");
+  const [template, setTemplate] = useState("ocean");
   const [leadId, setLeadId] = useState<string>("none");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { if (open) { setTitle(""); setTemplate("minimal"); setLeadId("none"); } }, [open]);
+  useEffect(() => { if (open) { setTitle(""); setTemplate("ocean"); setLeadId("none"); } }, [open]);
 
   const submit = async () => {
     if (!workspaceId || !userId || !title.trim()) return;
     setSaving(true);
     const lead = leads.find((l: Lead) => l.id === leadId);
     const slug = `${slugify(title)}-${Math.random().toString(36).slice(2, 7)}`;
-    const starterBlocks: Block[] = [
+    const starterBlocks: Block[] = isLandingTheme(template) ? themeStarterBlocks() : [
       { id: crypto.randomUUID(), type: "heading", text: "Hi {name}, this is for {company}", level: 1, align: "left" },
       { id: crypto.randomUUID(), type: "text", text: "A quick look at how we can help you grow.", align: "left" },
       { id: crypto.randomUUID(), type: "cta", label: "Book a call", url: "https://", style: "primary", align: "left" },
@@ -270,7 +270,7 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
         cta_label: null, cta_url: null,
         ctas: [] as any,
         blocks: starterBlocks as any,
-        accent_color: "#6366f1",
+        accent_color: THEME_ACCENT,
       })
       .select()
       .maybeSingle();
@@ -282,7 +282,7 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader><DialogTitle>New landing page</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div>
@@ -291,14 +291,7 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
           </div>
           <div>
             <Label>Template</Label>
-            <Select value={template} onValueChange={setTemplate}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {TEMPLATES.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name} — {t.desc}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LandingThemePicker value={template} onChange={setTemplate} />
           </div>
           <div>
             <Label>Link to lead (optional)</Label>
@@ -443,12 +436,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
 
               <TabsContent value="design" className="space-y-4 mt-4">
                 <Field label="Template">
-                  <Select value={p.template} onValueChange={(v) => set("template", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} — {t.desc}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <LandingThemePicker value={p.template} onChange={(v) => setP((x) => ({ ...x, template: v, accent_color: isLandingTheme(v) ? THEME_ACCENT : x.accent_color }))} />
                 </Field>
                 <Field label="Logo URL"><Input value={p.logo_url || ""} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" /></Field>
                 <Field label="Accent color">
@@ -486,6 +474,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
 }
 
 function LivePreview({ page }: { page: Page }) {
+  if (isLandingTheme(page.template)) return <ThemedLandingPage page={page} preview />;
   const accent = page.accent_color || "#6366f1";
   const vars = { name: page.prospect_name, company: page.prospect_company };
   const onDark = page.template === "bold";
