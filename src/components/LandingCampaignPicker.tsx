@@ -7,14 +7,16 @@ import { toast } from '@/hooks/use-toast';
 import { CAMPAIGN_STYLES, campaignBlocks } from '@/lib/landingCampaignDesign';
 import type { Block } from '@/lib/landingBlocks';
 
-export function LandingCampaignPicker({ workspaceId, sequences, onApply }: {
+export function LandingCampaignPicker({ workspaceId, sequences, onApply, locked = false }: {
   workspaceId: string; sequences: { id: string; name: string }[];
   onApply: (value: { template: string; blocks: Block[]; campaign_id: string | null }) => void;
+  locked?: boolean;
 }) {
   const [campaign, setCampaign] = useState('none');
   const [style, setStyle] = useState('outreach');
   const [busy, setBusy] = useState(false);
   const apply = async () => {
+    if (locked) return;
     if (!confirm('Replace current page sections with this campaign layout?')) return;
     setBusy(true);
     try {
@@ -33,7 +35,7 @@ export function LandingCampaignPicker({ workspaceId, sequences, onApply }: {
   };
   return <div className="space-y-3 border-b pb-4">
     <Label>Email campaign</Label>
-    <Select value={campaign} onValueChange={setCampaign}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
+    <Select value={campaign} onValueChange={setCampaign} disabled={locked}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
       <SelectItem value="none">New campaign layout</SelectItem>
       {sequences.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
     </SelectContent></Select>
@@ -41,6 +43,6 @@ export function LandingCampaignPicker({ workspaceId, sequences, onApply }: {
     <Select value={style} onValueChange={setStyle}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>
       {CAMPAIGN_STYLES.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
     </SelectContent></Select>
-    <Button variant="outline" onClick={apply} disabled={busy}>{busy ? 'Applying…' : 'Apply campaign layout'}</Button>
+    <Button variant="outline" onClick={apply} disabled={busy || locked}>{busy ? 'Applying…' : 'Apply campaign layout'}</Button>
   </div>;
 }

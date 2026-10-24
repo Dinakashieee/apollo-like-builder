@@ -445,7 +445,8 @@ function EditorPanel({ page, leads, sequences, onSaved, onClose }: { page: Page;
               </TabsContent>
 
               <TabsContent value="design" className="space-y-4 mt-4">
-                {allowed ? <LandingCampaignPicker workspaceId={p.workspace_id} sequences={sequences} onApply={(value) => setP(x => ({ ...x, ...value }))} /> : <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4"><Badge variant="secondary">{accessLoading ? 'Checking plan…' : 'Custom design · Paid plans'}</Badge><Button size="sm" variant="outline" asChild><a href="/#pricing">View plans</a></Button></div>}
+                {!allowed && <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4"><Badge variant="secondary">{accessLoading ? 'Checking plan…' : 'Campaign designs, custom colors & uploads · Paid plans'}</Badge><Button size="sm" variant="outline" asChild><a href="/#pricing">View plans</a></Button></div>}
+                <LandingCampaignPicker workspaceId={p.workspace_id} sequences={sequences} locked={!allowed} onApply={(value) => setP(x => ({ ...x, ...value }))} />
                 <Field label="Template">
                   <LandingThemePicker value={p.template} onChange={(v) => set("template", v)} />
                 </Field>
