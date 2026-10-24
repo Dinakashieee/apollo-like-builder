@@ -5,6 +5,7 @@
 - [x] Verify saved signals and downloads.
 
 # Landing page themes
+- [x] Show and verify an immediate side preview on the Landing Pages screen.
 - [x] Add Ocean & Teal theme collection and visual selection.
 - [x] Share themed rendering between preview and public pages.
 - [x] Verify theme selection, saving, and public rendering.
