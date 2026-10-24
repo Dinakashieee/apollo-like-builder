@@ -2244,6 +2244,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reserve_landing_image_credit: {
+        Args: { _workspace_id: string }
+        Returns: boolean
+      }
       track_landing_view: {
         Args: {
           _cta_clicked?: boolean
