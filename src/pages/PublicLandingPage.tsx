@@ -65,6 +65,10 @@ export default function PublicLandingPage({ byHost = false }: Props) {
         ctas: Array.isArray((row as any).ctas) ? (row as any).ctas : [],
         blocks: Array.isArray((row as any).blocks) ? (row as any).blocks : [],
       } as Page) : null;
+      if (p) {
+        const { data: design } = await supabase.rpc('get_public_landing_design', { _page_id: p.id });
+        if (design?.[0]) Object.assign(p, design[0]);
+      }
       setPage(p);
       setLoading(false);
       if (p) {
