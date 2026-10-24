@@ -138,8 +138,9 @@ function initials(name: string) {
 
 /** Best-fit division: highest fit, then intent, then signal, then buying stage. */
 function bestDivision(divs: Division[]): Division | null {
-  if (divs.length === 0) return null;
-  return [...divs].sort((a, b) => {
+  const researched = divs.filter((d) => d.signals_evidence?.fit_grade != null);
+  if (researched.length === 0) return null;
+  return [...researched].sort((a, b) => {
     const fit = FIT_RANK[b.fit_grade] - FIT_RANK[a.fit_grade];
     if (fit !== 0) return fit;
     const intent = INTENT_RANK[b.intent_level] - INTENT_RANK[a.intent_level];
@@ -888,8 +889,7 @@ export default function Companies() {
           <DialogHeader>
             <DialogTitle>{editing ? "Edit company" : "Add company"}</DialogTitle>
             <DialogDescription>
-              Track fit, intent, signal strength, and buying stage for this account. If you add
-              divisions, the headline score rolls up from the best-fit division.
+              Company details
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
