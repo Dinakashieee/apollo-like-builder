@@ -24,7 +24,7 @@ import {
   SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Block, BLOCK_LABELS, newBlock, ctaStyle } from "@/lib/landingBlocks";
+import { Block, BLOCK_LABELS, newBlock, ctaStyle, interpolate } from "@/lib/landingBlocks";
 
 import { THEME_ACCENT, isLandingTheme, themeStarterBlocks } from "@/lib/landingThemes";
 import { LandingThemePicker } from "@/components/LandingThemePicker";
