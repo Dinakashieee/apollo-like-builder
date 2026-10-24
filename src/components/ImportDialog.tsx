@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activities";
+import { researchLeadCompanies } from "@/lib/companySignals";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -136,6 +137,8 @@ export function ImportDialog({ onImported }: { onImported?: () => void }) {
         errorCount += chunk.length;
       } else {
         inserted += chunk.length;
+        const failed = await researchLeadCompanies(current.id, chunk.map((row) => row.company_name)).catch(() => chunk.length);
+        if (failed) toast({ title: "Leads saved; some company signals need a refresh", description: "Open Companies to retry research." });
       }
     }
     await logActivity(

@@ -6,6 +6,18 @@ export async function researchCompany(companyId: string, divisionId?: string, re
   return data;
 }
 
+export async function researchLeadCompanies(workspaceId: string, names: string[]) {
+  const unique = new Set(names.map((name) => name.trim().toLowerCase()));
+  const { data, error } = await supabase.from('account_intelligence').select('id,company_name,signals_status').eq('workspace_id', workspaceId).eq('signals_status', 'pending');
+  if (error) throw error;
+  let failed = 0;
+  for (const account of data ?? []) {
+    if (!unique.has(account.company_name.trim().toLowerCase())) continue;
+    try { await researchCompany(account.id); } catch { failed++; }
+  }
+  return failed;
+}
+
 export function csvCell(value: unknown) {
   const text = String(value ?? '');
   return `"${(/^[=+\-@\t\r]/.test(text) ? "'" : '') + text.replace(/"/g, '""')}"`;
