@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound.tsx";
 import { AppLayout } from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import Companies from "./pages/Companies";
 import Intelligence from "./pages/Intelligence";
 import Targets from "./pages/Targets";
 import Composer from "./pages/Composer";
@@ -69,6 +70,7 @@ const App = () => (
                   <Route index element={<Dashboard />} />
                   <Route path="getting-started" element={<GettingStarted />} />
                   <Route path="leads" element={<Leads />} />
+                  <Route path="companies" element={<Companies />} />
                   <Route path="signalhire" element={<SignalHire />} />
                   <Route path="pages" element={<LandingPages />} />
                   <Route path="email-health" element={<EmailHealth />} />
