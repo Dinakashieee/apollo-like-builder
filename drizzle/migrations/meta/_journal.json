@@ -29,6 +29,13 @@
       "when": 1792859729888,
       "tag": "0003_paid_landing_campaign_design",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792860849435,
+      "tag": "0004_landing_images_for_all_members",
+      "breakpoints": true
     }
   ]
 }
