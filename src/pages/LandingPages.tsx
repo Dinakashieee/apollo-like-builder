@@ -149,7 +149,7 @@ export default function LandingPages() {
       </div>
 
       <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="min-w-0">
+        <div className="min-w-0 order-2 xl:order-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold">Your pages</h2>
             {!loading && <span className="text-xs text-muted-foreground">{pages.length} {pages.length === 1 ? "page" : "pages"}</span>}
@@ -179,7 +179,7 @@ export default function LandingPages() {
             </div>
           )}
         </div>
-        <aside aria-label="Landing page preview" className="min-w-0 xl:sticky xl:top-6">
+        <aside aria-label="Landing page preview" className="min-w-0 order-1 xl:order-2 xl:sticky xl:top-6">
           <div className="flex items-center justify-between gap-3 mb-4">
             <h2 className="text-sm font-semibold flex items-center gap-2"><Eye className="h-4 w-4 text-primary" /> Preview</h2>
             {previewPage.id === samplePage.id ? <Badge variant="secondary">Sample design</Badge> :
@@ -193,7 +193,7 @@ export default function LandingPages() {
               <span className="truncate text-xs text-muted-foreground">{previewPage.id === samplePage.id ? "Your landing page" : publicPath(previewPage)}</span>
             </div>
             <div className="h-[600px] max-h-[75dvh] overflow-y-auto overflow-x-hidden">
-              <div {...{ inert: "" } as any}><LivePreview key={previewPage.id} page={previewPage} /></div>
+              <div ref={(node) => node?.setAttribute("inert", "")}><LivePreview key={previewPage.id} page={previewPage} /></div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3 truncate">{previewPage.id === samplePage.id ? "Ocean Studio" : previewPage.title}</p>
