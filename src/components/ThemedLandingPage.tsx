@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Block, interpolate, renderBlock } from "@/lib/landingBlocks";
 import { THEME_ACCENT } from "@/lib/landingThemes";
 import oceanImage from "@/assets/landing-ocean.jpg";
+import { BrandColors, hexToHsl } from '@/lib/landingCampaignDesign';
 
 type ThemedPage = {
   template: string; title: string; blocks: Block[]; logo_url: string | null; accent_color: string | null;
@@ -11,6 +12,7 @@ type ThemedPage = {
   headline: string | null; subheadline: string | null; body: string | null;
   ctas: { label: string; url: string; style: "primary" | "secondary" | "outline" }[];
   cta_label: string | null; cta_url: string | null;
+  brand_colors?: BrandColors; hero_image_url?: string | null;
 };
 
 export function ThemedLandingPage({ page, preview = false, onCta }: { page: ThemedPage; preview?: boolean; onCta?: (url: string, index: number) => void }) {
@@ -43,9 +45,14 @@ export function ThemedLandingPage({ page, preview = false, onCta }: { page: Them
     if (block.type === "cta") return <div className={`flex ${block.align === "center" ? "justify-center" : ""}`}><Button size="lg" variant={block.style === "outline" ? "outline" : block.style === "secondary" ? "secondary" : "default"} className="theme-cta h-auto min-h-11 max-w-full whitespace-normal text-left" onClick={() => click(block.url, index)}>{interpolate(block.label, vars)}<ArrowUpRight className="shrink-0" /></Button></div>;
     return renderBlock(block, { accent: accent || THEME_ACCENT, vars, onCta: click, ctaIndex: index });
   };
-  return <article className={`landing-theme landing-theme-${page.template} ${preview ? "theme-preview" : ""}`} style={{ "--theme-brand": accent } as CSSProperties}>
+  const tokens = { '--theme-brand': accent,
+    ...(hexToHsl(page.brand_colors?.background) ? { '--theme-paper': hexToHsl(page.brand_colors?.background) } : {}),
+    ...(hexToHsl(page.brand_colors?.text) ? { '--theme-ocean': hexToHsl(page.brand_colors?.text) } : {}),
+    ...(hexToHsl(page.brand_colors?.surface) ? { '--theme-mid': hexToHsl(page.brand_colors?.surface), '--theme-mint': hexToHsl(page.brand_colors?.surface) } : {}),
+  } as CSSProperties;
+  return <article className={`landing-theme landing-theme-${page.template} ${preview ? "theme-preview" : ""}`} style={tokens}>
     {sections.filter((section) => section.length).map((section, i) => <section key={i} className={`theme-section ${i === 0 ? "theme-hero" : "theme-content"}`}>
-      {i === 0 && page.template !== "tidal" && <><img src={oceanImage} alt="Contemporary waterfront office" width={1536} height={1024} fetchPriority={preview ? "auto" : "high"} className="theme-hero-image" /><div className="theme-hero-shade" /></>}
+      {i === 0 && (page.template !== "tidal" || page.hero_image_url) && <><img src={page.hero_image_url || oceanImage} alt={page.hero_image_url ? page.title : "Contemporary waterfront office"} width={1536} height={1024} fetchPriority={preview ? "auto" : "high"} className="theme-hero-image" /><div className="theme-hero-shade" /></>}
       <div className="theme-inner relative">
         {i === 0 && <header className="theme-masthead">{page.logo_url ? <img src={page.logo_url} alt={page.title} className="max-h-12 max-w-48 object-contain" /> : <span className="font-display font-semibold">{page.title}</span>}</header>}
         <div className="theme-blocks">{section.map(({ block, index }) => <div key={block.id}>{render(block, index)}</div>)}</div>

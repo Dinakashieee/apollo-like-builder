@@ -30,6 +30,9 @@ import { THEME_ACCENT, isLandingTheme, themeStarterBlocks } from "@/lib/landingT
 import { LandingThemePicker } from "@/components/LandingThemePicker";
 import { ThemedLandingPage } from "@/components/ThemedLandingPage";
 import { renderBlock } from "@/lib/landingBlocks";
+import { useLandingDesignAccess } from '@/hooks/useLandingDesignAccess';
+import { BrandColors, validateLandingImage } from '@/lib/landingCampaignDesign';
+import { LandingCampaignPicker } from '@/components/LandingCampaignPicker';
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null; email: string | null };
 type Sequence = { id: string; name: string };
@@ -56,6 +59,9 @@ type Page = {
   created_at: string;
   custom_domain: string | null;
   custom_path: string | null;
+  brand_colors?: BrandColors;
+  hero_image_url?: string | null;
+  campaign_id?: string | null;
 };
 
 function publicUrl(p: { slug: string; custom_domain?: string | null; custom_path?: string | null }) {
@@ -167,7 +173,7 @@ export default function LandingPages() {
       <Sheet open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <SheetContent className="w-full sm:max-w-[min(100vw,1200px)] overflow-hidden p-0">
           {editing && (
-            <EditorPanel page={editing} leads={leads} onSaved={() => load()} onClose={() => setEditing(null)} />
+            <EditorPanel page={editing} leads={leads} sequences={sequences} onSaved={() => load()} onClose={() => setEditing(null)} />
           )}
         </SheetContent>
       </Sheet>
@@ -315,8 +321,9 @@ function CreateDialog({ open, onOpenChange, leads, workspaceId, userId, onCreate
   );
 }
 
-function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lead[]; onSaved: () => void; onClose: () => void }) {
+function EditorPanel({ page, leads, sequences, onSaved, onClose }: { page: Page; leads: Lead[]; sequences: Sequence[]; onSaved: () => void; onClose: () => void }) {
   const [p, setP] = useState<Page>(page);
+  const { allowed, loading: accessLoading } = useLandingDesignAccess(page.workspace_id);
   const [saving, setSaving] = useState(false);
   useEffect(() => setP(page), [page.id]);
   const set = (k: keyof Page, v: any) => setP((x) => ({ ...x, [k]: v }));
@@ -339,6 +346,9 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
         blocks: p.blocks as any,
         logo_url: p.logo_url,
         accent_color: p.accent_color,
+        brand_colors: (p.brand_colors || {}) as any,
+        hero_image_url: p.hero_image_url || null,
+        campaign_id: p.campaign_id || null,
         lead_id: p.lead_id,
         published: p.published,
         slug: p.slug,
@@ -387,7 +397,7 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               </TabsList>
 
               <TabsContent value="blocks" className="mt-4">
-                <BlockBuilder blocks={p.blocks} onChange={(v) => set("blocks", v)} accent={p.accent_color || "#6366f1"} workspaceId={p.workspace_id} />
+                <BlockBuilder blocks={p.blocks} onChange={(v) => set("blocks", v)} accent={p.accent_color || THEME_ACCENT} workspaceId={p.workspace_id} />
               </TabsContent>
 
               <TabsContent value="content" className="space-y-4 mt-4">
@@ -435,16 +445,19 @@ function EditorPanel({ page, leads, onSaved, onClose }: { page: Page; leads: Lea
               </TabsContent>
 
               <TabsContent value="design" className="space-y-4 mt-4">
+                {allowed ? <LandingCampaignPicker workspaceId={p.workspace_id} sequences={sequences} onApply={(value) => setP(x => ({ ...x, ...value }))} /> : <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4"><Badge variant="secondary">{accessLoading ? 'Checking plan…' : 'Custom design · Paid plans'}</Badge><Button size="sm" variant="outline" asChild><a href="/#pricing">View plans</a></Button></div>}
                 <Field label="Template">
-                  <LandingThemePicker value={p.template} onChange={(v) => setP((x) => ({ ...x, template: v, accent_color: isLandingTheme(v) ? THEME_ACCENT : x.accent_color }))} />
+                  <LandingThemePicker value={p.template} onChange={(v) => set("template", v)} />
                 </Field>
-                <Field label="Logo URL"><Input value={p.logo_url || ""} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" /></Field>
+                <Field label="Logo"><div className="flex gap-2"><Input value={p.logo_url || ""} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('logo_url', url)} /></div></Field>
+                <Field label="Cover image"><div className="flex gap-2"><Input disabled={!allowed} value={p.hero_image_url || ''} onChange={e => set('hero_image_url', e.target.value)} placeholder="https://…/cover.jpg" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('hero_image_url', url)} /></div>{p.hero_image_url && <img src={p.hero_image_url} alt="Cover" className="mt-2 h-28 w-full object-cover rounded" />}</Field>
                 <Field label="Accent color">
                   <div className="flex gap-2 items-center">
-                    <Input type="color" value={p.accent_color || "#6366f1"} onChange={(e) => set("accent_color", e.target.value)} className="w-16 h-10 p-1" />
-                    <Input value={p.accent_color || ""} onChange={(e) => set("accent_color", e.target.value)} />
+                    <Input aria-label="Accent color" disabled={!allowed} type="color" value={p.accent_color || THEME_ACCENT} onChange={(e) => set("accent_color", e.target.value)} className="w-16 h-10 p-1" />
+                    <Input aria-label="Accent hex" disabled={!allowed} value={p.accent_color || ""} onChange={(e) => set("accent_color", e.target.value)} />
                   </div>
                 </Field>
+                {(['background', 'text', 'surface'] as const).map(role => <Field key={role} label={`${role} color`}><Input aria-label={`${role} color`} type="color" disabled={!allowed} className="w-16 h-10 p-1" value={p.brand_colors?.[role] || (role === 'background' ? '#f5fafa' : role === 'text' ? '#0c2340' : '#1a4a6e')} onChange={e => set('brand_colors', { ...p.brand_colors, [role]: e.target.value })} /></Field>)}
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
                     <Label>Published</Label>
@@ -568,6 +581,7 @@ function StatsPanel({ pageId }: { pageId: string }) {
 /* ============== Block builder ============== */
 
 function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block[]; onChange: (v: Block[]) => void; accent: string; workspaceId?: string }) {
+  const { allowed } = useLandingDesignAccess(workspaceId);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -587,6 +601,7 @@ function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block
   };
 
   const onDragEnd = (e: any) => {
+    if (!allowed) return;
     const { active, over } = e;
     if (!over || active.id === over.id) return;
     const from = blocks.findIndex((b) => b.id === active.id);
@@ -599,7 +614,7 @@ function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block
     <div className="space-y-3">
       <div>
         <Label className="text-sm">Page sections</Label>
-        <p className="text-xs text-muted-foreground">Drag the handle to reorder. Personalization tokens {"{name}"} and {"{company}"} work in text fields.</p>
+        {!allowed && <Badge variant="secondary">Drag & drop · Paid plans</Badge>}
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -625,6 +640,7 @@ function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block
                 <SortableBlock
                   key={b.id}
                   block={b}
+                  canDrag={allowed}
                   accent={accent}
                   workspaceId={workspaceId}
                   onUpdate={(patch) => updateBlock(b.id, patch)}
@@ -640,19 +656,19 @@ function BlockBuilder({ blocks, onChange, accent, workspaceId }: { blocks: Block
   );
 }
 
-function SortableBlock({ block, accent, workspaceId, onUpdate, onRemove, onDuplicate }: {
-  block: Block; accent: string; workspaceId?: string; onUpdate: (p: Partial<Block>) => void; onRemove: () => void; onDuplicate: () => void;
+function SortableBlock({ block, accent, workspaceId, canDrag, onUpdate, onRemove, onDuplicate }: {
+  block: Block; accent: string; workspaceId?: string; canDrag: boolean; onUpdate: (p: Partial<Block>) => void; onRemove: () => void; onDuplicate: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id, disabled: !canDrag });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const Icon = BLOCK_ICONS[block.type];
 
   return (
     <div ref={setNodeRef} style={style} className="border rounded-md bg-card">
       <div className="flex items-center gap-2 px-2 py-1.5 border-b bg-muted/30">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-muted-foreground p-1" aria-label="Drag">
+        <Button variant="ghost" size="icon" disabled={!canDrag} {...attributes} {...listeners} className="h-7 w-7 cursor-grab active:cursor-grabbing text-muted-foreground p-1 touch-none" aria-label="Drag" title="Reorder section">
           <GripVertical className="h-4 w-4" />
-        </button>
+        </Button>
         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
         <span className="text-xs font-medium uppercase tracking-wide">{BLOCK_LABELS[block.type]}</span>
         <div className="ml-auto flex items-center gap-1">
@@ -668,12 +684,15 @@ function SortableBlock({ block, accent, workspaceId, onUpdate, onRemove, onDupli
 }
 
 function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; onUploaded: (url: string) => void }) {
+  const { allowed } = useLandingDesignAccess(workspaceId);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handle = async (file: File) => {
+    if (!allowed) return;
     if (!workspaceId) { toast({ title: "No workspace", variant: "destructive" }); return; }
-    if (file.size > 15 * 1024 * 1024) { toast({ title: "File too large", description: "Max 15MB", variant: "destructive" }); return; }
+    const validation = validateLandingImage(file);
+    if (validation) { toast({ title: 'Invalid image', description: validation, variant: 'destructive' }); return; }
     setUploading(true);
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${workspaceId}/${crypto.randomUUID()}.${ext}`;
@@ -681,6 +700,7 @@ function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; 
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); setUploading(false); return; }
     const { data } = await supabase.storage.from("landing-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
     if (data?.signedUrl) onUploaded(data.signedUrl);
+    else toast({ title: 'Image link unavailable', description: 'Please upload again.', variant: 'destructive' });
     setUploading(false);
   };
 
@@ -689,11 +709,11 @@ function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; 
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/avif,image/apng,image/bmp"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handle(f); e.target.value = ""; }}
       />
-      <Button type="button" size="sm" variant="outline" className="h-9 text-xs" disabled={uploading} onClick={() => inputRef.current?.click()}>
+      <Button type="button" size="sm" variant="outline" className="h-9 text-xs" title={!allowed ? 'Image uploads require a paid plan' : 'Upload image'} disabled={uploading || !allowed} onClick={() => inputRef.current?.click()}>
         <Upload className="h-3.5 w-3.5 mr-1.5" />
         {uploading ? "Uploading…" : "Upload"}
       </Button>
