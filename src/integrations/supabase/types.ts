@@ -790,6 +790,8 @@ export type Database = {
           accent_color: string | null
           blocks: Json
           body: string | null
+          brand_colors: Json
+          campaign_id: string | null
           created_at: string
           created_by: string
           cta_label: string | null
@@ -798,6 +800,7 @@ export type Database = {
           custom_domain: string | null
           custom_path: string | null
           headline: string | null
+          hero_image_url: string | null
           id: string
           lead_id: string | null
           logo_url: string | null
@@ -815,6 +818,8 @@ export type Database = {
           accent_color?: string | null
           blocks?: Json
           body?: string | null
+          brand_colors?: Json
+          campaign_id?: string | null
           created_at?: string
           created_by: string
           cta_label?: string | null
@@ -823,6 +828,7 @@ export type Database = {
           custom_domain?: string | null
           custom_path?: string | null
           headline?: string | null
+          hero_image_url?: string | null
           id?: string
           lead_id?: string | null
           logo_url?: string | null
@@ -840,6 +846,8 @@ export type Database = {
           accent_color?: string | null
           blocks?: Json
           body?: string | null
+          brand_colors?: Json
+          campaign_id?: string | null
           created_at?: string
           created_by?: string
           cta_label?: string | null
@@ -848,6 +856,7 @@ export type Database = {
           custom_domain?: string | null
           custom_path?: string | null
           headline?: string | null
+          hero_image_url?: string | null
           id?: string
           lead_id?: string | null
           logo_url?: string | null
@@ -2115,6 +2124,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_customize_landing: {
+        Args: { _workspace_id: string }
+        Returns: boolean
+      }
       consume_signalhire_credit: {
         Args: { _amount?: number; _workspace_id: string }
         Returns: number
@@ -2132,6 +2145,13 @@ export type Database = {
       get_current_ai_emails: {
         Args: { _workspace_id: string }
         Returns: number
+      }
+      get_public_landing_design: {
+        Args: { _page_id: string }
+        Returns: {
+          brand_colors: Json
+          hero_image_url: string
+        }[]
       }
       get_public_landing_page: {
         Args: { _host?: string; _path?: string; _slug?: string }
