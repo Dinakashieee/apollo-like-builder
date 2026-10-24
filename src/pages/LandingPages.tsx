@@ -33,6 +33,7 @@ import { renderBlock } from "@/lib/landingBlocks";
 import { useLandingDesignAccess } from '@/hooks/useLandingDesignAccess';
 import { BrandColors, validateLandingImage } from '@/lib/landingCampaignDesign';
 import { LandingCampaignPicker } from '@/components/LandingCampaignPicker';
+import { LandingImageCreator } from '@/components/LandingImageCreator';
 
 type Lead = { id: string; contact_name: string | null; company_name: string | null; email: string | null };
 type Sequence = { id: string; name: string };
@@ -445,13 +446,13 @@ function EditorPanel({ page, leads, sequences, onSaved, onClose }: { page: Page;
               </TabsContent>
 
               <TabsContent value="design" className="space-y-4 mt-4">
-                {!allowed && <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4"><Badge variant="secondary">{accessLoading ? 'Checking plan…' : 'Campaign designs, custom colors & uploads · Paid plans'}</Badge><Button size="sm" variant="outline" asChild><a href="/#pricing">View plans</a></Button></div>}
+                {!allowed && <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-4"><Badge variant="secondary">{accessLoading ? 'Checking plan…' : 'Campaign designs & custom colors · Paid plans'}</Badge><Button size="sm" variant="outline" asChild><a href="/#pricing">View plans</a></Button></div>}
                 <LandingCampaignPicker workspaceId={p.workspace_id} sequences={sequences} locked={!allowed} onApply={(value) => setP(x => ({ ...x, ...value }))} />
                 <Field label="Template">
                   <LandingThemePicker value={p.template} onChange={(v) => set("template", v)} />
                 </Field>
                 <Field label="Logo"><div className="flex gap-2"><Input value={p.logo_url || ""} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://…/logo.png" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('logo_url', url)} /></div></Field>
-                <Field label="Cover image"><div className="flex gap-2"><Input disabled={!allowed} value={p.hero_image_url || ''} onChange={e => set('hero_image_url', e.target.value)} placeholder="https://…/cover.jpg" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('hero_image_url', url)} /></div>{p.hero_image_url && <img src={p.hero_image_url} alt="Cover" className="mt-2 h-28 w-full object-cover rounded" />}</Field>
+                <Field label="Cover image"><div className="flex flex-wrap gap-2"><Input className="min-w-0 flex-1" value={p.hero_image_url || ''} onChange={e => set('hero_image_url', e.target.value)} placeholder="https://…/cover.jpg" /><ImageUploadButton workspaceId={p.workspace_id} onUploaded={(url) => set('hero_image_url', url)} /><LandingImageCreator workspaceId={p.workspace_id} onCreated={url => set('hero_image_url', url)} /></div>{p.hero_image_url && <img src={p.hero_image_url} alt="Cover" className="mt-2 h-28 w-full object-cover rounded" />}</Field>
                 <Field label="Accent color">
                   <div className="flex gap-2 items-center">
                     <Input aria-label="Accent color" disabled={!allowed} type="color" value={p.accent_color || THEME_ACCENT} onChange={(e) => set("accent_color", e.target.value)} className="w-16 h-10 p-1" />
@@ -685,12 +686,10 @@ function SortableBlock({ block, accent, workspaceId, canDrag, onUpdate, onRemove
 }
 
 function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; onUploaded: (url: string) => void }) {
-  const { allowed } = useLandingDesignAccess(workspaceId);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handle = async (file: File) => {
-    if (!allowed) return;
     if (!workspaceId) { toast({ title: "No workspace", variant: "destructive" }); return; }
     const validation = validateLandingImage(file);
     if (validation) { toast({ title: 'Invalid image', description: validation, variant: 'destructive' }); return; }
@@ -714,7 +713,7 @@ function ImageUploadButton({ workspaceId, onUploaded }: { workspaceId?: string; 
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handle(f); e.target.value = ""; }}
       />
-      <Button type="button" size="sm" variant="outline" className="h-9 text-xs" title={!allowed ? 'Image uploads require a paid plan' : 'Upload image'} disabled={uploading || !allowed} onClick={() => inputRef.current?.click()}>
+      <Button type="button" size="sm" variant="outline" className="h-9 text-xs" title="Upload image" disabled={uploading || !workspaceId} onClick={() => inputRef.current?.click()}>
         <Upload className="h-3.5 w-3.5 mr-1.5" />
         {uploading ? "Uploading…" : "Upload"}
       </Button>
@@ -763,9 +762,10 @@ function BlockEditor({ block, accent, workspaceId, onUpdate }: { block: Block; a
     case "image":
       return (
         <>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Input placeholder="Image / GIF / SVG URL — or upload →" value={block.url} onChange={(e) => onUpdate({ url: e.target.value } as any)} />
             <ImageUploadButton workspaceId={workspaceId} onUploaded={(url) => onUpdate({ url } as any)} />
+            <LandingImageCreator workspaceId={workspaceId} onCreated={url => onUpdate({ url } as any)} />
           </div>
           {block.url && (
             <div className="rounded border bg-muted/30 p-2">
