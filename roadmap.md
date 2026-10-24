@@ -10,6 +10,7 @@
 - [x] Verify theme selection, saving, and public rendering.
 
 # Campaign landing-page customization
-- [ ] Add campaign-matched starter themes and branding.
-- [ ] Enable paid-plan colors, drag-and-drop, and image/logo uploads with enforced access.
-- [ ] Verify saving, public output, uploads, and access rules.
+- [x] Add campaign-matched starter themes and branding.
+- [x] Enable paid-plan colors, drag-and-drop, and image/logo uploads with enforced access.
+- [x] Verify free-plan saving, public output, and rejected unauthorized colors, ordering, and uploads.
+- [ ] Verify paid campaign import, custom-color save, drag-and-drop, and successful upload end-to-end — blocked: current account has no paid subscription.
