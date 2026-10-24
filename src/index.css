@@ -2,6 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scoped prospect-page themes; isolated from the application theme. */
+.landing-theme {
+  --theme-ocean: 210 68% 15%;
+  --theme-mid: 206 62% 27%;
+  --theme-teal: 191 56% 40%;
+  --theme-mint: 178 42% 55%;
+  --theme-paper: 180 25% 97%;
+  --theme-white: 0 0% 100%;
+  --theme-brand: #2d8a9e;
+  --background: var(--theme-paper);
+  --foreground: var(--theme-ocean);
+  --primary: var(--theme-teal);
+  --primary-foreground: var(--theme-white);
+  --secondary: var(--theme-ocean);
+  --secondary-foreground: var(--theme-white);
+  --border: 184 22% 80%;
+  --accent: 178 30% 90%;
+  --accent-foreground: var(--theme-ocean);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  container-type: inline-size;
+}
+.landing-theme h1, .landing-theme h2, .landing-theme h3 { font-family: 'Syne', sans-serif; letter-spacing: 0; overflow-wrap: anywhere; }
+.theme-section { position: relative; overflow: hidden; }
+.theme-inner { max-width: 1120px; margin: auto; padding: 56px 32px; }
+.theme-hero { background: hsl(var(--theme-ocean)); color: hsl(var(--theme-white)); }
+.theme-hero .theme-inner { min-height: 540px; padding-top: 28px; padding-bottom: 64px; }
+.theme-masthead { margin-bottom: 72px; overflow-wrap: anywhere; }
+.theme-hero-image, .theme-hero-shade { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.theme-hero-shade { background: hsl(var(--theme-ocean) / .65); }
+.theme-blocks { display: flex; flex-direction: column; gap: 24px; }
+.theme-blocks h1 { font-size: 56px; line-height: 1.08; max-width: 760px; font-weight: 700; }
+.theme-blocks h2 { font-size: 36px; line-height: 1.15; font-weight: 700; max-width: 760px; }
+.theme-blocks h3 { font-size: 26px; line-height: 1.2; }
+.theme-blocks p { max-width: 680px; font-size: 16px; line-height: 1.85; overflow-wrap: anywhere; }
+.theme-content:nth-child(odd) { background: hsl(var(--theme-mid)); color: hsl(var(--theme-white)); }
+.theme-content:nth-child(even) { background: hsl(var(--theme-paper)); color: hsl(var(--theme-ocean)); }
+.theme-cta { border-radius: 4px; }
+.theme-cta:not(.border) { background: var(--theme-brand); color: hsl(var(--theme-white)); }
+.theme-cta.border { background: transparent; border-color: currentColor; color: inherit; }
+.landing-theme-tidal .theme-hero { background: hsl(var(--theme-paper)); color: hsl(var(--theme-ocean)); border-bottom: 8px solid hsl(var(--theme-mint)); }
+.landing-theme-tidal .theme-masthead { color: hsl(var(--theme-teal)); }
+.landing-theme-tidal .theme-content:nth-child(even) { background: hsl(var(--theme-white)); }
+.landing-theme-tidal .theme-content:nth-child(odd) { background: hsl(var(--theme-mint)); color: hsl(var(--theme-ocean)); }
+.landing-theme-deep .theme-hero-shade { background: hsl(var(--theme-ocean) / .85); }
+.landing-theme-deep .theme-content:nth-child(even) { background: hsl(var(--theme-ocean)); color: hsl(var(--theme-white)); }
+.landing-theme-deep .theme-content:nth-child(odd) { background: hsl(var(--theme-mid)); }
+.landing-theme-deep .theme-blocks h2 { color: hsl(var(--theme-mint)); }
+.theme-thumbnail { color: hsl(var(--theme-white)); background: hsl(var(--theme-ocean)); }
+.theme-thumbnail-shade { background: hsl(var(--theme-ocean) / .6); }
+.theme-thumbnail-line, .theme-thumbnail-band { background: hsl(var(--theme-mint)); }
+.landing-theme-tidal.theme-thumbnail { background: hsl(var(--theme-paper)); color: hsl(var(--theme-ocean)); }
+.landing-theme-tidal .theme-thumbnail-shade { background: transparent; }
+.landing-theme-deep .theme-thumbnail-shade { background: hsl(var(--theme-ocean) / .85); }
+.landing-theme-deep .theme-thumbnail-band { background: hsl(var(--theme-mid)); }
+.theme-preview .theme-inner { padding: 32px 24px; }
+.theme-preview .theme-hero .theme-inner { min-height: 400px; }
+.theme-preview .theme-masthead { margin-bottom: 48px; }
+@container (max-width: 600px) {
+  .theme-blocks h1 { font-size: 36px; }
+  .theme-blocks h2 { font-size: 28px; }
+  .theme-inner { padding: 40px 24px; }
+  .theme-hero .theme-inner { min-height: 500px; }
+  .theme-masthead { margin-bottom: 56px; }
+}
+
 /* LeadGen Design System — Ocean Trust palette
    All colors HSL. Semantic tokens only.
 */
