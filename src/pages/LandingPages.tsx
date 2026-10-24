@@ -192,8 +192,8 @@ export default function LandingPages() {
               </div>
               <span className="truncate text-xs text-muted-foreground">{previewPage.id === samplePage.id ? "Your landing page" : publicPath(previewPage)}</span>
             </div>
-            <div className="h-[600px] max-h-[75dvh] overflow-y-auto overflow-x-hidden pointer-events-none" inert="" {...{} as any}>
-              <LivePreview key={previewPage.id} page={previewPage} />
+            <div className="h-[600px] max-h-[75dvh] overflow-y-auto overflow-x-hidden">
+              <div {...{ inert: "" } as any}><LivePreview key={previewPage.id} page={previewPage} /></div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3 truncate">{previewPage.id === samplePage.id ? "Ocean Studio" : previewPage.title}</p>
