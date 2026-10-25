@@ -5,8 +5,8 @@
 - [x] Verify saved signals and downloads.
 
 # Personal dashboard summary
-- [ ] Add personal Today, Week, Month, and Quarter summaries using saved activity.
-- [ ] Test date boundaries and user isolation; verify dashboard period switching.
+- [x] Add personal Today, Week, Month, and Quarter summaries using saved activity.
+- [x] Test calendar date boundaries; verify signed-in period switching, saved personal page count, owner-filtered lead count, and denial of unrelated workspace access.
 
 # Landing page themes
 - [x] Show and verify an immediate side preview on the Landing Pages screen.
