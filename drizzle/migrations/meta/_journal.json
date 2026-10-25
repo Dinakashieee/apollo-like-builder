@@ -71,6 +71,13 @@
       "when": 1792966153639,
       "tag": "0009_company_email_defaults_signatures",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792966903288,
+      "tag": "0010_user_daily_work_updates",
+      "breakpoints": true
     }
   ]
 }
