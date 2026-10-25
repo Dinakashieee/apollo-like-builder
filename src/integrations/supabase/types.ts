@@ -2258,6 +2258,10 @@ export type Database = {
         }
         Returns: number
       }
+      personal_dashboard_summary: {
+        Args: { _end: string; _start: string; _workspace_id: string }
+        Returns: Json
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
