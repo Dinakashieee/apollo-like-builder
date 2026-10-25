@@ -276,6 +276,10 @@ Deno.serve(async (req) => {
           template_name: payload.label || queue,
           recipient_email: payload.to,
           status: 'sent',
+          metadata:
+            typeof payload.workspace_id === 'string' && payload.workspace_id
+              ? { workspace_id: payload.workspace_id }
+              : undefined,
         })
 
         // Delete from queue
