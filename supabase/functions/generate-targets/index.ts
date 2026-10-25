@@ -38,7 +38,7 @@ async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource
   const key = Deno.env.get("FIRECRAWL_API_KEY");
   if (!key) return [];
   const ctrl = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), 8000); // hard cap so slow searches don't stall generation
+  const timeout = setTimeout(() => ctrl.abort(), 20000);
   try {
     const r = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
@@ -46,7 +46,11 @@ async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource
       body: JSON.stringify({ query, limit }),
       signal: ctrl.signal,
     });
-    if (!r.ok) return [];
+    if (!r.ok) {
+      const details = await r.text();
+      console.error(`Public search failed [${r.status}]: ${details}`);
+      throw new HttpError("Public research is temporarily unavailable. Try again later.", r.status === 429 ? 429 : 503);
+    }
     const data = await r.json();
     const results = data?.data?.web ?? data?.data ?? data?.web ?? [];
     return (Array.isArray(results) ? results : [])
@@ -67,7 +71,8 @@ async function firecrawlSearch(query: string, limit = 4): Promise<ResearchSource
         };
       })
       .filter((s: ResearchSource) => s.url);
-  } catch {
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
     return [];
   } finally {
     clearTimeout(timeout);
@@ -188,7 +193,7 @@ async function processTargetGeneration(body: GenerationBody, authHeader: string,
 
     await updateJob({ progress: 28, message: "Searching AppsRunTheWorld customer sources" });
     const appsRunTheWorldResults = await Promise.all(
-      appsRunTheWorldQueries.map((q) => firecrawlSearch(q, isReplace ? 4 : 6))
+      appsRunTheWorldQueries.slice(0, 2).map((q) => firecrawlSearch(q, 4))
     );
     const prioritizedArtSources = appsRunTheWorldResults.flat().map((source) => ({
       ...source,
@@ -197,11 +202,14 @@ async function processTargetGeneration(body: GenerationBody, authHeader: string,
     }));
 
     await updateJob({ progress: 38, message: "Cross-checking LinkedIn, PDFs, and market news" });
-    const researchResults = await Promise.all(queries.map((q) => firecrawlSearch(q, 5)));
+    const researchResults: ResearchSource[][] = [];
+    for (let i = 0; i < queries.length; i += 2) {
+      researchResults.push(...await Promise.all(queries.slice(i, i + 2).map((q) => firecrawlSearch(q, 4))));
+    }
     const dedup = new Map<string, ResearchSource>();
     [...prioritizedArtSources, ...researchResults.flat()].forEach((s) => { if (!dedup.has(s.url)) dedup.set(s.url, s); });
     const researchKey = Deno.env.get("FIRECRAWL_API_KEY");
-    const candidates = Array.from(dedup.values()).slice(0, 24);
+    const candidates = Array.from(dedup.values()).slice(0, 16);
     const sources = researchKey ? await checkResearchSources(candidates, researchKey) : [];
     if (!sources.some((s) => s.verification === "page_checked")) throw new HttpError("No public pages could be checked. Try research again later; no unsupported recommendations were generated.", 503);
 

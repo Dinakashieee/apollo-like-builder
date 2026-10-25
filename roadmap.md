@@ -1,7 +1,8 @@
 # Sourced recommendations and decision-makers
-- [ ] Scrape public evidence, retain source dates and distinguish checked sources from unsupported claims.
-- [ ] Show decision-maker reasons, LinkedIn verification reminders, and SignalHire preview/claim controls.
-- [ ] Test evidence rules and verify the signed-in recommendations flow.
+- [x] Scrape public evidence, retain source dates and distinguish checked sources from unsupported claims.
+- [x] Show decision-maker reasons, LinkedIn verification reminders, and SignalHire preview/claim controls.
+- [x] Test evidence rules and verify signed-in contact handoff and fail-closed research.
+- [ ] Verify populated research results and a real SignalHire claim end-to-end — blocked: research returned no checkable sources/rate limiting; current account has zero SignalHire credits.
 
 # Company signals
 - [x] Generate and save evidence-based company and division signals.

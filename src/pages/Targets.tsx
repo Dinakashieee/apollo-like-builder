@@ -592,7 +592,7 @@ export default function Targets() {
               Targets &amp; Competitors
             </h1>
             <p className="text-sm lg:text-base text-muted-foreground mt-2 max-w-2xl">
-              Real end-customer accounts with verified decision-makers, recent triggers, and public sources — never IT-services or vendor noise.
+              End-customer recommendations with dated public evidence and decision-maker previews to verify before outreach.
             </p>
             <div className="flex flex-wrap gap-2 mt-4">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-card/80 backdrop-blur border border-border rounded-full px-3 py-1">
