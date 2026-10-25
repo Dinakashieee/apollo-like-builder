@@ -83,7 +83,12 @@ export function SendPacePopup() {
               <span className="text-muted-foreground font-medium flex items-center gap-1">
                 <Mail className="h-3 w-3" /> Today's sends
               </span>
-              <span className="font-semibold">
+              <span
+                className={cn(
+                  "font-semibold",
+                  (nudge?.sent ?? 0) >= DAILY_HEALTHY_LIMIT && "text-destructive",
+                )}
+              >
                 {nudge?.sent ?? 0} / {DAILY_HEALTHY_LIMIT}
               </span>
             </div>
@@ -91,7 +96,11 @@ export function SendPacePopup() {
               <div
                 className={cn(
                   "h-full transition-all",
-                  pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-warning" : "bg-primary",
+                  (nudge?.sent ?? 0) >= DAILY_HEALTHY_LIMIT
+                    ? "bg-destructive"
+                    : pct >= 80
+                      ? "bg-warning"
+                      : "bg-primary",
                 )}
                 style={{ width: `${pct}%` }}
               />

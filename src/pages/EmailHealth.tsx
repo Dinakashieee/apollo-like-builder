@@ -403,7 +403,7 @@ export default function EmailHealth() {
                   Auto-logged
                 </span>
               </span>
-              <span className="font-semibold">
+              <span className={cn("font-semibold", sent >= DAILY_HEALTHY_LIMIT && "text-destructive")}>
                 {sent} / {DAILY_HEALTHY_LIMIT}
               </span>
             </div>
@@ -411,7 +411,11 @@ export default function EmailHealth() {
               <div
                 className={cn(
                   "h-full transition-all",
-                  dailyPct >= 100 ? "bg-destructive" : dailyPct >= 80 ? "bg-warning" : "bg-primary"
+                  sent >= DAILY_HEALTHY_LIMIT
+                    ? "bg-destructive"
+                    : dailyPct >= 80
+                      ? "bg-warning"
+                      : "bg-primary"
                 )}
                 style={{ width: `${dailyPct}%` }}
               />
