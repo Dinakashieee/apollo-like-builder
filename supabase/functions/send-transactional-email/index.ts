@@ -245,6 +245,26 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Validate the optional workspace_id used for send-pace tracking. It is only
+  // stamped into the send log metadata when the caller is a member of that
+  // workspace, so the pace counter can attribute the send. Invalid ids are
+  // dropped rather than failing the send — tracking is non-critical.
+  let trackedWorkspaceId: string | null = null
+  if (requestedWorkspaceId) {
+    if (isServiceRole) {
+      trackedWorkspaceId = requestedWorkspaceId
+    } else {
+      const { data: ws } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', claims!.sub as string)
+        .eq('workspace_id', requestedWorkspaceId)
+        .limit(1)
+      trackedWorkspaceId = ws && ws.length ? requestedWorkspaceId : null
+    }
+  }
+  const sendMetadata = trackedWorkspaceId ? { workspace_id: trackedWorkspaceId } : undefined
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')
