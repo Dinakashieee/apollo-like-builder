@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ShieldCheck,
   Mail,
@@ -15,12 +15,27 @@ import {
   Sparkles,
   Clock,
   TrendingUp,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import {
+  BREAK_MIN,
+  DAILY_HEALTHY_LIMIT,
+  fetchTodaySends,
+  loadPace,
+  localRecent,
+  nudgeSendPace,
+  paceAdvice,
+  recordLocalSend,
+  savePace,
+  todayStr,
+  type PaceState,
+} from "@/lib/sendPace";
 
 type CheckStatus = "pass" | "warn" | "fail";
 type Check = {
