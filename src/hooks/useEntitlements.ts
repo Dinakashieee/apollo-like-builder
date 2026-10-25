@@ -4,6 +4,7 @@ import { useSubscription } from "./useSubscription";
 import { useAuth } from "./useAuth";
 import { useWorkspace } from "./useWorkspace";
 import { useWorkspaceAddons } from "./useWorkspaceAddons";
+import { featureLimits } from "@/lib/featureAccess";
 
 export const PLAN_LIMITS = {
   free: { leads: 10, ai_emails: 25, seats: 1 },
@@ -44,7 +45,7 @@ export function useEntitlements() {
     refetch();
   }, [refetch]);
 
-  const baseLimits = (PLAN_LIMITS as any)[tier] ?? PLAN_LIMITS.free;
+  const baseLimits = featureLimits(PLAN_LIMITS[tier] ?? PLAN_LIMITS.free, !!user && !!current);
   const { extraSeats, extraCredits, extraLeads } = useWorkspaceAddons();
 
   const leadsLimit = isFinite(baseLimits.leads)

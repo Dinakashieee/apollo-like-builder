@@ -6,17 +6,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
+import { hasPaidFeatureAccess } from "@/lib/featureAccess";
 
 export function ConnectInboxBanner() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { current } = useWorkspace();
   const { isActive } = useSubscription(user?.id);
+  const featureAccess = hasPaidFeatureAccess(!!user, isActive);
   const [hidden, setHidden] = useState(true);
   const [hasAccount, setHasAccount] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!user || !current || !isActive) {
+    if (!user || !current || !featureAccess) {
       setHidden(true);
       return;
     }
@@ -29,13 +31,13 @@ export function ConnectInboxBanner() {
       if (cancelled) return;
       const has = (accounts?.length ?? 0) > 0;
       setHasAccount(has);
-      const dismissed = !!profile?.inbox_prompt_dismissed_at;
-      const dismissedRecent = dismissed
-        && (Date.now() - new Date(profile!.inbox_prompt_dismissed_at!).getTime()) < 7 * 24 * 60 * 60 * 1000;
+      const dismissedAt = profile?.inbox_prompt_dismissed_at;
+      const dismissedRecent = !!dismissedAt
+        && (Date.now() - new Date(dismissedAt).getTime()) < 7 * 24 * 60 * 60 * 1000;
       setHidden(has || dismissedRecent);
     })();
     return () => { cancelled = true; };
-  }, [user, current, isActive]);
+  }, [user, current, featureAccess]);
 
   const dismiss = async () => {
     setHidden(true);
