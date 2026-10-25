@@ -1,4 +1,5 @@
 # Architecture
+- Personal dashboard summaries use an authenticated, workspace-membership-gated aggregation scoped to auth.uid(); calendar-to-date boundaries use the user's local timezone and email counts deduplicate latest message status before filtering.
 - Email sending breaks are persisted per authenticated user and enforced at enqueue and dispatch; paused outreach remains pending until explicit resume, while authentication and essential system emails continue.
 - Landing-page themes use a shared renderer and scoped semantic tokens for identical editor/public output; legacy templates remain supported without rewriting saved content.
 - The Landing Pages list reuses the editor preview renderer for a selected saved page, with a local sample when empty, so viewing previews never creates or publishes content.

@@ -24,6 +24,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { DemoDataPrompt } from "@/components/DemoDataPrompt";
 import { AddLeadDialog } from "@/components/AddLeadDialog";
+import { PersonalDashboardSummary } from "@/components/PersonalDashboardSummary";
 
 type TabKey =
   | "landing"
@@ -112,7 +113,7 @@ export default function Dashboard() {
       );
   }, [user]);
 
-  const active = TABS.find((t) => t.key === tab)!;
+  const active = TABS.find((t) => t.key === tab) ?? TABS[0];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -135,6 +136,8 @@ export default function Dashboard() {
           <AddLeadDialog onCreated={() => {}} />
         </div>
       </div>
+
+      <PersonalDashboardSummary />
 
       {/* Tabs container styled like the landing preview */}
       <div className="relative card-elevated overflow-hidden border border-border/60 shadow-elevated">
