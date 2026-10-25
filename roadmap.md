@@ -1,3 +1,6 @@
+# SignalHire waiting-state repair
+- [ ] Ensure completed/empty searches clear loading, recover saved results without relying on live notifications, and verify a signed-in search.
+
 # SignalHire ICP search repair
 - [x] Correct provider search filters and synchronous result handling; tests pass and real signed-in Phil Jones search completes without empty-parameters error (provider returned no match; no contact claim performed).
 
