@@ -1,3 +1,6 @@
+# SignalHire credit display
+- [ ] Show verified API account credits separately from workspace reveal credits; replace browser-only connection status and verify a real balance read.
+
 # SignalHire waiting-state repair
 - [x] Ensure completed/empty searches clear loading and recover saved results without relying on live notifications; seven tests pass and signed-in Stuart Crawford search clears loading with no matches in 8.5 seconds. Actual contact claim remains unverified because no provider match returned and the account has no reveal credits.
 
