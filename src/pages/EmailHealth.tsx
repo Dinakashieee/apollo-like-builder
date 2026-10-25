@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import {
   BREAK_MIN,
+  BURST_LIMIT,
+  BURST_WINDOW_MIN,
   DAILY_HEALTHY_LIMIT,
   fetchTodaySends,
   loadPace,
