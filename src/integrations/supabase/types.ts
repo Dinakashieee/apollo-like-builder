@@ -284,6 +284,53 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_work_updates: {
+        Row: {
+          blockers: string
+          completed: string
+          created_at: string
+          id: string
+          next_steps: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          work_date: string
+          workspace_id: string
+        }
+        Insert: {
+          blockers?: string
+          completed: string
+          created_at?: string
+          id?: string
+          next_steps?: string
+          timezone: string
+          updated_at?: string
+          user_id?: string
+          work_date: string
+          workspace_id: string
+        }
+        Update: {
+          blockers?: string
+          completed?: string
+          created_at?: string
+          id?: string
+          next_steps?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          work_date?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_work_updates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_requests: {
         Row: {
           company: string | null

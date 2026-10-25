@@ -1,3 +1,8 @@
+# Daily work updates through chat
+- [x] Add private per-user daily work updates with completed work, next steps and blockers.
+- [x] Add daily-update chat view with editing and saved history.
+- [x] Test validation and verify signed-in saving, reload, editing, deletion and ownership isolation; delete temporary verification update.
+
 # Sourced recommendations and decision-makers
 - [x] Scrape public evidence, retain source dates and distinguish checked sources from unsupported claims.
 - [x] Show decision-maker reasons, LinkedIn verification reminders, and SignalHire preview/claim controls.
