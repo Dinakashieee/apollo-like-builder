@@ -2266,6 +2266,13 @@ export type Database = {
         Args: { _workspace_id: string }
         Returns: number
       }
+      workspace_sends_today: {
+        Args: { _workspace_id: string }
+        Returns: {
+          recent: number
+          total: number
+        }[]
+      }
     }
     Enums: {
       app_role: "owner" | "member"
