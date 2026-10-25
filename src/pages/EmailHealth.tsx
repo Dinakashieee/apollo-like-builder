@@ -128,14 +128,22 @@ function scoreOf(checks: Check[]) {
 // messages, and in-app sends). The local mirror keeps the UI instant.
 
 export default function EmailHealth() {
+  const { current } = useWorkspace();
   const [domain, setDomain] = useState("");
   const [checks, setChecks] = useState<Check[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [pace, setPace] = useState<PaceState>(() => loadPace());
-  const [, force] = useState(0);
+  const [dbSends, setDbSends] = useState<{ total: number; recent: number } | null>(null);
+  const [tick, setTick] = useState(0);
+
+  const refreshSends = useCallback(async () => {
+    if (!current?.id) return;
+    const res = await fetchTodaySends(current.id);
+    if (res) setDbSends(res);
+  }, [current?.id]);
 
   useEffect(() => {
-    const id = setInterval(() => force((n) => n + 1), 30_000);
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
     return () => clearInterval(id);
   }, []);
 
@@ -143,8 +151,34 @@ export default function EmailHealth() {
     savePace(pace);
   }, [pace]);
 
+  // Auto-log: pull real send counts from the database on mount, every 30s,
+  // and whenever the tab regains focus. This covers scheduled sends and
+  // connected-mailbox messages, not just sends made inside the app.
+  useEffect(() => {
+    refreshSends();
+    const id = setInterval(refreshSends, 30_000);
+    const onFocus = () => refreshSends();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refreshSends]);
+
   const score = checks ? scoreOf(checks) : null;
-  const advice = useMemo(() => paceAdvice(pace), [pace]);
+  const sent = Math.max(pace.sent, dbSends?.total ?? 0);
+  const recent = Math.max(localRecent(pace), dbSends?.recent ?? 0);
+  const advice = useMemo(
+    () => paceAdvice(sent, recent, pace.pausedUntil),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sent, recent, pace.pausedUntil, tick],
+  );
+
+  // Popup nudge when the healthy pace is exceeded — driven by the DB count,
+  // so scheduled and connected-mailbox sends trigger it too.
+  useEffect(() => {
+    if (sent > 0) nudgeSendPace(sent, recent);
+  }, [sent, recent]);
 
   const handleCheck = async () => {
     if (!domain.trim()) {
