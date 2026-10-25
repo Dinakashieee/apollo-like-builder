@@ -11,13 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useEmailSendingState } from "@/hooks/useEmailSendingState";
 import {
   BREAK_MIN,
   DAILY_HEALTHY_LIMIT,
   PACE_EVENT,
-  loadPace,
   paceAdvice,
-  savePace,
 } from "@/lib/sendPace";
 
 type NudgeDetail = { sent: number; recent: number };
@@ -28,27 +27,30 @@ type NudgeDetail = { sent: number; recent: number };
  */
 export function SendPacePopup() {
   const [nudge, setNudge] = useState<NudgeDetail | null>(null);
+  const { paused, changing, setPaused } = useEmailSendingState();
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<NudgeDetail>).detail;
-      if (detail) setNudge(detail);
+      if (detail && !paused) setNudge(detail);
     };
     window.addEventListener(PACE_EVENT, handler);
     return () => window.removeEventListener(PACE_EVENT, handler);
-  }, []);
+  }, [paused]);
+
+  useEffect(() => { if (paused) setNudge(null); }, [paused]);
 
   const advice = nudge ? paceAdvice(nudge.sent, nudge.recent, null) : null;
   const pct = nudge ? Math.min(100, (nudge.sent / DAILY_HEALTHY_LIMIT) * 100) : 0;
 
-  const takeBreak = () => {
-    const p = loadPace();
-    savePace({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 });
-    toast({
-      title: "Break started",
-      description: `We'll nudge you again in ${BREAK_MIN} minutes.`,
-    });
-    setNudge(null);
+  const takeBreak = async () => {
+    try {
+      await setPaused(true);
+      toast({ title: "Break started", description: "Your email sending is paused until you choose Resume sending." });
+      setNudge(null);
+    } catch {
+      toast({ title: "Couldn't pause sending", description: "Please try again.", variant: "destructive" });
+    }
   };
 
   return (
@@ -115,8 +117,8 @@ export function SendPacePopup() {
           <Button variant="outline" onClick={() => setNudge(null)}>
             Keep going
           </Button>
-          <Button onClick={takeBreak} className="gap-1.5">
-            <Coffee className="h-3.5 w-3.5" /> Take a {BREAK_MIN}-min break
+          <Button onClick={takeBreak} className="gap-1.5" disabled={changing}>
+            <Coffee className="h-3.5 w-3.5" /> Take a break
           </Button>
         </DialogFooter>
       </DialogContent>

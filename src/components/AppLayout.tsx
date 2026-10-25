@@ -25,6 +25,7 @@ import { PresenceIndicator } from "./PresenceIndicator";
 import { ConnectInboxBanner } from "./ConnectInboxBanner";
 import { DemoDataBanner } from "./DemoDataBanner";
 import { SendPacePopup } from "./SendPacePopup";
+import { EmailSendingBreakBanner } from "./EmailSendingBreakBanner";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -120,6 +121,7 @@ export function AppLayout() {
             </div>
           </header>
           <main className="flex-1 overflow-auto">
+            <EmailSendingBreakBanner />
             <DemoDataBanner />
             <Outlet />
           </main>
