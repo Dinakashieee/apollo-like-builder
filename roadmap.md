@@ -1,3 +1,7 @@
+# Temporary paid-feature access
+- [ ] Unlock subscription-gated features for all signed-in workspace members without changing AI or SignalHire credit checks.
+- [ ] Test feature access and preserved usage checks; verify signed-in custom-color saving and reordering.
+
 # Daily work updates through chat
 - [x] Add private per-user daily work updates with completed work, next steps and blockers.
 - [x] Add daily-update chat view with editing and saved history.
