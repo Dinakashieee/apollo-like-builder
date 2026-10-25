@@ -145,7 +145,11 @@ export default function EmailHealth() {
   }, [current?.id]);
 
   useEffect(() => {
-    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    const id = setInterval(() => {
+      setTick((n) => n + 1);
+      // Pick up pace changes made elsewhere (e.g. "Take a break" in the popup)
+      setPace(loadPace());
+    }, 30_000);
     return () => clearInterval(id);
   }, []);
 
