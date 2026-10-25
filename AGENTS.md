@@ -1,5 +1,6 @@
 # Architecture
 - SignalHire discovery uses documented top-level Search API filters and persists synchronous profile previews; search previews never imply contact details have been revealed.
+- SignalHire waiting states consume synchronous results and use bounded saved-row reads alongside live notifications for asynchronous completion; transport failures clear loading without automatically replaying provider searches.
 - Daily work updates use a dedicated chat view with explicit review/save, local calendar dates, one editable entry per user/workspace/day, and owner-plus-membership RLS; no AI inference is needed to record user answers.
 - Public recommendation evidence is checked through a bounded shared scraper; source dates come from publication metadata, system/contact claims require verbatim company-specific evidence, and SignalHire handoffs require review of real provider results before claiming.
 - Company email context defaults are shared by both composers and applied per selected lead; personal signatures use user-owned rows with a profile default pointer, retain the legacy profile signature, and sanitize HTML previews.

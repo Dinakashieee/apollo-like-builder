@@ -53,6 +53,7 @@ import { PayPalSmartButtons } from "@/components/PayPalSmartButtons";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { researchLeadCompanies } from "@/lib/companySignals";
+import { savedSearchOutcome } from "@/lib/signalHireSearchState";
 
 type Lead = {
   id: string;
@@ -205,40 +206,54 @@ export default function SignalHire() {
     }
   }, []);
 
-  // Subscribe to the search row for realtime callback completion
+  // Read saved completion as well as live events: a completion can precede subscription.
   useEffect(() => {
-    if (!currentSearchId) return;
+    if (!currentSearchId || searchStatus !== 'pending') return;
+    let disposed = false;
+    let checking = false;
+    const started = Date.now();
+    const applyRow = (row: { status?: string; results?: unknown; error?: string | null }) => {
+      const outcome = savedSearchOutcome(row);
+      if (disposed || !outcome) return;
+      setSearchStatus(outcome.status);
+      setSearchError(outcome.error);
+      setResults(outcome.results.map((r: any) => ({
+        id: String(r.id), name: r.name || 'Unknown',
+        initials: (r.name || '?').split(' ').map((part: string) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase(),
+        company: r.company || '—', role: r.role || '—', email: r.email || '', status: r.email ? 'valid' : 'guess',
+      })));
+      setSearching(false);
+    };
+    const checkSaved = async () => {
+      if (disposed || checking) return;
+      if (Date.now() - started >= 60000) {
+        setSearchError('SignalHire has not returned a result yet. No new search was started automatically.');
+        setSearchStatus('failed');
+        setSearching(false);
+        return;
+      }
+      checking = true;
+      try {
+        const { data } = await supabase.from('signalhire_searches').select('status,results,error').eq('id', currentSearchId).maybeSingle();
+        if (data) applyRow(data);
+      } finally { checking = false; }
+    };
+    void checkSaved();
+    const timer = window.setInterval(() => { void checkSaved(); }, 2000);
     const ch = supabase
       .channel(`sh-search-${currentSearchId}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "signalhire_searches", filter: `id=eq.${currentSearchId}` },
         (payload: any) => {
-          const row = payload.new;
-          setSearchStatus(row.status);
-          if (row.status === "completed") {
-            const mapped: Lead[] = (row.results ?? []).map((r: any) => ({
-              id: String(r.id),
-              name: r.name || "Unknown",
-              initials: (r.name || "?").split(" ").map((p: string) => p[0]).filter(Boolean).slice(0, 2).join("").toUpperCase(),
-              company: r.company || "—",
-              role: r.role || "—",
-              email: r.email || "",
-              status: r.email ? "valid" : "guess",
-            }));
-            setResults(mapped);
-            setSearching(false);
-          } else if (row.status === "failed") {
-            setSearchError(row.error ?? "Search failed");
-            setSearching(false);
-          }
+          applyRow(payload.new);
         },
       )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [currentSearchId]);
+    return () => { disposed = true; window.clearInterval(timer); supabase.removeChannel(ch); };
+  }, [currentSearchId, searchStatus]);
 
-  const hasRealResults = currentSearchId !== null || !!contactPreview;
+  const hasRealResults = searchStatus !== 'idle' || currentSearchId !== null || !!contactPreview;
   const baseLeads = results;
 
   const filtered = useMemo(() => {
@@ -403,10 +418,15 @@ export default function SignalHire() {
     setSearching(true);
     setSearchError(null);
     setResults([]);
+    setSelected([]);
     setSearchStatus("pending");
     setCurrentSearchId(null);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 60000);
+    try {
     const { data, error } = await supabase.functions.invoke("signalhire-search", {
       body: { workspace_id: workspace.id, filters, size: 20 },
+      signal: controller.signal,
     });
     if (error || !data?.ok) {
       const msg = error?.message ?? (typeof data?.error === "string" ? data.error : JSON.stringify(data?.error ?? "Search failed"));
@@ -427,7 +447,19 @@ export default function SignalHire() {
       setSearching(false);
       toast({ title: 'Search complete', description: `${data.results.length} provider profiles returned. Verify the match before claiming.` });
     } else {
+      if (!data.search_id) throw new Error('SignalHire did not return a search result.');
       toast({ title: "Search submitted", description: "Results will appear shortly." });
+    }
+    } catch (error) {
+      const message = controller.signal.aborted
+        ? 'The search response took too long. No new search was started automatically.'
+        : error instanceof Error ? error.message : 'SignalHire search failed.';
+      setSearchError(message);
+      setSearchStatus('failed');
+      setSearching(false);
+      toast({ title: 'SignalHire search unavailable', description: message, variant: 'destructive' });
+    } finally {
+      window.clearTimeout(timeout);
     }
   };
 
@@ -781,6 +813,9 @@ export default function SignalHire() {
                   <div className="px-4 py-10 text-center text-sm text-muted-foreground">
                     No profiles matched. Try broadening your filters.
                   </div>
+                )}
+                {hasRealResults && searchStatus === 'failed' && (
+                  <div className="px-4 py-10 text-center text-sm text-destructive">{searchError || 'Search failed. Please try again.'}</div>
                 )}
                 {filtered.map((lead) => (
                   <div
