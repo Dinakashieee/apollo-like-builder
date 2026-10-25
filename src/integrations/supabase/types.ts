@@ -1816,6 +1816,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_email_sending_state: {
+        Row: {
+          paused: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          paused?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          paused?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_oauth_apps: {
         Row: {
           client_id: string
