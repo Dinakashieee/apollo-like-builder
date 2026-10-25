@@ -417,7 +417,18 @@ export default function SignalHire() {
       return;
     }
     setCurrentSearchId(data.search_id);
-    toast({ title: "Search submitted", description: "Results will appear shortly." });
+    if (data.status === 'completed' && Array.isArray(data.results)) {
+      setResults(data.results.map((r: any) => ({
+        id: String(r.id), name: r.name || 'Unknown',
+        initials: (r.name || '?').split(' ').map((part: string) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase(),
+        company: r.company || '—', role: r.role || '—', email: r.email || '', status: r.email ? 'valid' : 'guess',
+      })));
+      setSearchStatus('completed');
+      setSearching(false);
+      toast({ title: 'Search complete', description: `${data.results.length} provider profiles returned. Verify the match before claiming.` });
+    } else {
+      toast({ title: "Search submitted", description: "Results will appear shortly." });
+    }
   };
 
 

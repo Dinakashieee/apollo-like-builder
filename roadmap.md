@@ -1,4 +1,8 @@
 # Temporary paid-feature access
+# SignalHire ICP search repair
+- [ ] Correct provider search filters and synchronous result handling; test and verify a real signed-in search.
+
+# Temporary paid-feature access
 - [x] Unlock subscription-gated features for all signed-in workspace members without changing AI or SignalHire credit checks.
 - [x] Test feature access and preserved usage checks; verify signed-in custom-color saving, reload, reordering, and unrelated-workspace denial; restore original page.
 
