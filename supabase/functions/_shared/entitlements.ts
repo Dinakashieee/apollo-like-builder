@@ -1,6 +1,10 @@
 // Shared entitlement helpers for edge functions.
 // Caller must pass a service-role Supabase client.
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// Only RPC access is needed; structural typing also lets local tests exercise
+// these server helpers without loading a remote runtime dependency.
+type SupabaseClient = {
+  rpc(name: string, args: { _workspace_id: string }): PromiseLike<{ data: unknown }>;
+};
 
 export const FREE_LIMITS = {
   leads: 10,

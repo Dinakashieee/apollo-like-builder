@@ -1,6 +1,6 @@
 # Temporary paid-feature access
-- [ ] Unlock subscription-gated features for all signed-in workspace members without changing AI or SignalHire credit checks.
-- [ ] Test feature access and preserved usage checks; verify signed-in custom-color saving and reordering.
+- [x] Unlock subscription-gated features for all signed-in workspace members without changing AI or SignalHire credit checks.
+- [x] Test feature access and preserved usage checks; verify signed-in custom-color saving, reload, reordering, and unrelated-workspace denial; restore original page.
 
 # Daily work updates through chat
 - [x] Add private per-user daily work updates with completed work, next steps and blockers.
@@ -38,7 +38,7 @@
 - [x] Add campaign-matched starter themes and branding.
 - [x] Enable paid-plan colors and drag-and-drop with enforced access; image/logo uploads now available on all plans.
 - [x] Verify free-plan saving, public output, and rejected unauthorized colors and ordering.
-- [ ] Verify paid campaign import, custom-color save, drag-and-drop, and successful upload end-to-end — blocked: current account has no paid subscription.
+- [x] Verify custom-color saving and drag-and-drop end-to-end during temporary all-user access; uploads were verified separately. Campaign import remains covered by text-preservation tests.
 
 # Landing-page images for all users
 
