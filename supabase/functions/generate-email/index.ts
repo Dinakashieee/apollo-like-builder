@@ -1,16 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { checkAiEmailQuota, incrementAiEmails } from "../_shared/entitlements.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const inputSchema = z.object({ workspace_id: z.string().uuid(), lead_id: z.string().uuid(), tone: z.string().max(100).optional(),
+  meeting_attendees: z.string().max(1000).optional(), meeting_type: z.string().max(200).optional(), meeting_description: z.string().max(3000).optional(), awards: z.string().max(3000).optional(), signature_override: z.string().max(20000).optional() });
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const { workspace_id, lead_id, tone, meeting_attendees, meeting_type, meeting_description, awards, signature_override } = await req.json();
+    const parsed = inputSchema.safeParse(await req.json());
+    if (!parsed.success) return new Response(JSON.stringify({ error: "Invalid email details" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { workspace_id, lead_id, tone, signature_override } = parsed.data;
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized");
     const supabase = createClient(
@@ -48,11 +50,21 @@ serve(async (req) => {
 
     const [{ data: company }, { data: lead }, { data: products }, { data: profile }] = await Promise.all([
       supabase.from("company_profiles").select("*").eq("workspace_id", workspace_id).maybeSingle(),
-      supabase.from("leads").select("*").eq("id", lead_id).maybeSingle(),
+      supabase.from("leads").select("*").eq("id", lead_id).eq("workspace_id", workspace_id).maybeSingle(),
       supabase.from("products").select("name, description").eq("workspace_id", workspace_id),
-      supabase.from("profiles").select("full_name, email_signature, sender_name").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("full_name, email_signature, sender_name, default_email_signature_id").eq("id", user.id).maybeSingle(),
     ]);
     if (!lead) throw new Error("Lead not found");
+    const defaults = company?.email_context ?? {};
+    const meeting_type = parsed.data.meeting_type ?? defaults.meeting_type;
+    const meeting_attendees = parsed.data.meeting_attendees ?? defaults.meeting_attendees;
+    const meeting_description = parsed.data.meeting_description ?? defaults.meeting_description;
+    const awards = parsed.data.awards ?? defaults.awards ?? company?.positioning;
+    let defaultSignature = profile?.email_signature ?? "";
+    if (profile?.default_email_signature_id) {
+      const { data: saved } = await supabase.from("email_signatures").select("content").eq("id", profile.default_email_signature_id).eq("user_id", user.id).maybeSingle();
+      if (saved) defaultSignature = saved.content;
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
@@ -175,7 +187,7 @@ OUTPUT: Return ONLY the structured email via the tool call. Do not include any s
 
     // Append the user's signature: prefer explicit override from composer, fall back to saved profile signature.
     let body = args.body ?? "";
-    const signature = ((signature_override ?? profile?.email_signature) ?? "").trim();
+    const signature = (signature_override ?? defaultSignature).trim();
     if (signature) {
       body = `${body.trimEnd()}\n\n${signature}`;
     }
