@@ -25,6 +25,8 @@
 - [x] Verify free-user upload, generation, saving, and public image output.
 
 # Send pace coach
+- [ ] Persist per-user sending breaks, enforce across delivery paths, and provide Resume controls.
+- [ ] Verify pause isolation, queued-send deferral, and resume end-to-end.
 - [x] Auto-log real sends from the database into Email Health (50/day highlighted).
 - [x] Pop up a break reminder on bursts or approaching the daily ceiling.
 - [x] Fix delivery bugs found during verification: composer payload not reaching templates, and From address not matching the verified sending domain.
