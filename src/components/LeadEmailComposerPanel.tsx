@@ -21,6 +21,7 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { LeadConversation } from "@/components/LeadConversation";
 import { nudgeFromLocalPace, recordLocalSend } from "@/lib/sendPace";
+import { useEmailSendingState } from "@/hooks/useEmailSendingState";
 
 interface Props {
   lead: any;
@@ -29,6 +30,7 @@ interface Props {
 export function LeadEmailComposerPanel({ lead }: Props) {
   const { current } = useWorkspace();
   const { user } = useAuth();
+  const { paused, loading: sendingStateLoading, error: sendingStateError } = useEmailSendingState();
   const { aiEmailsUsed, aiEmailsLimit, aiEmailsAtLimit, aiEmailsNearLimit, tier, refetch } =
     useEntitlements();
 
@@ -106,6 +108,10 @@ export function LeadEmailComposerPanel({ lead }: Props) {
   const [sending, setSending] = useState(false);
 
   const sendDirect = async () => {
+    if (paused || sendingStateLoading || sendingStateError) {
+      toast({ title: paused ? "Email sending is paused" : "Checking your sending status", description: paused ? "Choose Resume sending to continue." : "Please try again shortly." });
+      return;
+    }
     if (!lead?.email) {
       toast({ title: "No email", description: "Add an email to this lead first.", variant: "destructive" });
       return;
@@ -315,7 +321,7 @@ export function LeadEmailComposerPanel({ lead }: Props) {
             <Button
               size="sm"
               onClick={sendDirect}
-              disabled={sending || (!subject && !body)}
+              disabled={sending || paused || sendingStateLoading || !!sendingStateError || (!subject && !body)}
               className="bg-gradient-primary shadow-glow"
             >
               {sending ? (
@@ -323,7 +329,7 @@ export function LeadEmailComposerPanel({ lead }: Props) {
               ) : (
                 <Send className="h-3.5 w-3.5 mr-1.5" />
               )}
-              {sending ? "Sending..." : "Send now"}
+              {paused ? "Sending paused" : sending ? "Sending..." : "Send now"}
             </Button>
           </div>
         </div>

@@ -16,6 +16,7 @@ import {
   Clock,
   TrendingUp,
   Target,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,8 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useEmailSendingState } from "@/hooks/useEmailSendingState";
 import {
-  BREAK_MIN,
   BURST_LIMIT,
   BURST_WINDOW_MIN,
   DAILY_HEALTHY_LIMIT,
@@ -131,6 +132,7 @@ function scoreOf(checks: Check[]) {
 
 export default function EmailHealth() {
   const { current } = useWorkspace();
+  const { paused, changing, setPaused } = useEmailSendingState();
   const [domain, setDomain] = useState("");
   const [checks, setChecks] = useState<Check[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -175,16 +177,18 @@ export default function EmailHealth() {
   const sent = Math.max(pace.sent, dbSends?.total ?? 0);
   const recent = Math.max(localRecent(pace), dbSends?.recent ?? 0);
   const advice = useMemo(
-    () => paceAdvice(sent, recent, pace.pausedUntil),
+    () => paused
+      ? { tone: "warn" as const, title: "Your sending is paused", body: "Your emails are on hold until you choose Resume sending. A 10-minute break is recommended; you can resume whenever you're ready." }
+      : paceAdvice(sent, recent, null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sent, recent, pace.pausedUntil, tick],
+    [sent, recent, paused, tick],
   );
 
   // Popup nudge when the healthy pace is exceeded — driven by the DB count,
   // so scheduled and connected-mailbox sends trigger it too.
   useEffect(() => {
-    if (sent > 0) nudgeSendPace(sent, recent);
-  }, [sent, recent]);
+    if (sent > 0 && !paused) nudgeSendPace(sent, recent);
+  }, [sent, recent, paused]);
 
   const handleCheck = async () => {
     if (!domain.trim()) {
@@ -211,11 +215,13 @@ export default function EmailHealth() {
     setPace(loadPace());
   };
 
-  const startBreak = () => {
-    const p = loadPace();
-    savePace({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 });
-    setPace(loadPace());
-    toast({ title: "Break started", description: `We'll nudge you in ${BREAK_MIN} minutes.` });
+  const startBreak = async () => {
+    try {
+      await setPaused(!paused);
+      toast({ title: paused ? "Sending resumed" : "Break started", description: paused ? "Your waiting emails can continue sending." : "Your email sending is paused until you resume." });
+    } catch {
+      toast({ title: "Couldn't change sending status", description: "Please try again.", variant: "destructive" });
+    }
   };
 
   const resetDay = () => {
@@ -422,15 +428,15 @@ export default function EmailHealth() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(1)}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5 h-auto min-h-9 whitespace-normal py-2" onClick={() => recordSend(1)}>
               <Plus className="h-3.5 w-3.5" /> Sent it elsewhere? Log it
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(10)}>
               <Plus className="h-3.5 w-3.5" /> +10 batch
             </Button>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={startBreak}>
-              <Coffee className="h-3.5 w-3.5" /> Take a break
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={startBreak} disabled={changing}>
+              {paused ? <Play className="h-3.5 w-3.5" /> : <Coffee className="h-3.5 w-3.5" />} {paused ? "Resume sending" : "Take a break"}
             </Button>
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={resetDay}>
               <RotateCcw className="h-3.5 w-3.5" /> Reset day

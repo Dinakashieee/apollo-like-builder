@@ -1816,6 +1816,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_email_sending_state: {
+        Row: {
+          paused: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          paused?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          paused?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_oauth_apps: {
         Row: {
           client_id: string
@@ -2133,6 +2151,10 @@ export type Database = {
         Returns: number
       }
       current_lead_count: { Args: { _workspace_id: string }; Returns: number }
+      defer_email_for_break: {
+        Args: { message_id: number }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
