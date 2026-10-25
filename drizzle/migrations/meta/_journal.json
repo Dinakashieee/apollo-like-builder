@@ -57,6 +57,13 @@
       "when": 1792965488760,
       "tag": "0007_defer_paused_email_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792965786278,
+      "tag": "0008_personal_dashboard_summary",
+      "breakpoints": true
     }
   ]
 }
