@@ -100,6 +100,9 @@ Deno.serve(async (req) => {
     }
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
+    } else if (body.template_data && typeof body.template_data === 'object') {
+      // The app's composer sends snake_case; accept both spellings.
+      templateData = body.template_data
     }
   } catch {
     return new Response(
