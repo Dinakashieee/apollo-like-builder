@@ -345,7 +345,21 @@ export default function EmailHealth() {
             <div className="min-w-0">
               <h2 className="text-lg font-semibold">Send pace coach</h2>
               <p className="text-xs text-muted-foreground">
-                Healthy sending means breaks. We help you stay under spam-trigger limits.
+                Healthy sending means breaks. Every email you send is logged automatically.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 flex items-start gap-3">
+            <div className="h-9 w-9 rounded-lg bg-primary/15 grid place-items-center shrink-0">
+              <Target className="h-4.5 w-4.5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-primary-deep">
+                {DAILY_HEALTHY_LIMIT} emails a day = best email health
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                The sweet spot for inbox placement and reply rates. Go past it and we'll pop up a reminder to take a break.
               </p>
             </div>
           </div>
@@ -377,16 +391,21 @@ export default function EmailHealth() {
 
           <div>
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted-foreground font-medium">Today's sends</span>
+              <span className="text-muted-foreground font-medium flex items-center gap-1.5">
+                Today's sends
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-1.5 py-0.5">
+                  Auto-logged
+                </span>
+              </span>
               <span className="font-semibold">
-                {pace.sent} / {DAILY_LIMIT}
+                {sent} / {DAILY_HEALTHY_LIMIT}
               </span>
             </div>
             <div className="h-2 rounded-full bg-muted overflow-hidden">
               <div
                 className={cn(
                   "h-full transition-all",
-                  dailyPct >= 100 ? "bg-destructive" : dailyPct >= 75 ? "bg-warning" : "bg-primary"
+                  dailyPct >= 100 ? "bg-destructive" : dailyPct >= 80 ? "bg-warning" : "bg-primary"
                 )}
                 style={{ width: `${dailyPct}%` }}
               />
@@ -395,7 +414,7 @@ export default function EmailHealth() {
 
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(1)}>
-              <Plus className="h-3.5 w-3.5" /> Logged a send
+              <Plus className="h-3.5 w-3.5" /> Sent it elsewhere? Log it
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(10)}>
               <Plus className="h-3.5 w-3.5" /> +10 batch
@@ -414,12 +433,12 @@ export default function EmailHealth() {
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Inbox providers watch volume and rhythm. Sending {BURST_LIMIT}+ emails in {BURST_WINDOW_MIN} minutes — or more
-              than {DAILY_LIMIT} in a day — from a fresh domain is the fastest way into spam. Short breaks protect your
-              reputation and your reply rate.
+              than {DAILY_HEALTHY_LIMIT} in a day — from a fresh domain is the fastest way into spam. Short breaks protect
+              your reputation and your reply rate.
             </p>
           </div>
 
-          {pace.sent > 0 && (
+          {sent > 0 && (
             <button
               onClick={() => recordSend(-1)}
               className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
