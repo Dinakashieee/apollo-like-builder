@@ -1,6 +1,10 @@
 // Shared entitlement helpers for edge functions.
 // Caller must pass a service-role Supabase client.
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// Only RPC access is needed; structural typing also lets local tests exercise
+// these server helpers without loading a remote runtime dependency.
+type SupabaseClient = {
+  rpc(name: string, args: { _workspace_id: string }): PromiseLike<{ data: unknown }>;
+};
 
 export const FREE_LIMITS = {
   leads: 10,
@@ -23,6 +27,8 @@ export const SCALE_LIMITS = {
 } as const;
 
 export type Tier = "free" | "starter" | "growth" | "scale" | "pro";
+// Keep feature access separate from AI and contact-reveal allowances.
+export const TEMPORARY_FEATURE_ACCESS = true;
 
 export async function getWorkspaceTier(
   admin: SupabaseClient,
@@ -82,6 +88,7 @@ export async function checkLeadQuota(
   admin: SupabaseClient,
   workspaceId: string,
 ): Promise<{ blocked: true; reason: string; tier: Tier; used: number; limit: number } | null> {
+  if (TEMPORARY_FEATURE_ACCESS) return null;
   const tier = await getWorkspaceTier(admin, workspaceId);
   const limit =
     tier === "free" ? FREE_LIMITS.leads
