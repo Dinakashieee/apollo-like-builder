@@ -124,50 +124,8 @@ function scoreOf(checks: Check[]) {
 }
 
 // --- Send pace coach ---
-const PACE_KEY = "email_pace_v1";
-type PaceState = { date: string; sent: number; lastSendAt: number | null; pausedUntil: number | null };
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function loadPace(): PaceState {
-  try {
-    const raw = localStorage.getItem(PACE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw) as PaceState;
-      if (p.date === todayStr()) return p;
-    }
-  } catch {}
-  return { date: todayStr(), sent: 0, lastSendAt: null, pausedUntil: null };
-}
-
-function savePace(p: PaceState) {
-  localStorage.setItem(PACE_KEY, JSON.stringify(p));
-}
-
-const DAILY_LIMIT = 200;
-const BURST_LIMIT = 25;
-const BURST_WINDOW_MIN = 15;
-const BREAK_MIN = 10;
-
-function paceAdvice(p: PaceState): { tone: "good" | "warn" | "bad"; title: string; body: string } {
-  const now = Date.now();
-  if (p.pausedUntil && p.pausedUntil > now) {
-    const min = Math.ceil((p.pausedUntil - now) / 60000);
-    return { tone: "warn", title: `Take a ${min}-minute break`, body: "You're on a cool-down. Inboxes love consistent, human-paced sending." };
-  }
-  if (p.sent >= DAILY_LIMIT) {
-    return { tone: "bad", title: "Daily cap reached", body: `You've sent ${p.sent} emails today. Stop here — anything more puts your domain reputation at risk.` };
-  }
-  if (p.sent >= BURST_LIMIT && p.lastSendAt && now - p.lastSendAt < BURST_WINDOW_MIN * 60_000) {
-    return { tone: "warn", title: "Slow down", body: `You sent a burst recently. Take ${BREAK_MIN} minutes off to stay below spam triggers.` };
-  }
-  if (p.sent >= DAILY_LIMIT * 0.75) {
-    return { tone: "warn", title: "Approaching daily cap", body: `Only ${DAILY_LIMIT - p.sent} sends left today. Pace the rest.` };
-  }
-  return { tone: "good", title: "You're pacing well", body: "Keep batches small and spread sends across the day for the best inbox rate." };
-}
+// Sends are auto-logged from the database (scheduled sends, connected-mailbox
+// messages, and in-app sends). The local mirror keeps the UI instant.
 
 export default function EmailHealth() {
   const [domain, setDomain] = useState("");
