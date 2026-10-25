@@ -17,6 +17,9 @@
 - [ ] Verify paid campaign import, custom-color save, drag-and-drop, and successful upload end-to-end — blocked: current account has no paid subscription.
 
 # Landing-page images for all users
+
+# AI brand color matching
+- [x] Match landing-page colors to a company URL with AI, alongside the four-palette picker.
 - [x] Allow free-user uploads and saved cover images while retaining paid color/order restrictions.
 - [x] Add OpenAI image creation with workspace access and AI allowance checks.
 - [x] Verify free-user upload, generation, saving, and public image output.
