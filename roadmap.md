@@ -1,6 +1,5 @@
-# Temporary paid-feature access
 # SignalHire ICP search repair
-- [ ] Correct provider search filters and synchronous result handling; test and verify a real signed-in search.
+- [x] Correct provider search filters and synchronous result handling; tests pass and real signed-in Phil Jones search completes without empty-parameters error (provider returned no match; no contact claim performed).
 
 # Temporary paid-feature access
 - [x] Unlock subscription-gated features for all signed-in workspace members without changing AI or SignalHire credit checks.

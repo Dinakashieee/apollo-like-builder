@@ -27,7 +27,7 @@ export function normalizeSearchProfiles(profiles: unknown[]) {
       id: String(p.uid ?? p.id ?? i),
       name: p.fullName ?? p.name ?? [p.firstName, p.lastName].filter(Boolean).join(' ') ?? 'Unknown',
       company: p.currentCompany ?? experience.company ?? p.company ?? '',
-      role: p.currentTitle ?? experience.position ?? p.title ?? p.headline ?? '',
+      role: p.currentTitle ?? experience.title ?? experience.position ?? p.title ?? p.headline ?? '',
       email: '', // Search previews do not reveal contact details.
       linkedin: p.linkedin ?? p.linkedinUrl ?? p.social?.find?.((s: any) => s.type === 'li')?.link ?? null,
     };
