@@ -9,9 +9,9 @@
 - [x] Test calendar date boundaries; verify signed-in period switching, saved personal page count, owner-filtered lead count, and denial of unrelated workspace access.
 
 # Company email defaults and personal signatures
-- [ ] Save meeting and credential defaults on Company; apply them automatically in both email composers.
-- [ ] Add multiple per-user signatures with default selection, editing, deletion, and composer selection.
-- [ ] Verify saved defaults and personal signature selection with signed-in user isolation checks.
+- [x] Save meeting and credential defaults on Company; apply them automatically in both email composers.
+- [x] Add multiple per-user signatures with default selection, editing, deletion, and composer selection.
+- [x] Verify saved defaults and personal signature selection, editing, deletion, stored current-user ownership, and rejected alternative ownership through signed-in requests; remove temporary test values.
 
 # Landing page themes
 - [x] Show and verify an immediate side preview on the Landing Pages screen.
