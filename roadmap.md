@@ -1,5 +1,5 @@
 # SignalHire waiting-state repair
-- [ ] Ensure completed/empty searches clear loading, recover saved results without relying on live notifications, and verify a signed-in search.
+- [x] Ensure completed/empty searches clear loading and recover saved results without relying on live notifications; seven tests pass and signed-in Stuart Crawford search clears loading with no matches in 8.5 seconds. Actual contact claim remains unverified because no provider match returned and the account has no reveal credits.
 
 # SignalHire ICP search repair
 - [x] Correct provider search filters and synchronous result handling; tests pass and real signed-in Phil Jones search completes without empty-parameters error (provider returned no match; no contact claim performed).
