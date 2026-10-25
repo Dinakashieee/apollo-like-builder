@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -161,6 +162,8 @@ ${rows}
 }
 
 export default function SignalHire() {
+  const [contactParams] = useSearchParams();
+  const contactPreview = contactParams.get("name")?.slice(0, 200) ?? "";
   const [lists, setLists] = useState(INITIAL_LISTS);
   const [activeList, setActiveList] = useState("LinkedIn Leads");
   const [selected, setSelected] = useState<string[]>([]);
@@ -179,10 +182,10 @@ export default function SignalHire() {
   const { balance: signalhireBalance, lifetimePurchased, refetch: refetchCredits } = useSignalHireCredits();
 
   // Filter inputs
-  const [fName, setFName] = useState("");
-  const [fJobTitle, setFJobTitle] = useState("");
+  const [fName, setFName] = useState(contactPreview);
+  const [fJobTitle, setFJobTitle] = useState(contactParams.get("role")?.slice(0, 200) ?? "");
   const [fLocation, setFLocation] = useState("");
-  const [fCompany, setFCompany] = useState("");
+  const [fCompany, setFCompany] = useState(contactParams.get("company")?.slice(0, 200) ?? "");
   const [fIndustry, setFIndustry] = useState("");
 
   // Real results
@@ -196,7 +199,7 @@ export default function SignalHire() {
     const dismissed = localStorage.getItem("signalhire_connect_dismissed");
     const saved = localStorage.getItem("signalhire_connected");
     if (saved === "true") setConnected(true);
-    if (!dismissed && saved !== "true") {
+    if (!contactPreview && !dismissed && saved !== "true") {
       const t = setTimeout(() => setShowConnectModal(true), 400);
       return () => clearTimeout(t);
     }
@@ -324,7 +327,11 @@ export default function SignalHire() {
       setShowUpgradeModal(true);
       return;
     }
-    const rows = baseLeads.filter((l) => selected.includes(l.id));
+    const rows = results.filter((l) => selected.includes(l.id));
+    if (!rows.length) {
+      toast({ title: "Search SignalHire first", description: "Only returned provider results can be claimed.", variant: "destructive" });
+      return;
+    }
     setClaiming(true);
     let claimed = 0;
     for (const lead of rows) {
@@ -415,6 +422,14 @@ export default function SignalHire() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
+      {contactPreview && <section className="border-b border-border pb-4 space-y-2">
+        <h2 className="text-lg font-semibold">Contact preview · {contactPreview}</h2>
+        <p className="text-sm text-muted-foreground">{fJobTitle} · {fCompany}</p>
+        <p className="text-xs text-warning">Verify this person’s identity, current company and role on LinkedIn before approaching. Search results are provider-reported; compare them with this preview before claiming.</p>
+        <p className="text-xs text-muted-foreground">No email or phone has been claimed. Claiming a returned person uses your existing SignalHire credits.</p>
+        <Button onClick={handleSearch} disabled={searching || searchStatus === "pending"}><Search className="h-4 w-4 mr-2" /> Find matching details in SignalHire</Button>
+      </section>}
+
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground font-medium mb-1">

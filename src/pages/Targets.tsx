@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DecisionMakerPreview } from "@/components/DecisionMakerPreview";
 import { Link } from "react-router-dom";
 import { Sparkles, Target, RefreshCw, Building2, ExternalLink, Users, Crosshair, CheckCircle2, Flag, Layers, Linkedin, ShieldCheck, ShieldOff, HelpCircle, X, TrendingUp, Lock, Plus, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ interface RefLink {
   label: string;
   url: string;
   type?: RefType;
+  publication_year?: number | null;
+  checked_at?: string;
+  verification?: "page_checked" | "search_only";
 }
 
 function refType(r: RefLink): RefType {
@@ -33,7 +37,7 @@ function RefChip({ r }: { r: RefLink }) {
     t === "pdf"
       ? "bg-warm/10 text-warm border-warm/30"
       : t === "linkedin"
-      ? "bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/30"
+      ? "bg-primary/10 text-primary border-primary/30"
       : "bg-primary/5 text-primary border-primary/15";
   return (
     <a
@@ -43,6 +47,7 @@ function RefChip({ r }: { r: RefLink }) {
       className={`inline-flex items-center gap-1 text-[11px] hover:underline border rounded px-2 py-0.5 ${tone}`}
     >
       <Icon className="h-3 w-3" />
+      <span>{r.publication_year ?? "Year unavailable"} · {r.verification === "page_checked" ? "Page checked" : "Not verified"}</span>
       <span className="truncate max-w-[200px]">{r.label || (t === "linkedin" ? "LinkedIn" : t === "pdf" ? "PDF" : "Link")}</span>
     </a>
   );
@@ -62,6 +67,9 @@ interface IcpContact {
   full_name: string;
   role: string;
   linkedin_url: string;
+  why_selected?: string;
+  source_url?: string;
+  publication_year?: number | null;
 }
 
 interface TargetCompany {
@@ -792,7 +800,7 @@ export default function Targets() {
                   <div className="min-w-0">
                     <h3 className="font-display font-bold text-primary-deep truncate">{title}</h3>
                     {t.website && (
-                      <p className="text-xs text-muted-foreground italic">Website revealed after claiming</p>
+                      <a href={t.website} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline break-all">{t.website}</a>
                     )}
                   </div>
                   <span className={`text-[10px] font-bold border px-2 py-1 rounded-md whitespace-nowrap ${lvl.color}`}>
@@ -826,19 +834,11 @@ export default function Targets() {
                     ))}
                   </div>
                 )}
-                <div className="mt-1 mb-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center">
-                  <p className="text-sm font-semibold text-primary-deep flex items-center justify-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5" /> Claim to unlock the full brief
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Website, pain points, why-you-fit, decision-maker LinkedIn profiles, designations & verifiable references all appear in your Leads once you claim.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3 text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Crosshair className="h-3 w-3" /> Their problem</span>
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Users className="h-3 w-3" /> {t.icp_contacts?.length ?? 0} ICP contacts</span>
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><Linkedin className="h-3 w-3" /> LinkedIn + SignalHire</span>
-                    <span className="inline-flex items-center gap-1 bg-card border border-border rounded-full px-2 py-0.5"><ExternalLink className="h-3 w-3" /> {t.references?.length ?? 0} references</span>
-                  </div>
+                <div className="my-3 space-y-3">
+                  <p className="text-xs text-muted-foreground">Sources support the observations below; fit and outreach angles are assessments, not proof of buying intent.</p>
+                  <p className="text-sm">{t.problem}</p>
+                  {t.references?.length ? <div className="flex flex-wrap gap-1.5">{t.references.map((r, j) => <RefChip key={j} r={r} />)}</div> : <p className="text-xs text-warning">No checked sources saved. Refresh research before using these claims.</p>}
+                  <DecisionMakerPreview company={title} contacts={t.icp_contacts ?? []} />
                 </div>
                 <div className="border-t border-border/60 pt-4 mt-4 flex items-center justify-between gap-3 flex-wrap">
                   <p className="text-[11px] text-muted-foreground leading-tight flex-1 min-w-[140px]">
@@ -991,25 +991,9 @@ export default function Targets() {
                 </Section>
               )}
 
-              {revealed.icp_contacts && revealed.icp_contacts.length > 0 && (
-                <Section title="ICP contacts" icon={Users}>
-                  <div className="space-y-2">
-                    {revealed.icp_contacts.map((c, i) => (
-                      <div key={i} className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border/60 bg-muted/20">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-primary-deep">{c.full_name}</p>
-                          <p className="text-xs text-muted-foreground">{c.role}</p>
-                        </div>
-                        {c.linkedin_url && (
-                          <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 shrink-0">
-                            <Linkedin className="h-3 w-3" /> LinkedIn
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </Section>
-              )}
+              <Section title="Decision-maker preview" icon={Users}>
+                <DecisionMakerPreview company={revealed.company ?? revealed.type ?? "Company"} contacts={revealed.icp_contacts ?? []} />
+              </Section>
 
               {revealed.focus_areas && revealed.focus_areas.length > 0 && (
                 <Section title="Focus areas" icon={Target}>
