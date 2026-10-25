@@ -13,7 +13,6 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useEmailSendingState } from "@/hooks/useEmailSendingState";
 import {
-  BREAK_MIN,
   DAILY_HEALTHY_LIMIT,
   PACE_EVENT,
   paceAdvice,

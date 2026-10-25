@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useEmailSendingState } from "@/hooks/useEmailSendingState";
 import {
-  BREAK_MIN,
   BURST_LIMIT,
   BURST_WINDOW_MIN,
   DAILY_HEALTHY_LIMIT,
@@ -429,8 +428,8 @@ export default function EmailHealth() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(1)}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5 h-auto min-h-9 whitespace-normal py-2" onClick={() => recordSend(1)}>
               <Plus className="h-3.5 w-3.5" /> Sent it elsewhere? Log it
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(10)}>
