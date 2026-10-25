@@ -2,6 +2,7 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+import { isUserSendingPaused } from '../_shared/email-sending-break.ts'
 
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
@@ -89,8 +90,10 @@ Deno.serve(async (req) => {
   let messageId: string
   let templateData: Record<string, any> = {}
   let requestedWorkspaceId: string | null = null
+  let trustedSenderUserId: string | null = null
   try {
     const body = await req.json()
+    if (isServiceRole && typeof body.sender_user_id === 'string') trustedSenderUserId = body.sender_user_id
     templateName = body.templateName || body.template_name
     recipientEmail = body.recipientEmail || body.recipient_email
     messageId = crypto.randomUUID()
@@ -159,6 +162,21 @@ Deno.serve(async (req) => {
 
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const senderUserId = isServiceRole ? trustedSenderUserId : typeof claims?.sub === 'string' ? claims.sub : null
+  const isOutreach = templateName === 'lead-outreach' || (isServiceRole && !!trustedSenderUserId)
+  if (isOutreach) {
+    try {
+      if (await isUserSendingPaused(supabase, senderUserId)) {
+        return new Response(JSON.stringify({ error: 'Your email sending is paused. Choose Resume sending to continue.', code: 'sending_paused' }), {
+          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: 'Unable to verify email sending status' }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
 
   // Per-template recipient ownership validation for end-user callers.
   // Service-role callers (server-to-server) bypass this since they already
@@ -260,13 +278,13 @@ Deno.serve(async (req) => {
       const { data: ws } = await supabase
         .from('workspace_members')
         .select('workspace_id')
-        .eq('user_id', claims!.sub as string)
+        .eq('user_id', senderUserId ?? '')
         .eq('workspace_id', requestedWorkspaceId)
         .limit(1)
       trackedWorkspaceId = ws && ws.length ? requestedWorkspaceId : null
     }
   }
-  const sendMetadata = trackedWorkspaceId ? { workspace_id: trackedWorkspaceId } : undefined
+  const sendMetadata = { workspace_id: trackedWorkspaceId, sender_user_id: senderUserId, pause_sensitive: isOutreach }
 
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
@@ -468,6 +486,8 @@ Deno.serve(async (req) => {
       unsubscribe_token: unsubscribeToken,
       queued_at: new Date().toISOString(),
       workspace_id: trackedWorkspaceId ?? undefined,
+      sender_user_id: senderUserId ?? undefined,
+      pause_sensitive: isOutreach,
     },
   })
 

@@ -1,5 +1,6 @@
 import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { isUserSendingPaused } from '../_shared/email-sending-break.ts'
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -192,6 +193,20 @@ Deno.serve(async (req) => {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i]
       const payload = msg.message
+      const pauseSensitive = queue === 'transactional_emails' && payload.pause_sensitive === true
+      const senderUserId = typeof payload.sender_user_id === 'string' ? payload.sender_user_id : null
+      if (pauseSensitive) {
+        try {
+          if (!senderUserId || await isUserSendingPaused(supabase, senderUserId)) {
+            await supabase.rpc('defer_email_for_break', { message_id: msg.msg_id })
+            continue
+          }
+        } catch {
+          // A status lookup outage must never bypass a user's break.
+          await supabase.rpc('defer_email_for_break', { message_id: msg.msg_id })
+          continue
+        }
+      }
       const failedAttempts =
         payload?.message_id && typeof payload.message_id === 'string'
           ? (failedAttemptsByMessageId.get(payload.message_id) ?? 0)
@@ -201,7 +216,9 @@ Deno.serve(async (req) => {
       // Prefer payload.queued_at when present; fall back to PGMQ's enqueued_at
       // which is always set by the queue.
       const queuedAt = payload.queued_at ?? msg.enqueued_at
-      if (queuedAt) {
+      // User outreach is durable: a voluntary break must not expire waiting mail.
+      // Authentication and other transactional messages retain their short TTL.
+      if (queuedAt && !pauseSensitive) {
         const ageMs = Date.now() - new Date(queuedAt).getTime()
         const maxAgeMs = ttlMinutes[queue] * 60 * 1000
         if (ageMs > maxAgeMs) {
@@ -276,10 +293,7 @@ Deno.serve(async (req) => {
           template_name: payload.label || queue,
           recipient_email: payload.to,
           status: 'sent',
-          metadata:
-            typeof payload.workspace_id === 'string' && payload.workspace_id
-              ? { workspace_id: payload.workspace_id }
-              : undefined,
+          metadata: { workspace_id: payload.workspace_id, sender_user_id: senderUserId },
         })
 
         // Delete from queue

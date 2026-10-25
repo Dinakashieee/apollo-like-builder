@@ -2,6 +2,7 @@
 // Sends due rows from public.scheduled_emails using the built-in transactional sender,
 // or marks them sent if they were prepared for the user's connected mailbox (handled client-side).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isUserSendingPaused } from "../_shared/email-sending-break.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,16 @@ Deno.serve(async (req) => {
       .limit(20);
     const results: any[] = [];
     for (const row of due ?? []) {
+      // Leave paused emails pending; never mark them failed or sent.
+      try {
+        if (await isUserSendingPaused(admin, row.user_id)) {
+          results.push({ id: row.id, deferred: true });
+          continue;
+        }
+      } catch {
+        results.push({ id: row.id, deferred: true });
+        continue;
+      }
       try {
         if (row.send_via === "builtin") {
           const r = await admin.functions.invoke("send-transactional-email", {
@@ -38,9 +49,17 @@ Deno.serve(async (req) => {
               recipientEmail: row.to_email,
               idempotencyKey: `scheduled-${row.id}`,
               templateData: { subject: row.subject, body: row.body },
+              sender_user_id: row.user_id,
+              workspace_id: row.workspace_id,
             },
           });
-          if (r.error) throw new Error(r.error.message);
+          if (r.error) {
+            if (r.error.context?.status === 409 || r.error.context?.status === 503) {
+              results.push({ id: row.id, deferred: true });
+              continue;
+            }
+            throw new Error(r.error.message);
+          }
         }
         // For 'connected' / 'mailto' the client handles sending; cron just marks attempted.
         await admin.from("scheduled_emails")
