@@ -13,7 +13,7 @@ const SENDER_DOMAIN = "notify.www.engageiqlk.com"
 // FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
 // When display_from_root is enabled, this can be the root domain for cleaner branding,
 // even though actual sending uses the subdomain above.
-const FROM_DOMAIN = "engageiqlk.com"
+const FROM_DOMAIN = "www.engageiqlk.com"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -88,14 +88,21 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  let requestedWorkspaceId: string | null = null
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
     recipientEmail = body.recipientEmail || body.recipient_email
     messageId = crypto.randomUUID()
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
+    if (typeof body.workspace_id === 'string' && body.workspace_id) {
+      requestedWorkspaceId = body.workspace_id
+    }
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
+    } else if (body.template_data && typeof body.template_data === 'object') {
+      // The app's composer sends snake_case; accept both spellings.
+      templateData = body.template_data
     }
   } catch {
     return new Response(
@@ -240,6 +247,26 @@ Deno.serve(async (req) => {
       )
     }
   }
+
+  // Validate the optional workspace_id used for send-pace tracking. It is only
+  // stamped into the send log metadata when the caller is a member of that
+  // workspace, so the pace counter can attribute the send. Invalid ids are
+  // dropped rather than failing the send — tracking is non-critical.
+  let trackedWorkspaceId: string | null = null
+  if (requestedWorkspaceId) {
+    if (isServiceRole) {
+      trackedWorkspaceId = requestedWorkspaceId
+    } else {
+      const { data: ws } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', claims!.sub as string)
+        .eq('workspace_id', requestedWorkspaceId)
+        .limit(1)
+      trackedWorkspaceId = ws && ws.length ? requestedWorkspaceId : null
+    }
+  }
+  const sendMetadata = trackedWorkspaceId ? { workspace_id: trackedWorkspaceId } : undefined
 
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
@@ -422,6 +449,7 @@ Deno.serve(async (req) => {
     template_name: templateName,
     recipient_email: effectiveRecipient,
     status: 'pending',
+    metadata: sendMetadata,
   })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
@@ -439,6 +467,7 @@ Deno.serve(async (req) => {
       idempotency_key: idempotencyKey,
       unsubscribe_token: unsubscribeToken,
       queued_at: new Date().toISOString(),
+      workspace_id: trackedWorkspaceId ?? undefined,
     },
   })
 

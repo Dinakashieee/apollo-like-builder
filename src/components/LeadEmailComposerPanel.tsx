@@ -20,6 +20,7 @@ import { logActivity } from "@/lib/activities";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { LeadConversation } from "@/components/LeadConversation";
+import { nudgeFromLocalPace, recordLocalSend } from "@/lib/sendPace";
 
 interface Props {
   lead: any;
@@ -118,6 +119,7 @@ export function LeadEmailComposerPanel({ lead }: Props) {
           recipient_email: lead.email,
           template_data: { subject, body, signature: signatureOverride },
           idempotency_key: `lead-${lead.id}-${Date.now()}`,
+          workspace_id: current?.id,
         },
       });
       if (error) throw error;
@@ -130,6 +132,9 @@ export function LeadEmailComposerPanel({ lead }: Props) {
           `Email sent to ${lead.contact_name || lead.email}`,
         );
       }
+      // Send-pace coach: auto-log the send and nudge when over the healthy pace.
+      recordLocalSend(1);
+      nudgeFromLocalPace();
       toast({ title: "Email queued", description: `Sending to ${lead.email}` });
     } catch (e: any) {
       toast({ title: "Send failed", description: e?.message ?? "Try again", variant: "destructive" });

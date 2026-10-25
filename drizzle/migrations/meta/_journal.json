@@ -36,6 +36,13 @@
       "when": 1792860849435,
       "tag": "0004_landing_images_for_all_members",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792962771277,
+      "tag": "0005_workspace_sends_today",
+      "breakpoints": true
     }
   ]
 }

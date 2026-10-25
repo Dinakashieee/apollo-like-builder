@@ -23,3 +23,9 @@
 - [x] Allow free-user uploads and saved cover images while retaining paid color/order restrictions.
 - [x] Add OpenAI image creation with workspace access and AI allowance checks.
 - [x] Verify free-user upload, generation, saving, and public image output.
+
+# Send pace coach
+- [x] Auto-log real sends from the database into Email Health (50/day highlighted).
+- [x] Pop up a break reminder on bursts or approaching the daily ceiling.
+- [x] Fix delivery bugs found during verification: composer payload not reaching templates, and From address not matching the verified sending domain.
+- [x] Verify end-to-end: real sends counted, popup fires, break syncs to the page.

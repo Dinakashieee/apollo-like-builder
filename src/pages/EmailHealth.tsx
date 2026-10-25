@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ShieldCheck,
   Mail,
@@ -15,12 +15,29 @@ import {
   Sparkles,
   Clock,
   TrendingUp,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useWorkspace } from "@/hooks/useWorkspace";
+import {
+  BREAK_MIN,
+  BURST_LIMIT,
+  BURST_WINDOW_MIN,
+  DAILY_HEALTHY_LIMIT,
+  fetchTodaySends,
+  loadPace,
+  localRecent,
+  nudgeSendPace,
+  paceAdvice,
+  recordLocalSend,
+  savePace,
+  todayStr,
+  type PaceState,
+} from "@/lib/sendPace";
 
 type CheckStatus = "pass" | "warn" | "fail";
 type Check = {
@@ -109,60 +126,30 @@ function scoreOf(checks: Check[]) {
 }
 
 // --- Send pace coach ---
-const PACE_KEY = "email_pace_v1";
-type PaceState = { date: string; sent: number; lastSendAt: number | null; pausedUntil: number | null };
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function loadPace(): PaceState {
-  try {
-    const raw = localStorage.getItem(PACE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw) as PaceState;
-      if (p.date === todayStr()) return p;
-    }
-  } catch {}
-  return { date: todayStr(), sent: 0, lastSendAt: null, pausedUntil: null };
-}
-
-function savePace(p: PaceState) {
-  localStorage.setItem(PACE_KEY, JSON.stringify(p));
-}
-
-const DAILY_LIMIT = 200;
-const BURST_LIMIT = 25;
-const BURST_WINDOW_MIN = 15;
-const BREAK_MIN = 10;
-
-function paceAdvice(p: PaceState): { tone: "good" | "warn" | "bad"; title: string; body: string } {
-  const now = Date.now();
-  if (p.pausedUntil && p.pausedUntil > now) {
-    const min = Math.ceil((p.pausedUntil - now) / 60000);
-    return { tone: "warn", title: `Take a ${min}-minute break`, body: "You're on a cool-down. Inboxes love consistent, human-paced sending." };
-  }
-  if (p.sent >= DAILY_LIMIT) {
-    return { tone: "bad", title: "Daily cap reached", body: `You've sent ${p.sent} emails today. Stop here — anything more puts your domain reputation at risk.` };
-  }
-  if (p.sent >= BURST_LIMIT && p.lastSendAt && now - p.lastSendAt < BURST_WINDOW_MIN * 60_000) {
-    return { tone: "warn", title: "Slow down", body: `You sent a burst recently. Take ${BREAK_MIN} minutes off to stay below spam triggers.` };
-  }
-  if (p.sent >= DAILY_LIMIT * 0.75) {
-    return { tone: "warn", title: "Approaching daily cap", body: `Only ${DAILY_LIMIT - p.sent} sends left today. Pace the rest.` };
-  }
-  return { tone: "good", title: "You're pacing well", body: "Keep batches small and spread sends across the day for the best inbox rate." };
-}
+// Sends are auto-logged from the database (scheduled sends, connected-mailbox
+// messages, and in-app sends). The local mirror keeps the UI instant.
 
 export default function EmailHealth() {
+  const { current } = useWorkspace();
   const [domain, setDomain] = useState("");
   const [checks, setChecks] = useState<Check[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [pace, setPace] = useState<PaceState>(() => loadPace());
-  const [, force] = useState(0);
+  const [dbSends, setDbSends] = useState<{ total: number; recent: number } | null>(null);
+  const [tick, setTick] = useState(0);
+
+  const refreshSends = useCallback(async () => {
+    if (!current?.id) return;
+    const res = await fetchTodaySends(current.id);
+    if (res) setDbSends(res);
+  }, [current?.id]);
 
   useEffect(() => {
-    const id = setInterval(() => force((n) => n + 1), 30_000);
+    const id = setInterval(() => {
+      setTick((n) => n + 1);
+      // Pick up pace changes made elsewhere (e.g. "Take a break" in the popup)
+      setPace(loadPace());
+    }, 30_000);
     return () => clearInterval(id);
   }, []);
 
@@ -170,8 +157,34 @@ export default function EmailHealth() {
     savePace(pace);
   }, [pace]);
 
+  // Auto-log: pull real send counts from the database on mount, every 30s,
+  // and whenever the tab regains focus. This covers scheduled sends and
+  // connected-mailbox messages, not just sends made inside the app.
+  useEffect(() => {
+    refreshSends();
+    const id = setInterval(refreshSends, 30_000);
+    const onFocus = () => refreshSends();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refreshSends]);
+
   const score = checks ? scoreOf(checks) : null;
-  const advice = useMemo(() => paceAdvice(pace), [pace]);
+  const sent = Math.max(pace.sent, dbSends?.total ?? 0);
+  const recent = Math.max(localRecent(pace), dbSends?.recent ?? 0);
+  const advice = useMemo(
+    () => paceAdvice(sent, recent, pace.pausedUntil),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sent, recent, pace.pausedUntil, tick],
+  );
+
+  // Popup nudge when the healthy pace is exceeded — driven by the DB count,
+  // so scheduled and connected-mailbox sends trigger it too.
+  useEffect(() => {
+    if (sent > 0) nudgeSendPace(sent, recent);
+  }, [sent, recent]);
 
   const handleCheck = async () => {
     if (!domain.trim()) {
@@ -194,20 +207,25 @@ export default function EmailHealth() {
   };
 
   const recordSend = (n: number) => {
-    setPace((p) => ({ ...p, sent: Math.max(0, p.sent + n), lastSendAt: Date.now() }));
+    recordLocalSend(n);
+    setPace(loadPace());
   };
 
   const startBreak = () => {
-    setPace((p) => ({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 }));
-    toast({ title: `Break started`, description: `We'll nudge you in ${BREAK_MIN} minutes.` });
+    const p = loadPace();
+    savePace({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 });
+    setPace(loadPace());
+    toast({ title: "Break started", description: `We'll nudge you in ${BREAK_MIN} minutes.` });
   };
 
   const resetDay = () => {
-    setPace({ date: todayStr(), sent: 0, lastSendAt: null, pausedUntil: null });
+    const p = loadPace();
+    savePace({ ...p, date: todayStr(), sent: 0, times: [], pausedUntil: null });
+    setPace(loadPace());
     toast({ title: "Counter reset" });
   };
 
-  const dailyPct = Math.min(100, (pace.sent / DAILY_LIMIT) * 100);
+  const dailyPct = Math.min(100, (sent / DAILY_HEALTHY_LIMIT) * 100);
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -333,7 +351,21 @@ export default function EmailHealth() {
             <div className="min-w-0">
               <h2 className="text-lg font-semibold">Send pace coach</h2>
               <p className="text-xs text-muted-foreground">
-                Healthy sending means breaks. We help you stay under spam-trigger limits.
+                Healthy sending means breaks. Every email you send is logged automatically.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-4 flex items-start gap-3">
+            <div className="h-9 w-9 rounded-lg bg-primary/15 grid place-items-center shrink-0">
+              <Target className="h-4.5 w-4.5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-primary-deep">
+                {DAILY_HEALTHY_LIMIT} emails a day = best email health
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                The sweet spot for inbox placement and reply rates. Go past it and we'll pop up a reminder to take a break.
               </p>
             </div>
           </div>
@@ -365,16 +397,21 @@ export default function EmailHealth() {
 
           <div>
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted-foreground font-medium">Today's sends</span>
+              <span className="text-muted-foreground font-medium flex items-center gap-1.5">
+                Today's sends
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-1.5 py-0.5">
+                  Auto-logged
+                </span>
+              </span>
               <span className="font-semibold">
-                {pace.sent} / {DAILY_LIMIT}
+                {sent} / {DAILY_HEALTHY_LIMIT}
               </span>
             </div>
             <div className="h-2 rounded-full bg-muted overflow-hidden">
               <div
                 className={cn(
                   "h-full transition-all",
-                  dailyPct >= 100 ? "bg-destructive" : dailyPct >= 75 ? "bg-warning" : "bg-primary"
+                  dailyPct >= 100 ? "bg-destructive" : dailyPct >= 80 ? "bg-warning" : "bg-primary"
                 )}
                 style={{ width: `${dailyPct}%` }}
               />
@@ -383,7 +420,7 @@ export default function EmailHealth() {
 
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(1)}>
-              <Plus className="h-3.5 w-3.5" /> Logged a send
+              <Plus className="h-3.5 w-3.5" /> Sent it elsewhere? Log it
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => recordSend(10)}>
               <Plus className="h-3.5 w-3.5" /> +10 batch
@@ -402,12 +439,12 @@ export default function EmailHealth() {
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Inbox providers watch volume and rhythm. Sending {BURST_LIMIT}+ emails in {BURST_WINDOW_MIN} minutes — or more
-              than {DAILY_LIMIT} in a day — from a fresh domain is the fastest way into spam. Short breaks protect your
-              reputation and your reply rate.
+              than {DAILY_HEALTHY_LIMIT} in a day — from a fresh domain is the fastest way into spam. Short breaks protect
+              your reputation and your reply rate.
             </p>
           </div>
 
-          {pace.sent > 0 && (
+          {sent > 0 && (
             <button
               onClick={() => recordSend(-1)}
               className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
