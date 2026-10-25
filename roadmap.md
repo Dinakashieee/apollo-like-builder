@@ -29,3 +29,4 @@
 - [x] Pop up a break reminder on bursts or approaching the daily ceiling.
 - [x] Fix delivery bugs found during verification: composer payload not reaching templates, and From address not matching the verified sending domain.
 - [x] Verify end-to-end: real sends counted, popup fires, break syncs to the page.
+- [x] Turn the daily bar red at 50 sends (amber from 40, blue below); add the missing amber status color.
