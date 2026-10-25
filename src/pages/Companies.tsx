@@ -1,3 +1,4 @@
+import { DecisionMakerPreview, type DecisionMaker } from "@/components/DecisionMakerPreview";
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -73,7 +74,7 @@ interface Account {
   signals_status: string;
   signals_error: string | null;
   signals_generated_at: string | null;
-  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; sources?: { title: string; url: string; evidence: string }[] };
+  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; decision_makers?: DecisionMaker[]; sources?: { title: string; url: string; evidence: string; publication_year?: number | null; verification?: string }[] };
 }
 
 interface Division {
@@ -91,7 +92,7 @@ interface Division {
   signals_status: string;
   signals_error: string | null;
   signals_generated_at: string | null;
-  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; sources?: { title: string; url: string; evidence: string }[] };
+  signals_evidence: { fit_grade?: FitGrade | null; intent_level?: Level | null; signal_strength?: Level | null; buying_stage?: number | null; reasoning?: string; decision_makers?: DecisionMaker[]; sources?: { title: string; url: string; evidence: string; publication_year?: number | null; verification?: string }[] };
 }
 
 const STAGE_LABELS = ["Research", "Awareness", "Consideration", "Evaluation", "Purchase", "Closed Won"];
@@ -550,7 +551,8 @@ export default function Companies() {
         <DialogContent><DialogHeader><DialogTitle>{evidence?.company_name} — Signals</DialogTitle><DialogDescription>{evidence?.signals_status === "ready" ? "Research complete" : evidence?.signals_status === "insufficient" ? "Limited evidence" : evidence?.signals_status}</DialogDescription></DialogHeader>
           <p className="text-sm">{evidence?.signals_evidence?.reasoning ?? evidence?.signals_error ?? "Research pending"}</p>
           {evidence?.signals_generated_at && <p className="text-xs text-muted-foreground">Updated {new Date(evidence.signals_generated_at).toLocaleString()}</p>}
-          {evidence?.signals_evidence?.sources?.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{source.title || source.url}</a>)}
+          {evidence?.signals_evidence?.sources?.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">{source.title || source.url} · {source.publication_year ?? "Year unavailable"} · {source.verification === "page_checked" ? "Page checked" : "Not verified"}</a>)}
+          <DecisionMakerPreview company={evidence?.company_name ?? "Company"} contacts={evidence?.signals_evidence?.decision_makers ?? []} />
         </DialogContent>
       </Dialog>
       {/* Toolbar */}
