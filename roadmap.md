@@ -1,3 +1,8 @@
+# Sourced recommendations and decision-makers
+- [ ] Scrape public evidence, retain source dates and distinguish checked sources from unsupported claims.
+- [ ] Show decision-maker reasons, LinkedIn verification reminders, and SignalHire preview/claim controls.
+- [ ] Test evidence rules and verify the signed-in recommendations flow.
+
 # Company signals
 - [x] Generate and save evidence-based company and division signals.
 - [x] Connect manual creation, lead imports, and SignalHire claims.
