@@ -238,8 +238,8 @@ export default function SignalHire() {
     return () => { supabase.removeChannel(ch); };
   }, [currentSearchId]);
 
-  const hasRealResults = currentSearchId !== null;
-  const baseLeads = hasRealResults ? results : MOCK_LEADS;
+  const hasRealResults = currentSearchId !== null || !!contactPreview;
+  const baseLeads = results;
 
   const filtered = useMemo(() => {
     if (!query) return baseLeads;
@@ -311,6 +311,7 @@ export default function SignalHire() {
   };
 
   const [claiming, setClaiming] = useState(false);
+  const [reviewClaim, setReviewClaim] = useState(false);
 
   const handleCrmSync = async () => {
     if (selected.length === 0) return;
@@ -676,7 +677,7 @@ export default function SignalHire() {
                   <Building2 className="h-3.5 w-3.5" />
                 </button>
                 <button
-                  onClick={handleCrmSync}
+                  onClick={() => setReviewClaim(true)}
                   title="CRM Sync"
                   className="h-8 w-8 rounded-lg border border-border grid place-items-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors active:scale-95"
                 >
@@ -724,8 +725,7 @@ export default function SignalHire() {
                   )
                 ) : (
                   <>
-                    <span className="font-semibold text-foreground">100,000</span> results ·{" "}
-                    <span className="font-semibold text-foreground">20</span> displayed
+                      <span className="font-semibold text-foreground">0</span> results · Search to find provider-reported contacts
                   </>
                 )}
               </p>
@@ -739,7 +739,7 @@ export default function SignalHire() {
                     className="pl-8 h-9 w-[220px] bg-muted/30 border-border/60"
                   />
                 </div>
-                <Button variant="outline" size="sm" className="gap-2" disabled={selected.length === 0} onClick={handleCrmSync}>
+                <Button variant="outline" size="sm" className="gap-2" disabled={selected.length === 0} onClick={() => setReviewClaim(true)}>
                   <ArrowLeftRight className="h-3.5 w-3.5" /> CRM Sync
                 </Button>
                 <Button variant="outline" size="sm" disabled={selected.length === 0} onClick={handleDeleteLeads}>
@@ -810,6 +810,13 @@ export default function SignalHire() {
       </div>
 
       {/* Connect SignalHire Modal */}
+      <Dialog open={reviewClaim} onOpenChange={setReviewClaim}>
+        <DialogContent><DialogHeader><DialogTitle>Review SignalHire claim</DialogTitle><DialogDescription>Confirm the person’s identity, current company and role before claiming. Details below are provider-reported.</DialogDescription></DialogHeader>
+          <div className="space-y-3 max-h-80 overflow-y-auto">{results.filter((r) => selected.includes(r.id)).map((r) => <div key={r.id} className="border-b border-border pb-2"><p className="font-semibold">{r.name}</p><p className="text-sm text-muted-foreground">{r.role} · {r.company}</p><p className="text-sm break-all">{r.email || "No email returned"}</p></div>)}</div>
+          <p className="text-sm">{selected.length} selected · {selected.length} SignalHire credits · {signalhireBalance} available</p>
+          <DialogFooter><Button variant="outline" onClick={() => setReviewClaim(false)}>Cancel</Button><Button disabled={claiming || !results.some((r) => selected.includes(r.id))} onClick={async () => { setReviewClaim(false); await handleCrmSync(); }}>Confirm and claim details</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={showConnectModal} onOpenChange={setShowConnectModal}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
