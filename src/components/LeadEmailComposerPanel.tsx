@@ -22,6 +22,8 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { LeadConversation } from "@/components/LeadConversation";
 import { nudgeFromLocalPace, recordLocalSend } from "@/lib/sendPace";
 import { useEmailSendingState } from "@/hooks/useEmailSendingState";
+import { useCompanyEmailContext } from "@/hooks/useCompanyEmailContext";
+import { EmailSignaturePicker } from "@/components/EmailSignaturePicker";
 
 interface Props {
   lead: any;
@@ -40,11 +42,8 @@ export function LeadEmailComposerPanel({ lead }: Props) {
   const [generating, setGenerating] = useState(false);
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [meetingAttendees, setMeetingAttendees] = useState("");
-  const [meetingType, setMeetingType] = useState("not_specified");
-  const [meetingDescription, setMeetingDescription] = useState("");
-  const [awards, setAwards] = useState("");
-  const [signatureOverride, setSignatureOverride] = useState("");
+  const { meetingAttendees, setMeetingAttendees, meetingType, setMeetingType, meetingDescription, setMeetingDescription,
+    awards, setAwards, signatureOverride, setSignatureOverride, signatureId, setSignatureId } = useCompanyEmailContext(lead?.id);
 
   useEffect(() => {
     if (!user) return;
@@ -75,11 +74,11 @@ export function LeadEmailComposerPanel({ lead }: Props) {
           workspace_id: current.id,
           lead_id: lead.id,
           tone,
-          meeting_attendees: meetingAttendees.trim() || undefined,
-          meeting_type: meetingType === "not_specified" ? undefined : meetingType,
-          meeting_description: meetingDescription.trim() || undefined,
-          awards: awards.trim() || undefined,
-          signature_override: signatureOverride.trim() || undefined,
+          meeting_attendees: meetingAttendees.trim(),
+          meeting_type: meetingType,
+          meeting_description: meetingDescription.trim(),
+          awards: awards.trim(),
+          signature_override: signatureOverride.trim(),
         },
       });
       if (error) throw error;
@@ -123,7 +122,7 @@ export function LeadEmailComposerPanel({ lead }: Props) {
         body: {
           template_name: "lead-outreach",
           recipient_email: lead.email,
-          template_data: { subject, body, signature: signatureOverride },
+          template_data: { subject, body },
           idempotency_key: `lead-${lead.id}-${Date.now()}`,
           workspace_id: current?.id,
         },
@@ -281,6 +280,7 @@ export function LeadEmailComposerPanel({ lead }: Props) {
             />
           </div>
           <div>
+            <EmailSignaturePicker value={signatureId} onChange={(id, content) => { setSignatureId(id); setSignatureOverride(content); }} />
             <Label className="text-xs">Signature override</Label>
             <Textarea
               value={signatureOverride}

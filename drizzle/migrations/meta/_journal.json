@@ -64,6 +64,13 @@
       "when": 1792965786278,
       "tag": "0008_personal_dashboard_summary",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792966153639,
+      "tag": "0009_company_email_defaults_signatures",
+      "breakpoints": true
     }
   ]
 }

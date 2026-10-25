@@ -197,6 +197,7 @@ export type Database = {
           company_name: string
           created_at: string
           description: string | null
+          email_context: Json
           id: string
           industries: string[] | null
           positioning: string | null
@@ -210,6 +211,7 @@ export type Database = {
           company_name: string
           created_at?: string
           description?: string | null
+          email_context?: Json
           id?: string
           industries?: string[] | null
           positioning?: string | null
@@ -223,6 +225,7 @@ export type Database = {
           company_name?: string
           created_at?: string
           description?: string | null
+          email_context?: Json
           id?: string
           industries?: string[] | null
           positioning?: string | null
@@ -615,6 +618,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_signatures: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       email_threads: {
         Row: {
@@ -1198,6 +1228,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_email_signature_id: string | null
           email: string
           email_signature: string | null
           full_name: string | null
@@ -1211,6 +1242,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_email_signature_id?: string | null
           email: string
           email_signature?: string | null
           full_name?: string | null
@@ -1224,6 +1256,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_email_signature_id?: string | null
           email?: string
           email_signature?: string | null
           full_name?: string | null

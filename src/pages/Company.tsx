@@ -10,6 +10,10 @@ import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { Mail, UserPlus, Trash2, Building2, Upload, Loader2, Sparkles } from "lucide-react";
 import { z } from "zod";
+import { companyEmailContext, MEETING_TYPES, type EmailContext } from "@/lib/emailContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PersonalSignatureManager } from "@/components/PersonalSignatureManager";
+import { useQueryClient } from "@tanstack/react-query";
 
 const companySchema = z.object({
   company_name: z.string().trim().min(1).max(120),
@@ -24,6 +28,8 @@ const companySchema = z.object({
 export default function Company() {
   const { user } = useAuth();
   const { current } = useWorkspace();
+  const queryClient = useQueryClient();
+  const [emailContext, setEmailContext] = useState<EmailContext>(() => companyEmailContext(null));
   const [companyName, setCompanyName] = useState("");
   const [description, setDescription] = useState("");
   const [industries, setIndustries] = useState("");
@@ -59,6 +65,7 @@ export default function Company() {
       setTargetSystems((company.target_systems ?? []).join(", "));
       setSolvedPainPoints((company.solved_pain_points ?? []).join("\n"));
       setPositioning(company.positioning ?? "");
+      setEmailContext(companyEmailContext(company.email_context, company.positioning ?? ""));
     }
     setMembers(mems ?? []);
     setInvites(invs ?? []);
@@ -104,6 +111,7 @@ export default function Company() {
       target_systems: targetSystemsArray,
       solved_pain_points: solvedPainArray,
       positioning: parsed.data.positioning ?? null,
+      email_context: emailContext,
     };
     const { error } = existing
       ? await supabase.from("company_profiles").update(payload).eq("id", existing.id)
@@ -113,11 +121,12 @@ export default function Company() {
       return;
     }
     await logActivity(current.id, user?.id, "company_updated", `Company profile updated`);
+    void queryClient.invalidateQueries({ queryKey: ["company-email-context", current.id] });
     toast({ title: "Saved" });
   };
 
   const sendInvite = async () => {
-    if (!current || !inviteEmail) return;
+    if (!current || !user || !inviteEmail) return;
     const parsed = z.string().email().safeParse(inviteEmail);
     if (!parsed.success) {
       toast({ title: "Invalid email", variant: "destructive" });
@@ -127,7 +136,7 @@ export default function Company() {
       workspace_id: current.id,
       email: inviteEmail.toLowerCase(),
       role: "member",
-      invited_by: user!.id,
+      invited_by: user.id,
     });
     if (error) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
@@ -289,8 +298,21 @@ Fragmented operational + financial data`}
             The AI matches these to the recipient's role so the email lands ("a CFO will see reconciliation; a COO will see throughput").
           </p>
         </div>
+        <div className="space-y-3 border-t border-border pt-4">
+          <h3 className="font-semibold text-primary-deep">Email meeting & credential defaults</h3>
+          <div><Label htmlFor="company-meeting-type">Meeting type</Label>
+            <Select value={emailContext.meeting_type} onValueChange={value => setEmailContext(p => ({ ...p, meeting_type: value }))}>
+              <SelectTrigger id="company-meeting-type"><SelectValue /></SelectTrigger><SelectContent>{MEETING_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div><Label htmlFor="company-attendees">Who will join (from our side)</Label><Input id="company-attendees" maxLength={1000} value={emailContext.meeting_attendees} onChange={e => setEmailContext(p => ({ ...p, meeting_attendees: e.target.value }))} /></div>
+          <div><Label htmlFor="company-meeting-details">Physical meeting / booth details</Label><Textarea id="company-meeting-details" maxLength={3000} value={emailContext.meeting_description} onChange={e => setEmailContext(p => ({ ...p, meeting_description: e.target.value }))} /></div>
+          <div><Label htmlFor="company-credentials">Company awards / credentials</Label><Textarea id="company-credentials" maxLength={3000} value={emailContext.awards} onChange={e => setEmailContext(p => ({ ...p, awards: e.target.value }))} /></div>
+        </div>
         <Button onClick={saveCompany} className="bg-gradient-primary">Save</Button>
       </section>
+
+      <PersonalSignatureManager />
 
       <section className="card-elevated p-6 space-y-4">
         <h2 className="font-display font-bold text-lg text-primary-deep flex items-center gap-2">

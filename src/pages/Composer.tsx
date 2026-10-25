@@ -20,6 +20,8 @@ import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useCompanyEmailContext } from "@/hooks/useCompanyEmailContext";
+import { EmailSignaturePicker } from "@/components/EmailSignaturePicker";
 
 export default function Composer() {
   const { current } = useWorkspace();
@@ -36,11 +38,8 @@ export default function Composer() {
   const [mailClient, setMailClient] = useState<string>("default");
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState<boolean | undefined>(undefined);
-  const [meetingAttendees, setMeetingAttendees] = useState("");
-  const [meetingType, setMeetingType] = useState("not_specified");
-  const [meetingDescription, setMeetingDescription] = useState("");
-  const [awards, setAwards] = useState("");
-  const [signatureOverride, setSignatureOverride] = useState("");
+  const { meetingAttendees, setMeetingAttendees, meetingType, setMeetingType, meetingDescription, setMeetingDescription,
+    awards, setAwards, signatureOverride, setSignatureOverride, signatureId, setSignatureId } = useCompanyEmailContext(selectedLead);
 
   useEffect(() => {
     if (!current) return;
@@ -92,11 +91,11 @@ export default function Composer() {
           workspace_id: current.id,
           lead_id: selectedLead,
           tone,
-          meeting_attendees: meetingAttendees.trim() || undefined,
-          meeting_type: meetingType === "not_specified" ? undefined : meetingType,
-          meeting_description: meetingDescription.trim() || undefined,
-          awards: awards.trim() || undefined,
-          signature_override: signatureOverride.trim() || undefined,
+          meeting_attendees: meetingAttendees.trim(),
+          meeting_type: meetingType,
+          meeting_description: meetingDescription.trim(),
+          awards: awards.trim(),
+          signature_override: signatureOverride.trim(),
         },
       });
       if (error) throw error;
@@ -270,7 +269,8 @@ export default function Composer() {
               />
             </div>
             <div>
-              <Label className="text-xs">Email signature (paste text or HTML — overrides saved signature)</Label>
+              <EmailSignaturePicker value={signatureId} onChange={(id, content) => { setSignatureId(id); setSignatureOverride(content); }} />
+              <Label className="text-xs">Email signature</Label>
               <Textarea
                 value={signatureOverride}
                 onChange={(e) => setSignatureOverride(e.target.value)}
