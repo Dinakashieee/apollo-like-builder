@@ -25,6 +25,7 @@ import {
   FileText,
   Zap,
   ShoppingCart,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { researchLeadCompanies } from "@/lib/companySignals";
 import { savedSearchOutcome } from "@/lib/signalHireSearchState";
+import { useSignalHireProviderCredits } from "@/hooks/useSignalHireProviderCredits";
 
 type Lead = {
   id: string;
@@ -175,12 +177,12 @@ export default function SignalHire() {
   const [activeRail, setActiveRail] = useState("Lists");
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [connected, setConnected] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  const providerCredits = useSignalHireProviderCredits();
+  const connected = providerCredits.isSuccess;
   const [packMode, setPackMode] = useState<"once" | "monthly">("once");
   const [selectedPack, setSelectedPack] = useState<string | null>(null);
   const { current: workspace } = useWorkspace();
-  const { balance: signalhireBalance, lifetimePurchased, refetch: refetchCredits } = useSignalHireCredits();
+  const { balance: signalhireBalance, lifetimePurchased, loading: creditsLoading, refetch: refetchCredits } = useSignalHireCredits();
 
   // Filter inputs
   const [fName, setFName] = useState(contactPreview);
@@ -195,16 +197,6 @@ export default function SignalHire() {
   const [searchStatus, setSearchStatus] = useState<"idle" | "pending" | "completed" | "failed">("idle");
   const [results, setResults] = useState<Lead[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem("signalhire_connect_dismissed");
-    const saved = localStorage.getItem("signalhire_connected");
-    if (saved === "true") setConnected(true);
-    if (!contactPreview && !dismissed && saved !== "true") {
-      const t = setTimeout(() => setShowConnectModal(true), 400);
-      return () => clearTimeout(t);
-    }
-  }, []);
 
   // Read saved completion as well as live events: a completion can precede subscription.
   useEffect(() => {
@@ -279,16 +271,12 @@ export default function SignalHire() {
   const creditsTotal = Math.max(lifetimePurchased, signalhireBalance, 0);
   const creditsPct = creditsTotal > 0 ? (creditsUsed / creditsTotal) * 100 : 0;
 
-  const handleConnect = () => {
-    if (!apiKey.trim()) {
-      toast({ title: "API key required", description: "Paste your live SignalHire API key to connect.", variant: "destructive" });
-      return;
+  const handleConnect = async () => {
+    const result = await providerCredits.refetch();
+    if (result.isSuccess) {
+      setShowConnectModal(false);
+      toast({ title: 'SignalHire verified', description: `${result.data.toLocaleString()} API account credits available.` });
     }
-    localStorage.setItem("signalhire_connected", "true");
-    setConnected(true);
-    setShowConnectModal(false);
-    setShowUpgradeModal(false);
-    toast({ title: "SignalHire connected", description: "Your live account is now linked. Credits will sync shortly." });
   };
 
   const handleDismiss = () => {
@@ -490,7 +478,7 @@ export default function SignalHire() {
             </Badge>
           ) : (
             <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowConnectModal(true)}>
-              <KeyRound className="h-4 w-4" /> Connect SignalHire
+              <KeyRound className="h-4 w-4" /> {providerCredits.isFetching ? 'Checking SignalHire…' : 'Check SignalHire'}
             </Button>
           )}
           <Button size="sm" className="gap-2" onClick={() => setShowUpgradeModal(true)}>
@@ -500,12 +488,24 @@ export default function SignalHire() {
       </div>
 
       {/* Credits */}
+      <section className="border-b border-border pb-4 flex items-start justify-between gap-4">
+        <div className="space-y-1 min-w-0">
+          <p className="text-sm font-medium">SignalHire API account credits</p>
+          <p className={cn('text-xl font-semibold', providerCredits.isError && 'text-destructive')}>
+            {providerCredits.isPending ? 'Checking…' : providerCredits.isError ? 'Unavailable' : `${providerCredits.data?.toLocaleString()} available`}
+          </p>
+          <p className="text-xs text-muted-foreground">{providerCredits.error?.message || 'Configured SignalHire account · separate from your EngageIQ.lk reveal wallet below.'}</p>
+        </div>
+        <Button size="icon" variant="outline" aria-label="Refresh SignalHire credits" disabled={providerCredits.isFetching} onClick={() => { void providerCredits.refetch(); void refetchCredits(); }}>
+          <RefreshCw className={cn('h-4 w-4', providerCredits.isFetching && 'animate-spin')} />
+        </Button>
+      </section>
       <div className="card-elevated p-4 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-muted-foreground font-medium">SignalHire Reveal Credits</span>
+            <span className="text-muted-foreground font-medium">EngageIQ.lk reveal wallet</span>
             <span className="font-semibold text-foreground">
-              {signalhireBalance.toLocaleString()} available
+              {creditsLoading ? 'Checking…' : `${signalhireBalance.toLocaleString()} available`}
               {lifetimePurchased > 0 && (
                 <span className="text-muted-foreground font-normal">
                   {" · "}{creditsUsed.toLocaleString()} used of {lifetimePurchased.toLocaleString()} purchased
@@ -869,56 +869,20 @@ export default function SignalHire() {
             <div className="h-11 w-11 rounded-xl bg-primary/10 grid place-items-center mb-2">
               <KeyRound className="h-5 w-5 text-primary" />
             </div>
-            <DialogTitle className="text-xl">Connect your live SignalHire account</DialogTitle>
+            <DialogTitle className="text-xl">Check the configured SignalHire account</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              We support the SignalHire API directly inside EngageIQ.lk. Connect your live account
-              to claim leads, pull verified emails, and sync them to your CRM — all without leaving the platform.
+              This checks the API key saved in EngageIQ.lk’s secure settings. A key entered on the previous screen was not saved or linked.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            <div className="rounded-lg bg-muted/40 border border-border/60 p-3 space-y-2 text-xs">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
-                <span>Reuse your existing SignalHire credits in EngageIQ.lk.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
-                <span>One-click CRM sync for every claimed lead.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" />
-                <span>Your key is stored encrypted — never exposed to the browser.</span>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="sh-api-key" className="text-xs font-semibold">SignalHire Live API Key</Label>
-              <Input
-                id="sh-api-key"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Paste your live API key"
-                className="mt-1.5"
-              />
-              <a
-                href="https://www.signalhire.com/api"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] text-primary hover:underline inline-flex items-center gap-1 mt-1.5"
-              >
-                Where do I find my API key? <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          </div>
+          {providerCredits.isError && <p className="text-sm text-destructive">{providerCredits.error.message}</p>}
 
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="ghost" onClick={handleDismiss}>
               Maybe later
             </Button>
-            <Button onClick={handleConnect} className="gap-2">
-              <KeyRound className="h-4 w-4" /> Connect
+            <Button onClick={handleConnect} disabled={providerCredits.isFetching} className="gap-2">
+              <RefreshCw className="h-4 w-4" /> Check balance
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1008,7 +972,7 @@ export default function SignalHire() {
             <div className="flex-1">
               <p className="text-xs font-semibold text-foreground mb-0.5">Already paying SignalHire directly?</p>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Connect your live API key instead and reuse credits you already own — no extra fees.
+                Check the configured API account’s balance. API credits are separate from this reveal wallet.
               </p>
             </div>
             <Button
@@ -1017,7 +981,7 @@ export default function SignalHire() {
               className="text-xs"
               onClick={() => { setShowUpgradeModal(false); setShowConnectModal(true); }}
             >
-              Connect key
+              Check account
             </Button>
           </div>
 
