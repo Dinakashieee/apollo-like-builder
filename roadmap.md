@@ -4,6 +4,10 @@
 - [x] Add company import and CSV export with signals.
 - [x] Verify saved signals and downloads.
 
+# Personal dashboard summary
+- [ ] Add personal Today, Week, Month, and Quarter summaries using saved activity.
+- [ ] Test date boundaries and user isolation; verify dashboard period switching.
+
 # Landing page themes
 - [x] Show and verify an immediate side preview on the Landing Pages screen.
 - [x] Add Ocean & Teal theme collection and visual selection.
