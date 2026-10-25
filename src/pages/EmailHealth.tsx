@@ -201,20 +201,25 @@ export default function EmailHealth() {
   };
 
   const recordSend = (n: number) => {
-    setPace((p) => ({ ...p, sent: Math.max(0, p.sent + n), lastSendAt: Date.now() }));
+    recordLocalSend(n);
+    setPace(loadPace());
   };
 
   const startBreak = () => {
-    setPace((p) => ({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 }));
-    toast({ title: `Break started`, description: `We'll nudge you in ${BREAK_MIN} minutes.` });
+    const p = loadPace();
+    savePace({ ...p, pausedUntil: Date.now() + BREAK_MIN * 60_000 });
+    setPace(loadPace());
+    toast({ title: "Break started", description: `We'll nudge you in ${BREAK_MIN} minutes.` });
   };
 
   const resetDay = () => {
-    setPace({ date: todayStr(), sent: 0, lastSendAt: null, pausedUntil: null });
+    const p = loadPace();
+    savePace({ ...p, date: todayStr(), sent: 0, times: [], pausedUntil: null });
+    setPace(loadPace());
     toast({ title: "Counter reset" });
   };
 
-  const dailyPct = Math.min(100, (pace.sent / DAILY_LIMIT) * 100);
+  const dailyPct = Math.min(100, (sent / DAILY_HEALTHY_LIMIT) * 100);
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
