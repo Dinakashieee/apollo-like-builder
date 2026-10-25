@@ -24,6 +24,7 @@ import { EmailConfirmBanner } from "./EmailConfirmBanner";
 import { PresenceIndicator } from "./PresenceIndicator";
 import { ConnectInboxBanner } from "./ConnectInboxBanner";
 import { DemoDataBanner } from "./DemoDataBanner";
+import { SendPacePopup } from "./SendPacePopup";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -125,6 +126,7 @@ export function AppLayout() {
         </div>
         </div>
         <ChatWidget mode="assistant" />
+        <SendPacePopup />
       </div>
     </SidebarProvider>
   );
