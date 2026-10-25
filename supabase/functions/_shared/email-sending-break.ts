@@ -1,8 +1,16 @@
-import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
+type SendingStateClient = {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => PromiseLike<{ data: { paused?: boolean } | null; error: unknown }>;
+      };
+    };
+  };
+};
 
 /** Fail closed on lookup errors; breaks belong to senders, never workspaces. */
 export async function isUserSendingPaused(
-  client: Pick<SupabaseClient, 'from'>,
+  client: SendingStateClient,
   userId: string | null | undefined,
 ): Promise<boolean> {
   if (!userId) return false;
