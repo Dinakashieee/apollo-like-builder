@@ -47,7 +47,7 @@ export function DailyWorkUpdateChat() {
     if (!user || !current) return;
     setBusy(true); setError('');
     try {
-      const { error } = await supabase.from('daily_work_updates').upsert({ ...parsed.data, user_id: user.id, workspace_id: current.id, work_date: date, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { onConflict: 'user_id,workspace_id,work_date' });
+      const { error } = await supabase.from('daily_work_updates').upsert({ completed: parsed.data.completed ?? '', next_steps: parsed.data.next_steps ?? '', blockers: parsed.data.blockers ?? '', user_id: user.id, workspace_id: current.id, work_date: date, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { onConflict: 'user_id,workspace_id,work_date' });
       if (error) throw error;
       await client.invalidateQueries({ queryKey: ['daily-work-updates', user.id, current.id] });
       setEditing(false); setStep(0); setDraft(empty); setInput('');

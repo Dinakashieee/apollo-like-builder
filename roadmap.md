@@ -1,7 +1,7 @@
 # Daily work updates through chat
-- [ ] Add private per-user daily work updates with completed work, next steps and blockers.
-- [ ] Add daily-update chat view with editing and saved history.
-- [ ] Test validation and verify signed-in saving, reload and ownership isolation.
+- [x] Add private per-user daily work updates with completed work, next steps and blockers.
+- [x] Add daily-update chat view with editing and saved history.
+- [x] Test validation and verify signed-in saving, reload, editing, deletion and ownership isolation; delete temporary verification update.
 
 # Sourced recommendations and decision-makers
 - [x] Scrape public evidence, retain source dates and distinguish checked sources from unsupported claims.
