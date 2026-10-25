@@ -23,6 +23,8 @@ export const SCALE_LIMITS = {
 } as const;
 
 export type Tier = "free" | "starter" | "growth" | "scale" | "pro";
+// Keep feature access separate from AI and contact-reveal allowances.
+export const TEMPORARY_FEATURE_ACCESS = true;
 
 export async function getWorkspaceTier(
   admin: SupabaseClient,
@@ -82,6 +84,7 @@ export async function checkLeadQuota(
   admin: SupabaseClient,
   workspaceId: string,
 ): Promise<{ blocked: true; reason: string; tier: Tier; used: number; limit: number } | null> {
+  if (TEMPORARY_FEATURE_ACCESS) return null;
   const tier = await getWorkspaceTier(admin, workspaceId);
   const limit =
     tier === "free" ? FREE_LIMITS.leads
