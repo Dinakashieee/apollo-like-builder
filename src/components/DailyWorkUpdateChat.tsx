@@ -50,6 +50,7 @@ export function DailyWorkUpdateChat() {
       const { error } = await supabase.from('daily_work_updates').upsert({ completed: parsed.data.completed ?? '', next_steps: parsed.data.next_steps ?? '', blockers: parsed.data.blockers ?? '', user_id: user.id, workspace_id: current.id, work_date: date, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { onConflict: 'user_id,workspace_id,work_date' });
       if (error) throw error;
       await client.invalidateQueries({ queryKey: ['daily-work-updates', user.id, current.id] });
+      await client.invalidateQueries({ queryKey: ['daily-work-tasks', user.id, current.id] });
       setEditing(false); setStep(0); setDraft(empty); setInput('');
     } catch { setError('Your update wasn’t saved. Your answers are still here; try again.'); }
     finally { setBusy(false); }
@@ -60,7 +61,10 @@ export function DailyWorkUpdateChat() {
     setBusy(true);
     const { error } = await supabase.from('daily_work_updates').delete().eq('id', today.id).eq('user_id', user.id).eq('workspace_id', current.id);
     if (error) setError('Could not delete your update.');
-    else await query.refetch();
+    else await Promise.all([
+      client.invalidateQueries({ queryKey: ['daily-work-updates', user.id, current.id] }),
+      client.invalidateQueries({ queryKey: ['daily-work-tasks', user.id, current.id] }),
+    ]);
     setBusy(false);
   };
 
