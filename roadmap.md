@@ -1,3 +1,8 @@
+# Daily updates reflected in dashboard and tasks
+- [ ] Show each user's saved updates in their selected dashboard period.
+- [ ] Automatically synchronize next-step lines into private tasks without duplicate tasks on edits.
+- [ ] Test and verify chat save, dashboard readback, task completion, editing and deletion.
+
 # SignalHire credit display
 - [x] Show verified API account credits separately from workspace reveal credits; replace browser-only connection status. Three tests pass; signed-in API read and refresh show 286 provider credits and a separate zero workspace wallet. Personal-key linking and provider contact claiming were not changed.
 
