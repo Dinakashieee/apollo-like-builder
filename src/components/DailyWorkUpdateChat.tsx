@@ -6,21 +6,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { useWorkspace } from '@/hooks/useWorkspace';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { dailyWorkUpdateSchema, localWorkDate } from '@/lib/dailyWorkUpdates';
+import { localWorkDate } from '@/lib/dailyWorkUpdates';
 
 const prompts = ['What did you complete today?', 'What are your next steps?', 'Any blockers?'];
 const keys = ['completed', 'next_steps', 'blockers'] as const;
-const empty = { completed: '', next_steps: '', blockers: '' };
+
 
 export function DailyWorkUpdateChat() {
   const { user } = useAuth();
   const { current } = useWorkspace();
   const client = useQueryClient();
   const [date, setDate] = useState(localWorkDate);
-  const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState(empty);
   const [input, setInput] = useState('');
-  const [editing, setEditing] = useState(false);
+  const [receipt, setReceipt] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const query = useQuery({
@@ -33,7 +31,7 @@ export function DailyWorkUpdateChat() {
     },
   });
   useEffect(() => {
-    setStep(0); setDraft(empty); setInput(''); setEditing(false); setError('');
+    setInput(''); setReceipt(''); setError('');
   }, [user?.id, current?.id]);
   useEffect(() => {
     const timer = window.setInterval(() => setDate(localWorkDate()), 30000);
@@ -42,17 +40,21 @@ export function DailyWorkUpdateChat() {
   const today = query.data?.find((row) => row.work_date === date);
 
   const save = async () => {
-    const parsed = dailyWorkUpdateSchema.safeParse(draft);
-    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? 'Check your update.'); return; }
-    if (!user || !current) return;
+    if (!input.trim() || !user || !current || busy) return;
     setBusy(true); setError('');
     try {
-      const { error } = await supabase.from('daily_work_updates').upsert({ completed: parsed.data.completed ?? '', next_steps: parsed.data.next_steps ?? '', blockers: parsed.data.blockers ?? '', user_id: user.id, workspace_id: current.id, work_date: date, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { onConflict: 'user_id,workspace_id,work_date' });
-      if (error) throw error;
-      await client.invalidateQueries({ queryKey: ['daily-work-updates', user.id, current.id] });
-      await client.invalidateQueries({ queryKey: ['daily-work-tasks', user.id, current.id] });
-      setEditing(false); setStep(0); setDraft(empty); setInput('');
-    } catch { setError('Your update wasn’t saved. Your answers are still here; try again.'); }
+      const { data, error } = await supabase.functions.invoke('daily-work-chat', { body: { message: input.trim(), workspace_id: current.id, work_date: date, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } });
+      if (error || data?.error) throw new Error(data?.error ?? 'Your update wasn’t saved. Your message is still here; try again.');
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ['daily-work-updates', user.id, current.id] }),
+        client.invalidateQueries({ queryKey: ['daily-work-tasks', user.id, current.id] }),
+        client.invalidateQueries({ queryKey: ['personal-dashboard-summary', user.id, current.id] }),
+        client.invalidateQueries({ queryKey: ['leads'] }),
+      ]);
+      const changes = Array.isArray(data?.changes) ? data.changes.map((change: { company_name: string; status: string }) => `${change.company_name} → ${change.status}.`).join(' ') : '';
+      const notices = Array.isArray(data?.notices) ? data.notices.join(' ') : '';
+      setReceipt(`Daily update saved. ${changes} ${notices}`.trim()); setInput('');
+    } catch (error) { setError(error instanceof Error ? error.message : 'Your update wasn’t saved. Your message is still here; try again.'); }
     finally { setBusy(false); }
   };
 
@@ -72,22 +74,21 @@ export function DailyWorkUpdateChat() {
     <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
       <p className="text-xs text-muted-foreground">{date} · Only you · {Intl.DateTimeFormat().resolvedOptions().timeZone}</p>
       {query.isLoading ? <p className="text-sm">Loading your updates…</p> : query.isError ? <div role="alert"><p className="text-sm text-destructive">Your updates couldn’t load.</p><Button variant="outline" size="sm" onClick={() => void query.refetch()}>Try again</Button></div> : <>
-        {today && !editing ? <>
+        {today ? <>
           <p className="text-sm text-success flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Today’s update saved</p>
-          {keys.map((key, i) => <div key={key}><p className="text-xs font-semibold">{prompts[i]}</p><p className="text-sm whitespace-pre-wrap break-words mt-1">{today[key] || 'None recorded'}</p></div>)}
-          <div className="flex gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={() => { setDraft({ completed: today.completed, next_steps: today.next_steps, blockers: today.blockers }); setEditing(true); setStep(0); setInput(today.completed); }}><Pencil className="h-3 w-3 mr-1" /> Edit update</Button><Button size="icon" variant="ghost" aria-label="Delete today's update" disabled={busy} onClick={() => void remove()}><Trash2 className="h-4 w-4" /></Button></div>
-        </> : <>
-          {keys.slice(0, Math.min(step, 3)).map((key, i) => <div key={key} className="space-y-2"><p className="bg-muted rounded-lg p-3 text-sm">{prompts[i]}</p><p className="bg-primary text-primary-foreground rounded-lg p-3 text-sm whitespace-pre-wrap break-words">{draft[key] || 'None'}</p></div>)}
-          <p className="bg-muted rounded-lg p-3 text-sm">{step < 3 ? prompts[step] : 'Ready to save today’s update?'}</p>
-          {step === 3 && <div className="flex gap-2"><Button onClick={() => void save()} disabled={busy}>{busy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <CheckCircle2 className="h-4 w-4 mr-1" />} Save daily update</Button><Button variant="outline" disabled={busy} onClick={() => { setStep(0); setInput(draft.completed); }}>Review answers</Button></div>}
-        </>}
+          {keys.map((key, i) => today[key] ? <div key={key}><p className="text-xs font-semibold">{['Completed work', 'Next steps', 'Blockers'][i]}</p><p className="text-sm whitespace-pre-wrap break-words mt-1">{today[key]}</p></div> : null)}
+          <div className="flex gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={() => setInput(today.chat_message ?? `Completed: ${today.completed}\nNext steps: ${today.next_steps}\nBlockers: ${today.blockers}`)}><Pencil className="h-3 w-3 mr-1" /> Edit update</Button><Button size="icon" variant="ghost" aria-label="Delete today's update" disabled={busy} onClick={() => void remove()}><Trash2 className="h-4 w-4" /></Button></div>
+        </> : <p className="text-sm">What did you get done today?</p>}
+        {receipt && <p role="status" className="text-sm whitespace-pre-wrap break-words">{receipt}</p>}
+        {busy && <p role="status" className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Updating your day…</p>}
         <div className="border-t border-border pt-3 space-y-3"><h3 className="text-xs font-semibold">Previous updates</h3>{query.data?.filter((row) => row.work_date !== date).map((row) => <details key={row.id} className="text-sm"><summary className="cursor-pointer text-primary">{row.work_date}</summary>{keys.map((key, i) => <div key={key} className="mt-2"><p className="text-xs font-semibold">{prompts[i]}</p><p className="whitespace-pre-wrap break-words">{row[key] || 'None recorded'}</p></div>)}</details>)}{!query.data?.some((row) => row.work_date !== date) && <p className="text-xs text-muted-foreground">No previous updates.</p>}</div>
       </>}
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
     </div>
-    {!query.isLoading && !query.isError && (!today || editing) && step < 3 && <form className="p-3 border-t border-border flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); if (step === 0 && !input.trim()) { setError('Add the work you completed.'); return; } setDraft((value) => ({ ...value, [keys[step]]: input.trim() })); setStep(step + 1); setInput(step < 2 ? draft[keys[step + 1]] : ''); setError(''); }}>
-      <Textarea aria-label="Daily update answer" value={input} onChange={(e) => setInput(e.target.value)} maxLength={4000} rows={2} placeholder={step === 0 ? 'Completed work…' : 'Optional — leave blank if none'} className="resize-none min-w-0" />
-      <Button type="submit" size="icon" aria-label="Submit update answer"><Send className="h-4 w-4" /></Button>
+    {!query.isLoading && !query.isError && <form className="p-3 border-t border-border flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); void save(); }}>
+      <Textarea autoFocus aria-label="Daily update message" value={input} onChange={(e) => setInput(e.target.value)} maxLength={4000} rows={3} placeholder="Today I met CCL Design — closed lost. Tomorrow I’ll follow up with Acme." className="resize-none min-w-0" onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void save(); } }} />
+      <Button type="submit" size="icon" disabled={busy || !input.trim()} aria-label="Send daily update">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}</Button>
     </form>}
+
   </div>;
 }

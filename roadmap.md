@@ -1,4 +1,6 @@
 # Daily updates reflected in dashboard and tasks
+- [ ] Replace the questionnaire with one natural-language submission; interpret completed work, next steps and blockers and automatically apply unambiguous lead status requests.
+- [ ] Test safe matching, repeat submissions and signed-in save/status/dashboard readback.
 - [x] Show each user's saved updates in their selected dashboard period.
 - [x] Automatically synchronize next-step lines into private tasks without duplicate tasks on edits.
 - [x] Twelve tests pass; signed-in chat saving, dashboard readback, task completion after reload, edit synchronization and cascading deletion verified; temporary verification data removed.

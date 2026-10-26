@@ -335,6 +335,8 @@ export type Database = {
       daily_work_updates: {
         Row: {
           blockers: string
+          chat_message: string | null
+          chat_result: Json | null
           completed: string
           created_at: string
           id: string
@@ -347,6 +349,8 @@ export type Database = {
         }
         Insert: {
           blockers?: string
+          chat_message?: string | null
+          chat_result?: Json | null
           completed: string
           created_at?: string
           id?: string
@@ -359,6 +363,8 @@ export type Database = {
         }
         Update: {
           blockers?: string
+          chat_message?: string | null
+          chat_result?: Json | null
           completed?: string
           created_at?: string
           id?: string
@@ -2270,6 +2276,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_daily_chat_update: {
+        Args: {
+          _blockers: string
+          _changes: Json
+          _completed: string
+          _message: string
+          _next_steps: string
+          _notices: Json
+          _timezone: string
+          _work_date: string
+          _workspace_id: string
+        }
+        Returns: Json
+      }
       can_customize_landing: {
         Args: { _workspace_id: string }
         Returns: boolean
