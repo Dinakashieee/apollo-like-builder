@@ -92,6 +92,13 @@
       "when": 1792988687279,
       "tag": "0012_daily_update_personal_tasks",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792989196354,
+      "tag": "0013_apply_daily_chat_update",
+      "breakpoints": true
     }
   ]
 }
