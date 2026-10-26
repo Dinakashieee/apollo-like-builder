@@ -1,3 +1,5 @@
+import { localWorkDate } from '@/lib/dailyWorkUpdates';
+
 export type SummaryPeriod = "day" | "week" | "month" | "quarter";
 export const SUMMARY_PERIODS: { value: SummaryPeriod; label: string }[] = [
   { value: "day", label: "Today" }, { value: "week", label: "Week" },
@@ -13,6 +15,11 @@ export function summaryRange(period: SummaryPeriod, now = new Date()) {
     start.setMonth(Math.floor(start.getMonth() / 3) * 3, 1);
   }
   return { start: start.toISOString(), end: now.toISOString() };
+}
+
+export function summaryWorkDates(period: SummaryPeriod, now = new Date()) {
+  const range = summaryRange(period, now);
+  return { start: localWorkDate(new Date(range.start)), end: localWorkDate(now) };
 }
 
 export type PersonalSummary = {

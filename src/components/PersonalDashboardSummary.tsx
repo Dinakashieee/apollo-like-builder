@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SUMMARY_PERIODS, summaryRange, parsePersonalSummary, type SummaryPeriod } from "@/lib/personalSummary";
+import { DailyWorkSummary } from '@/components/DailyWorkSummary';
 
 const metrics = [
   { key: "leads", label: "Leads added", icon: Users },
@@ -90,6 +91,7 @@ export function PersonalDashboardSummary() {
           </div>
         </>
       )}
+      <DailyWorkSummary period={period} />
     </section>
   );
 }

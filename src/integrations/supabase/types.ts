@@ -284,6 +284,54 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_work_tasks: {
+        Row: {
+          created_at: string
+          id: string
+          note: string
+          status: string
+          update_id: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note: string
+          status?: string
+          update_id: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string
+          status?: string
+          update_id?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_work_tasks_update_id_fkey"
+            columns: ["update_id"]
+            isOneToOne: false
+            referencedRelation: "daily_work_updates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_work_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_work_updates: {
         Row: {
           blockers: string
@@ -2231,6 +2279,12 @@ export type Database = {
         Returns: number
       }
       current_lead_count: { Args: { _workspace_id: string }; Returns: number }
+      daily_next_step_lines: {
+        Args: { _text: string }
+        Returns: {
+          note: string
+        }[]
+      }
       defer_email_for_break: {
         Args: { message_id: number }
         Returns: undefined

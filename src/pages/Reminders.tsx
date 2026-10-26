@@ -7,6 +7,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { Bell, CalendarClock, Check, Loader2, X, Mail } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+import { DailyWorkTaskList } from '@/components/DailyWorkTaskList';
 
 interface Reminder {
   id: string;
@@ -67,6 +68,11 @@ export default function Reminders() {
           Reminders auto-detected from inbound replies (e.g. "get back to me on the 25th") and emails you've scheduled to send later.
         </p>
       </header>
+
+      <section aria-label="Your daily tasks" className="space-y-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Your daily tasks</h2>
+        <DailyWorkTaskList />
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Follow-up reminders</h2>
