@@ -1,5 +1,5 @@
 # Getting Started workflow
-- [ ] Update the outdated workflow and first-session checklist to match current discovery, company signals, outreach, campaigns and daily updates; verify the page and links.
+- [x] Update the outdated workflow and first-session checklist to match current discovery, company signals, outreach, campaigns and daily updates; signed-in page, Companies link and desktop/current-screen layouts verified; build OK.
 
 # Daily updates reflected in dashboard and tasks
 - [ ] Replace the questionnaire with one natural-language submission; interpret completed work, next steps and blockers and automatically apply unambiguous lead status requests.
