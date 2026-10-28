@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import {
   Rocket,
   Users,
-  Sparkles,
   Mail,
   Bell,
-  MessageCircle,
   LifeBuoy,
   ArrowRight,
   PlayCircle,
   Target,
-  Brain,
+  ClipboardCheck,
+  Workflow,
+  ChartNoAxesCombined,
   Building2,
 } from "lucide-react";
 
@@ -20,91 +20,51 @@ const steps = [
   {
     n: 1,
     title: "Set up your company profile",
-    desc: "Add your products, positioning, target industries, and the pain points you solve. The AI uses this to personalise every message.",
+    desc: "Save your products, positioning, target industries and pain points, plus meeting details, company credentials and personal email signatures.",
     icon: Building2,
     to: "/app/company",
-    color: "from-slate-500 to-slate-700",
   },
   {
     n: 2,
-    title: "Build your target list",
-    desc: "Pull AI-curated target companies filtered by your industries, size, and the systems they use today.",
+    title: "Discover target accounts",
+    desc: "Review target recommendations and their public sources. Check publication dates where available and verify decision-makers and current roles on LinkedIn.",
     icon: Target,
     to: "/app/targets",
-    color: "from-indigo-500 to-blue-600",
   },
   {
     n: 3,
-    title: "Add leads",
-    desc: "Claim targets as leads, enter contacts manually, or upload a CSV. Each lead holds the company, contact, and conversation history.",
+    title: "Find and save contacts",
+    desc: "Search SignalHire and review real profile previews before revealing contacts. API account credits and the EngageIQ.lk reveal wallet are separate. You can also add leads manually or import a CSV.",
     icon: Users,
-    to: "/app/leads",
-    color: "from-blue-500 to-cyan-500",
+    to: "/app/signalhire",
   },
   {
     n: 4,
-    title: "Generate lead intelligence",
-    desc: "AI scrapes the company's public footprint to surface focus areas, likely tech stack, specific gaps, and the right people to contact.",
-    icon: Brain,
-    to: "/app/intelligence",
-    color: "from-fuchsia-500 to-purple-500",
+    title: "Review company signals",
+    desc: "Saved leads create linked company accounts. EngageIQ generates Fit, Intent, Signal Strength and Buying Stage with evidence; unsupported signals stay unknown. Review divisions, products and services, or export companies.",
+    icon: ChartNoAxesCombined,
+    to: "/app/companies",
   },
   {
     n: 5,
-    title: "Send outbound email",
-    desc: "Draft from scratch or use AI-suggested replies grounded in the lead's intelligence and your positioning.",
+    title: "Send personalised outreach",
+    desc: "Compose email with company context and your chosen signature, or use a lead's WhatsApp tab. Email Health tracks logged sends and highlights 50 per day, with a break reminder and an explicit Resume control.",
     icon: Mail,
     to: "/app/composer",
-    color: "from-amber-500 to-orange-500",
   },
   {
     n: 6,
-    title: "Engage on WhatsApp",
-    desc: "Open a lead → WhatsApp tab → review the AI-suggested reply → send. The full thread stays attached to the lead.",
-    icon: MessageCircle,
-    to: "/app/leads",
-    color: "from-green-500 to-emerald-500",
+    title: "Run campaigns and follow-ups",
+    desc: "Build email sequences, prepare campaign landing pages with your branding and images, and set reminders to keep follow-ups moving.",
+    icon: Workflow,
+    to: "/app/automation",
   },
   {
     n: 7,
-    title: "Track everything",
-    desc: "Every claimed lead, email sent, WhatsApp thread, reply, and reminder is logged on the lead timeline — and surfaced in the dashboard so you always see what's open, what's waiting, and what's next.",
-    icon: Bell,
-    to: "/app/reminders",
-    color: "from-rose-500 to-pink-500",
-  },
-];
-
-const flow = [
-  {
-    n: "01",
-    title: "Define your offer",
-    body: "Enter who you are, what you sell, the industries you serve, and the problems you solve.",
-  },
-  {
-    n: "02",
-    title: "Identify fit accounts",
-    body: "Pull a filtered list of companies from market databases and competitor-usage data that match your ICP.",
-  },
-  {
-    n: "03",
-    title: "Convert to leads",
-    body: "Claim accounts into your pipeline with contacts, role, and preferred channel.",
-  },
-  {
-    n: "04",
-    title: "Enrich with AI",
-    body: "Run lead intelligence for focus areas, likely tech stack, company-specific gaps, and recommended target roles.",
-  },
-  {
-    n: "05",
-    title: "Reach out on the right channel",
-    body: "Send personalised email or WhatsApp messages drafted from the lead's intelligence and your positioning.",
-  },
-  {
-    n: "06",
-    title: "Follow up systematically",
-    body: "Reminders, activity log, and reply suggestions keep every conversation moving until it closes.",
+    title: "Post one daily update",
+    desc: "Send one daily work message with completed work, next steps and blockers. It fills your dashboard summary and personal tasks, and applies explicit lead status requests only when a unique lead matches. Review Today, Week, Month or Quarter.",
+    icon: ClipboardCheck,
+    to: "/app",
   },
 ];
 
@@ -118,60 +78,38 @@ export default function GettingStarted() {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold">How EngageIQ.lk works</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          A seven-step workflow from defining your offer to closing follow-ups — built for B2B sales teams running personalised outbound at scale.
+          From company setup and verified research to personalised outreach, campaigns and one-message daily updates.
         </p>
       </div>
 
       {/* Workflow diagram */}
-      <Card className="p-6 md:p-8 bg-gradient-to-br from-background to-muted/30">
+      <section>
         <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
           <PlayCircle className="h-5 w-5 text-primary" /> The workflow
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {steps.map((s, i) => (
             <div key={s.n} className="relative">
               <Link
                 to={s.to}
-                className="block h-full p-4 rounded-xl border bg-card hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                className="block h-full p-5 rounded-lg border bg-card hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
               >
                 <div
-                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.color} text-white flex items-center justify-center mb-3 shadow-md`}
+                  className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-3"
                 >
                   <s.icon className="h-6 w-6" />
                 </div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                <div className="text-xs font-bold text-muted-foreground uppercase">
                   Step {s.n}
                 </div>
-                <div className="font-semibold text-sm mt-1">{s.title}</div>
-                <p className="text-xs text-muted-foreground mt-1">{s.desc}</p>
+                <div className="font-semibold text-base mt-1 flex items-center justify-between gap-2">{s.title}<ArrowRight className="h-4 w-4 shrink-0" /></div>
+                <p className="text-sm text-muted-foreground mt-2">{s.desc}</p>
               </Link>
-              {i < steps.length - 1 && (
-                <ArrowRight className="hidden xl:block absolute top-1/2 -right-3 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 z-10" />
-              )}
             </div>
           ))}
         </div>
-      </Card>
-
-      {/* End-to-end flow */}
-      <Card className="p-6 md:p-8">
-        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" /> End-to-end flow
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {flow.map((s) => (
-            <div
-              key={s.n}
-              className="p-5 rounded-xl border bg-gradient-to-br from-muted/30 to-background"
-            >
-              <div className="text-xs font-bold text-primary tracking-wider mb-2">{s.n}</div>
-              <div className="font-semibold text-sm">{s.title}</div>
-              <p className="text-sm text-muted-foreground mt-1">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </Card>
+      </section>
 
       {/* Help + quick wins */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -197,14 +135,14 @@ export default function GettingStarted() {
 
         <Card className="p-6 space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Bell className="h-5 w-5 text-primary" />
             <h3 className="font-semibold">Recommended first session</h3>
           </div>
           <ol className="text-sm text-muted-foreground space-y-2 list-decimal pl-5">
-            <li>Pick one account in <Link to="/app/targets" className="text-primary underline">Targets</Link></li>
-            <li>Claim it to convert it into a lead</li>
-            <li>Open <Link to="/app/intelligence" className="text-primary underline">AI Intelligence</Link> and review the brief</li>
-            <li>Click "Suggest reply" and send your first personalised message</li>
+            <li>Save your context and signature in <Link to="/app/company" className="text-primary underline">Company</Link></li>
+            <li>Add or import a contact in <Link to="/app/leads" className="text-primary underline">Leads</Link>, or review a <Link to="/app/signalhire" className="text-primary underline">SignalHire</Link> result before claiming</li>
+            <li>Review the linked account and evidence in <Link to="/app/companies" className="text-primary underline">Companies</Link></li>
+            <li>Prepare a personalised email, then post one daily work update with your next steps</li>
           </ol>
         </Card>
       </div>
