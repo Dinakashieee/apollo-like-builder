@@ -1,0 +1,16 @@
+CREATE TABLE public.lead_lists (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE, name text NOT NULL CHECK (char_length(trim(name)) BETWEEN 1 AND 120), created_by uuid NOT NULL DEFAULT auth.uid(), created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(workspace_id, name), UNIQUE(id, workspace_id));
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.lead_lists TO authenticated;
+GRANT ALL ON public.lead_lists TO service_role;
+ALTER TABLE public.lead_lists ENABLE ROW LEVEL SECURITY;
+CREATE POLICY lead_lists_member_read ON public.lead_lists FOR SELECT TO authenticated USING (public.is_workspace_member(workspace_id, auth.uid()));
+CREATE POLICY lead_lists_member_insert ON public.lead_lists FOR INSERT TO authenticated WITH CHECK (created_by = auth.uid() AND public.is_workspace_member(workspace_id, auth.uid()));
+CREATE POLICY lead_lists_member_update ON public.lead_lists FOR UPDATE TO authenticated USING (public.is_workspace_member(workspace_id, auth.uid())) WITH CHECK (public.is_workspace_member(workspace_id, auth.uid()));
+CREATE POLICY lead_lists_member_delete ON public.lead_lists FOR DELETE TO authenticated USING (public.is_workspace_member(workspace_id, auth.uid()));
+CREATE TABLE public.lead_list_members (list_id uuid NOT NULL, workspace_id uuid NOT NULL, lead_id uuid NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY(list_id, lead_id), FOREIGN KEY(list_id, workspace_id) REFERENCES public.lead_lists(id, workspace_id) ON DELETE CASCADE);
+GRANT SELECT, INSERT, DELETE ON public.lead_list_members TO authenticated;
+GRANT ALL ON public.lead_list_members TO service_role;
+ALTER TABLE public.lead_list_members ENABLE ROW LEVEL SECURITY;
+CREATE POLICY lead_list_members_read ON public.lead_list_members FOR SELECT TO authenticated USING (public.is_workspace_member(workspace_id, auth.uid()));
+CREATE POLICY lead_list_members_insert ON public.lead_list_members FOR INSERT TO authenticated WITH CHECK (public.is_workspace_member(workspace_id, auth.uid()) AND EXISTS (SELECT 1 FROM public.leads l WHERE l.id = lead_id AND l.workspace_id = lead_list_members.workspace_id));
+CREATE POLICY lead_list_members_delete ON public.lead_list_members FOR DELETE TO authenticated USING (public.is_workspace_member(workspace_id, auth.uid()));
+CREATE INDEX lead_list_members_workspace ON public.lead_list_members(workspace_id);
