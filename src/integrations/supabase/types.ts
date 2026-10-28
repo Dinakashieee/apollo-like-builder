@@ -1018,6 +1018,74 @@ export type Database = {
           },
         ]
       }
+      lead_list_members: {
+        Row: {
+          created_at: string
+          lead_id: string
+          list_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          lead_id: string
+          list_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          lead_id?: string
+          list_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_list_members_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_list_members_list_id_workspace_id_fkey"
+            columns: ["list_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "lead_lists"
+            referencedColumns: ["id", "workspace_id"]
+          },
+        ]
+      }
+      lead_lists: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_lists_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           company_name: string
