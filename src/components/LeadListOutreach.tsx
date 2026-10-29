@@ -20,7 +20,7 @@ export function LeadListOutreach({ leads, subject, body, mailClient }: { leads: 
   const [excluded, setExcluded] = useState<string[]>([]);
   const [opened, setOpened] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
-  const { paused } = useEmailSendingState();
+  const { paused, loading: sendingStateLoading, error: sendingStateError } = useEmailSendingState();
   useEffect(() => {
     setPages([]);
     if (!current) return;
@@ -37,9 +37,9 @@ export function LeadListOutreach({ leads, subject, body, mailClient }: { leads: 
   const getPage = (id: string) => pages.find(page => page.id === id);
   const draftBody = (lead: OutreachLead) => {
     const page = getPage(mode === "shared" ? sharedPage : individualPages[lead.id]);
-    return outreachBody(body, lead, mode !== "email" && page ? landingLink(page, window.location.origin) : undefined);
+    return outreachBody(body, lead, mode !== "email" && page ? landingLink(page, "https://www.engageiqlk.com") : undefined);
   };
-  const ready = (lead: OutreachLead) => !!subject.trim() && !!body.trim() && !paused && (mode === "email" || !!getPage(mode === "shared" ? sharedPage : individualPages[lead.id]));
+  const ready = (lead: OutreachLead) => !!subject.trim() && !!body.trim() && !paused && !sendingStateLoading && !sendingStateError && (mode === "email" || !!getPage(mode === "shared" ? sharedPage : individualPages[lead.id]));
   function openDraft(lead: OutreachLead) {
     if (!lead.email || !ready(lead)) return;
     const url = mailDraftUrl(mailClient, lead.email, subject, draftBody(lead));
@@ -57,6 +57,7 @@ export function LeadListOutreach({ leads, subject, body, mailClient }: { leads: 
     <p className="text-sm text-muted-foreground">Drafts open individually in your mail client; delivery is not confirmed here. List outreach does not use app emails.</p>
     {leads.length !== recipients.length && <p className="text-sm text-warning">{leads.length - recipients.length} missing, invalid or duplicate email addresses excluded.</p>}
     {paused && <p className="text-sm text-destructive">Your sending break is active. Resume sending to open drafts.</p>}
+    {sendingStateError && <p className="text-sm text-destructive">Could not check your sending status. Please refresh before opening drafts.</p>}
     <div className="divide-y">
       {recipients.map(lead => <div key={lead.id} className="py-3 space-y-2">
         <div className="flex items-center gap-3 flex-wrap">
