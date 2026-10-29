@@ -1,4 +1,5 @@
 # Architecture
+- Lead lists use workspace-scoped list/member records with database-validated lead membership; list outreach opens one recipient draft at a time in external mail clients and never uses built-in app-email infrastructure, because campaigns are not app emails.
 - SignalHire API account balances are validated server-side and displayed separately from workspace reveal wallets; connection badges require a successful provider response, never browser flags.
 - SignalHire discovery uses documented top-level Search API filters and persists synchronous profile previews; search previews never imply contact details have been revealed.
 - SignalHire waiting states consume synchronous results and use bounded saved-row reads alongside live notifications for asynchronous completion; transport failures clear loading without automatically replaying provider searches.

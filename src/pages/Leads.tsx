@@ -26,6 +26,9 @@ import { toast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activities";
 import { useAuth } from "@/hooks/useAuth";
 import { extractOwnedProducts, matchOwnedProducts } from "@/lib/productMatch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { LeadListToolbar } from "@/components/LeadListToolbar";
+import { useLeadLists } from "@/hooks/useLeadLists";
 
 const TEMP_BADGE: Record<string, { cls: string; icon: typeof Flame; label: string }> = {
   hot: { cls: "bg-hot/15 text-hot", icon: Flame, label: "Hot" },
@@ -56,6 +59,9 @@ export default function Leads() {
   const [convLead, setConvLead] = useState<any | null>(null);
   const [sheetTab, setSheetTab] = useState<string>("profile");
   const [ownedProducts, setOwnedProducts] = useState<string[]>([]);
+  const [listFilter, setListFilter] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { members } = useLeadLists();
 
   const refresh = async () => {
     if (!current) return;
@@ -94,6 +100,7 @@ export default function Leads() {
   const mineCount = leads.length - targetsCount - signalhireCount;
 
   const filtered = leads.filter((l) => {
+    if (listFilter !== "all" && !members.some(m => m.list_id === listFilter && m.lead_id === l.id)) return false;
     if (sourceFilter === "mine" && (isTargetLead(l) || isSignalHireLead(l))) return false;
     if (sourceFilter === "targets" && !isTargetLead(l)) return false;
     if (sourceFilter === "signalhire" && !isSignalHireLead(l)) return false;
@@ -160,6 +167,8 @@ export default function Leads() {
         </div>
       </div>
 
+      <LeadListToolbar value={listFilter} onChange={id => { setListFilter(id); setSelectedIds([]); if (id !== "all") setSourceFilter("all"); }} selected={selectedIds} onSaved={() => setSelectedIds([])} />
+
       <div className="card-elevated overflow-hidden">
         <div className="px-4 pt-4">
           <Tabs value={sourceFilter} onValueChange={(v) => setSourceFilter(v as any)}>
@@ -216,6 +225,7 @@ export default function Leads() {
           <table className="w-full">
             <thead>
               <tr className="bg-muted/30 text-left">
+                <th className="px-4 py-3"><Checkbox aria-label="Select all visible leads" checked={filtered.length > 0 && filtered.every(l => selectedIds.includes(l.id))} onCheckedChange={checked => setSelectedIds(checked ? filtered.map(l => l.id) : [])} /></th>
                 <th className="px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Company</th>
                 <th className="px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Contact</th>
                 <th className="px-5 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
@@ -229,14 +239,14 @@ export default function Leads() {
               {loading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td className="px-5 py-4" colSpan={7}>
+                    <td className="px-5 py-4" colSpan={8}>
                       <Skeleton className="h-6 w-full" />
                     </td>
                   </tr>
                 ))}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td className="px-5 py-12 text-center text-muted-foreground" colSpan={7}>
+                  <td className="px-5 py-12 text-center text-muted-foreground" colSpan={8}>
                     {leads.length === 0
                       ? "No leads yet. Add one or import a file."
                       : "No leads match your filters."}
@@ -251,6 +261,7 @@ export default function Leads() {
                 const matches = matchOwnedProducts(lead, ownedProducts);
                 return (
                   <tr key={lead.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-4"><Checkbox aria-label={`Select ${lead.contact_name || lead.company_name}`} checked={selectedIds.includes(lead.id)} onCheckedChange={checked => setSelectedIds(ids => checked ? [...new Set([...ids, lead.id])] : ids.filter(id => id !== lead.id))} /></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-md bg-secondary flex items-center justify-center text-[11px] font-bold text-secondary-foreground">

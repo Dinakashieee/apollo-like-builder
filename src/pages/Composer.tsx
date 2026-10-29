@@ -22,10 +22,16 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useCompanyEmailContext } from "@/hooks/useCompanyEmailContext";
 import { EmailSignaturePicker } from "@/components/EmailSignaturePicker";
+import { useSearchParams } from "react-router-dom";
+import { useLeadLists } from "@/hooks/useLeadLists";
+import { LeadListOutreach } from "@/components/LeadListOutreach";
 
 export default function Composer() {
   const { current } = useWorkspace();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedList = searchParams.get("list") || "individual";
+  const { lists, members } = useLeadLists();
   const { aiEmailsUsed, aiEmailsLimit, aiEmailsAtLimit, aiEmailsNearLimit, tier, refetch: refetchUsage } =
     useEntitlements();
   const [leads, setLeads] = useState<any[]>([]);
@@ -123,6 +129,11 @@ export default function Composer() {
   };
 
   const lead = leads.find((l) => l.id === selectedLead);
+  const listLeads = leads.filter(l => members.some(m => m.list_id === selectedList && m.lead_id === l.id));
+  const availableLeads = selectedList === "individual" ? leads : listLeads;
+  useEffect(() => {
+    if (selectedList !== "individual" && !listLeads.some(l => l.id === selectedLead)) setSelectedLead(listLeads[0]?.id || "");
+  }, [selectedList, members, leads, selectedLead]);
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -181,6 +192,8 @@ export default function Composer() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="card-elevated p-6 lg:col-span-2 space-y-4">
+          <div><Label>Recipients</Label><Select value={selectedList} onValueChange={id => { setSearchParams(id === "individual" ? {} : { list: id }); }}><SelectTrigger className="mt-1" aria-label="Email recipient list"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="individual">Individual lead</SelectItem>{lists.map(list => <SelectItem key={list.id} value={list.id}>{list.name} · {members.filter(m => m.list_id === list.id).length}</SelectItem>)}</SelectContent></Select></div>
+          {selectedList !== "individual" && <p className="text-sm text-warning">Review each recipient before sending. AI generation uses the selected lead's context, not every lead in the list.</p>}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Lead</Label>
@@ -189,10 +202,10 @@ export default function Composer() {
                   <SelectValue placeholder="Select a lead" />
                 </SelectTrigger>
                 <SelectContent>
-                  {leads.length === 0 && (
+                  {availableLeads.length === 0 && (
                     <div className="px-2 py-2 text-xs text-muted-foreground">No leads yet</div>
                   )}
-                  {leads.map((l) => (
+                  {availableLeads.map((l) => (
                     <SelectItem key={l.id} value={l.id}>
                       {l.contact_name || l.company_name} · {l.company_name}
                     </SelectItem>
@@ -302,7 +315,7 @@ export default function Composer() {
             />
           </div>
 
-          <div className="flex justify-between pt-3 border-t border-border/60">
+          {selectedList === "individual" && <div className="flex justify-between pt-3 border-t border-border/60">
             <p className="text-xs text-muted-foreground">
               {body.length} characters
             </p>
@@ -334,7 +347,8 @@ export default function Composer() {
             >
               <Send className="h-4 w-4 mr-2" /> Open in mail client
             </Button>
-          </div>
+          </div>}
+          {selectedList !== "individual" && <LeadListOutreach key={`${current?.id}:${selectedList}`} leads={listLeads} subject={subject} body={body} mailClient={mailClient} />}
         </div>
 
         <div className="card-elevated p-5 h-fit">

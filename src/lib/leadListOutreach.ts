@@ -18,7 +18,7 @@ export function listRecipients(leads: OutreachLead[]) {
 }
 
 export function outreachBody(body: string, lead: OutreachLead, pageLink?: string) {
-  const text = body.replaceAll("{{name}}", lead.contact_name || lead.company_name).replaceAll("{{company}}", lead.company_name);
+  const text = body.split("{{name}}").join(lead.contact_name || lead.company_name).split("{{company}}").join(lead.company_name);
   return pageLink ? `${text.trim()}\n\n${pageLink}`.trim() : text;
 }
 
