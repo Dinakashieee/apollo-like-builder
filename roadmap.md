@@ -1,7 +1,7 @@
 # Saved lead lists
-- [ ] Save workspace lead lists and add/remove selected leads.
-- [ ] Select a list for email drafts with shared or per-lead published landing-page links, using external mail clients rather than built-in app emails for list outreach.
-- [ ] Verify saved list reload, recipients, page links and workspace isolation.
+- [x] Save workspace lead lists and add/remove selected leads.
+- [x] Select a list for email drafts with shared or per-lead published landing-page links, using external mail clients rather than built-in app emails for list outreach.
+- [x] Verify signed-in list creation/add/reload/deletion, populated recipient selection, shared published-site page link and individual page selector; five tests pass, compact layout has no overflow, build OK. Workspace policies and same-workspace lead validation reviewed; cross-workspace denial not exercised. Temporary list removed; no emails sent and external delivery not verified.
 
 # Getting Started workflow
 - [x] Update the outdated workflow and first-session checklist to match current discovery, company signals, outreach, campaigns and daily updates; signed-in page, Companies link and desktop/current-screen layouts verified; build OK.
