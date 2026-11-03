@@ -48,10 +48,8 @@ export async function processScheduledBatch(admin: SchedulerClient, now = new Da
             sender_user_id: row.user_id, workspace_id: row.workspace_id,
           },
         });
-        if (r.error?.context?.status === 409 || r.error?.context?.status === 503) {
-          await defer(row.id);
-          continue;
-        }
+        if (r.error?.context?.status === 409 || r.error?.context?.status === 503) sendError = 'deferred';
+        else
         sendError = r.error?.message;
       } catch {
         // Unknown transport outcomes are retried using the same idempotency key.
@@ -59,6 +57,7 @@ export async function processScheduledBatch(admin: SchedulerClient, now = new Da
         continue;
       }
     }
+    if (sendError === 'deferred') { await defer(row.id); continue; }
     if (sendError) {
       await update(row.id, { status: 'failed', error: sendError, retry_after: null });
       results.push({ id: row.id, ok: false });
