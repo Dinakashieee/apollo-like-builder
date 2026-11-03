@@ -9,6 +9,7 @@
 - Company email context defaults are shared by both composers and applied per selected lead; personal signatures use user-owned rows with a profile default pointer, retain the legacy profile signature, and sanitize HTML previews.
 - Personal dashboard summaries use an authenticated, workspace-membership-gated aggregation scoped to auth.uid(); calendar-to-date boundaries use the user's local timezone and email counts deduplicate latest message status before filtering.
 - Email sending breaks are persisted per authenticated user and enforced at enqueue and dispatch; paused outreach remains pending until explicit resume, while authentication and essential system emails continue.
+- Scheduled-email selection excludes paused senders and future retry-after timestamps before limiting the batch; transient failures back off without changing scheduled times, so one sender cannot starve others.
 - Landing-page themes use a shared renderer and scoped semantic tokens for identical editor/public output; legacy templates remain supported without rewriting saved content.
 - The Landing Pages list reuses the editor preview renderer for a selected saved page, with a local sample when empty, so viewing previews never creates or publishes content.
 - Landing color palettes update the existing accent and brand-color fields together; palette swatches use scoped CSS tokens so selection adds no separate persistence path.

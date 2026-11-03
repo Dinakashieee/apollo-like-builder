@@ -1447,6 +1447,7 @@ export type Database = {
           id: string
           in_reply_to_message_id: string | null
           lead_id: string | null
+          retry_after: string | null
           scheduled_for: string
           send_via: string
           sent_at: string | null
@@ -1466,6 +1467,7 @@ export type Database = {
           id?: string
           in_reply_to_message_id?: string | null
           lead_id?: string | null
+          retry_after?: string | null
           scheduled_for: string
           send_via?: string
           sent_at?: string | null
@@ -1485,6 +1487,7 @@ export type Database = {
           id?: string
           in_reply_to_message_id?: string | null
           lead_id?: string | null
+          retry_after?: string | null
           scheduled_for?: string
           send_via?: string
           sent_at?: string | null
@@ -2495,6 +2498,35 @@ export type Database = {
       reserve_landing_image_credit: {
         Args: { _workspace_id: string }
         Returns: boolean
+      }
+      select_due_scheduled_emails: {
+        Args: { _now?: string }
+        Returns: {
+          account_id: string | null
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          in_reply_to_message_id: string | null
+          lead_id: string | null
+          retry_after: string | null
+          scheduled_for: string
+          send_via: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          thread_id: string | null
+          to_email: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "scheduled_emails"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       track_landing_view: {
         Args: {
