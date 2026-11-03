@@ -113,6 +113,13 @@
       "when": 1793229105017,
       "tag": "0015_workspace_lead_lists",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793726553424,
+      "tag": "0016_scheduled_sender_eligible_batch",
+      "breakpoints": true
     }
   ]
 }
