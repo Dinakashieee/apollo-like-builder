@@ -5,13 +5,18 @@ type ScheduledEmail = {
   to_email: string; subject: string | null; body: string;
 };
 type DbError = { message: string } | null;
-type SchedulerClient = Parameters<typeof isUserSendingPaused>[0] & {
+type SchedulerClient = {
   rpc: (name: string, args: { _now: string }) => PromiseLike<{ data: ScheduledEmail[] | null; error: DbError }>;
-  from: ((table: string) => {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => PromiseLike<{ data: { paused?: boolean } | null; error: unknown }>;
+      };
+    };
     update: (values: Record<string, unknown>) => {
       eq: (column: string, id: string) => PromiseLike<{ error: DbError }>;
     };
-  });
+  };
   functions: {
     invoke: (name: string, options: { body: Record<string, unknown> }) => PromiseLike<{
       error: { message: string; context?: { status?: number } } | null;
