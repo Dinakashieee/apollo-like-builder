@@ -1,5 +1,5 @@
 # Monitoring: scheduled email starvation
-- [ ] Exclude paused users before batch selection, back off transient failures, and verify with no actual deliveries; preserve existing AI allowances.
+- [x] Exclude paused users before batch selection and back off transient failures; deployed dispatcher, 12 tests pass, build OK. Exact selection SQL tested against 25 paused rows plus one active row (active selected, paused excluded), Resume and retry eligibility checked, synthetic data removed. Direct RPC invocation is denied to the diagnostic role as intended; actual delivery/cron authorization remains unverified. Existing AI allowances preserved; quota finding resolved as contrary to the saved policy.
 
 # Saved lead lists
 - [x] Save workspace lead lists and add/remove selected leads.
