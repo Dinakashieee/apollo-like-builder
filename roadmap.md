@@ -1,3 +1,6 @@
+# Monitoring: scheduled email starvation
+- [ ] Exclude paused users before batch selection, back off transient failures, and verify with no actual deliveries; preserve existing AI allowances.
+
 # Saved lead lists
 - [x] Save workspace lead lists and add/remove selected leads.
 - [x] Select a list for email drafts with shared or per-lead published landing-page links, using external mail clients rather than built-in app emails for list outreach.
