@@ -38,6 +38,8 @@ import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
 import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import welcomePoster from "@/assets/engageiq-welcome.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -254,6 +256,7 @@ const tiers: Tier[] = [
 ];
 
 export default function Landing() {
+  const [welcomeOpen, setWelcomeOpen] = useState(true);
   const [annual, setAnnual] = useState(true);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [waitlistPlan, setWaitlistPlan] = useState<string | undefined>(undefined);
@@ -1104,6 +1107,17 @@ export default function Landing() {
         </div>
       </footer>
       <ChatWidget mode="support" />
+      <Dialog open={welcomeOpen} onOpenChange={setWelcomeOpen}>
+        <DialogContent className="w-[min(720px,calc(100vw-32px),calc(100dvh-32px))] max-w-none gap-0 overflow-hidden rounded-lg border-0 p-0 [&>button]:right-2 [&>button]:top-2 [&>button]:bg-background [&>button]:p-2 [&>button]:text-foreground [&>button]:opacity-100">
+          <DialogTitle className="sr-only">Welcome to EngageIQ.lk</DialogTitle>
+          <DialogDescription className="sr-only">Discover B2B opportunities with EngageIQ.lk. Sign up for free access.</DialogDescription>
+          <Button asChild variant="ghost" className="h-auto w-full rounded-none p-0">
+            <Link to={user ? "/app" : "/auth"} aria-label={user ? "Open EngageIQ.lk" : "Sign up for free access"} onClick={() => setWelcomeOpen(false)}>
+              <img src={welcomePoster.url} alt="EngageIQ.lk — find the right accounts, engage via email and WhatsApp, and track opportunities. Sign up for free access." className="block aspect-square w-full object-contain" />
+            </Link>
+          </Button>
+        </DialogContent>
+      </Dialog>
       <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel={waitlistPlan} />
     </div>
   );
