@@ -36,6 +36,22 @@ export function AppLayout() {
     null
   );
   const [companyExists, setCompanyExists] = useState<boolean | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(() => {
+    try {
+      return !sessionStorage.getItem("engageiq-welcome-dismissed");
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissWelcome = () => {
+    setWelcomeOpen(false);
+    try {
+      sessionStorage.setItem("engageiq-welcome-dismissed", "1");
+    } catch {
+      /* ignore storage failures */
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
