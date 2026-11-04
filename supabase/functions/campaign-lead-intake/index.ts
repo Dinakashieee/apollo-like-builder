@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
         } else campaign = created;
       }
     }
-    const { data: row, error } = await admin.from('ad_campaign_leads').insert({ ...lead.data, workspace_id: campaign.workspace_id, campaign_id: campaign.id, raw: body }).select('id').single();
+    const { data: row, error } = await admin.from('ad_campaign_leads').insert({ ...lead.data, workspace_id: campaign.workspace_id, campaign_id: campaign.id, raw: { ...body, token: undefined } }).select('id').single();
     if (error) throw error;
     return respond({ ok: true, id: row.id });
   } catch (e) {
