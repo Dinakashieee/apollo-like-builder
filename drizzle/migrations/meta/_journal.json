@@ -148,6 +148,20 @@
       "when": 1793796834506,
       "tag": "0020_career_cv_storage_preflight",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793799470954,
+      "tag": "0021_ad_campaign_leads",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793799501167,
+      "tag": "0022_ad_campaigns_hide_token",
+      "breakpoints": true
     }
   ]
 }

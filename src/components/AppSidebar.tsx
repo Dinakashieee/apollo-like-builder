@@ -18,6 +18,7 @@ import {
   Globe,
   Table2,
   Ghost,
+  Megaphone,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,7 @@ const mainItems = [
   { title: "Getting Started", url: "/app/getting-started", icon: Rocket, badge: "New" },
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Leads", url: "/app/leads", icon: Users },
+  { title: "Campaign Leads", url: "/app/campaign-leads", icon: Megaphone, badge: "New" },
   { title: "Companies", url: "/app/companies", icon: Table2, badge: "New" },
   { title: "SignalHire Claim", url: "/app/signalhire", icon: ListChecks, badge: "New" },
   

@@ -88,3 +88,8 @@
 - [x] Fix delivery bugs found during verification: composer payload not reaching templates, and From address not matching the verified sending domain.
 - [x] Verify end-to-end: real sends counted, popup fires, break syncs to the page.
 - [x] Turn the daily bar red at 50 sends (amber from 40, blue below); add the missing amber status color.
+# Campaign leads
+- [x] Campaign Leads page: leads per campaign, platform counts, assign + status (Admin/Marketing), Sales sees assigned only.
+- [x] Auto-intake link (auto-creates campaigns) and CSV import.
+- [ ] Direct LinkedIn/Facebook/TikTok/Google lead-form connections per subscriber (needs per-platform app approvals).
+- [ ] Launch real paid campaigns from the app (needs subscriber ad accounts connected).
