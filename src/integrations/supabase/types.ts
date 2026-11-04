@@ -121,6 +121,8 @@ export type Database = {
         Row: {
           consent: boolean
           created_at: string
+          cv_name: string | null
+          cv_path: string | null
           email: string
           full_name: string
           id: string
@@ -133,6 +135,8 @@ export type Database = {
         Insert: {
           consent: boolean
           created_at?: string
+          cv_name?: string | null
+          cv_path?: string | null
           email: string
           full_name: string
           id?: string
@@ -145,6 +149,8 @@ export type Database = {
         Update: {
           consent?: boolean
           created_at?: string
+          cv_name?: string | null
+          cv_path?: string | null
           email?: string
           full_name?: string
           id?: string

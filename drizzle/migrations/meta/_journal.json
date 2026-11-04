@@ -134,6 +134,13 @@
       "when": 1793795287896,
       "tag": "0018_career_application_least_privilege",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793796641251,
+      "tag": "0019_career_cv_uploads",
+      "breakpoints": true
     }
   ]
 }

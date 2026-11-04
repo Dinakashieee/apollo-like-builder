@@ -1,0 +1,15 @@
+ALTER TABLE public.career_applications ADD COLUMN cv_path text, ADD COLUMN cv_name text;
+ALTER TABLE public.career_applications ADD CONSTRAINT career_cv_attachment_shape CHECK ((cv_path IS NULL AND cv_name IS NULL) OR (cv_path IS NOT NULL AND cv_name IS NOT NULL AND cv_path ~ '^[0-9a-f-]{36}\.(pdf|doc|docx)$' AND char_length(cv_name) BETWEEN 1 AND 255));
+CREATE UNIQUE INDEX career_cv_path_unique ON public.career_applications(cv_path) WHERE cv_path IS NOT NULL;
+GRANT INSERT (cv_path,cv_name) ON public.career_applications TO anon, authenticated;
+CREATE POLICY "Public applicants upload CVs" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'career-cvs' AND name ~ '^[0-9a-f-]{36}\.(pdf|doc|docx)$' AND lower(storage.extension(name)) IN ('pdf','doc','docx') AND (metadata->>'size')::bigint BETWEEN 1 AND 5242880 AND metadata->>'mimetype' IN ('application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'));
+CREATE POLICY "Recruitment admins read CVs" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'career-cvs' AND public.is_platform_admin(auth.uid()));
+CREATE POLICY "Career CV private read boundary" ON storage.objects AS RESTRICTIVE FOR SELECT TO anon, authenticated USING (bucket_id <> 'career-cvs' OR public.is_platform_admin(auth.uid()));
+CREATE POLICY "Career CV immutable uploads" ON storage.objects AS RESTRICTIVE FOR UPDATE TO anon, authenticated USING (bucket_id <> 'career-cvs') WITH CHECK (bucket_id <> 'career-cvs');
+CREATE POLICY "Career CV protected deletion" ON storage.objects AS RESTRICTIVE FOR DELETE TO anon, authenticated USING (bucket_id <> 'career-cvs');
+CREATE POLICY "Career CV validated uploads boundary" ON storage.objects AS RESTRICTIVE FOR INSERT TO anon, authenticated WITH CHECK (bucket_id <> 'career-cvs' OR (name ~ '^[0-9a-f-]{36}\.(pdf|doc|docx)$' AND (metadata->>'size')::bigint BETWEEN 1 AND 5242880 AND metadata->>'mimetype' IN ('application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document')));
+CREATE OR REPLACE FUNCTION public.validate_career_cv_attachment() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ BEGIN
+IF NEW.cv_path IS NOT NULL AND NOT EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id = 'career-cvs' AND name = NEW.cv_path AND (metadata->>'size')::bigint BETWEEN 1 AND 5242880 AND metadata->>'mimetype' IN ('application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document')) THEN RAISE EXCEPTION 'CV attachment is missing or invalid'; END IF;
+RETURN NEW; END; $$;
+REVOKE ALL ON FUNCTION public.validate_career_cv_attachment() FROM PUBLIC, anon, authenticated;
+CREATE TRIGGER validate_career_cv_before_insert BEFORE INSERT ON public.career_applications FOR EACH ROW EXECUTE FUNCTION public.validate_career_cv_attachment();
