@@ -146,6 +146,7 @@ export function AppLayout() {
         </div>
         <ChatWidget mode="assistant" />
         <SendPacePopup />
+        <WelcomeSideCard open={welcomeOpen} onClose={dismissWelcome} />
       </div>
     </SidebarProvider>
   );
