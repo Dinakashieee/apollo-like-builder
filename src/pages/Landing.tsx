@@ -502,6 +502,179 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* About the product */}
+      <section id="about" className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <p className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">About the product</p>
+            <h2 className="text-4xl lg:text-5xl font-display font-bold text-primary-deep tracking-tight">
+              B2B sales no longer requires onsite meetings
+            </h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              Traditional lead generation is time-consuming, fragmented and often ineffective.
+              Sales teams spend valuable hours on manual research, cold outreach and travel —
+              with uncertain results.
+            </p>
+          </div>
+
+          {/* Why teams struggle */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                icon: Clock,
+                title: "Time wasted on manual research",
+                desc: "Hours spent searching for the right companies and contacts.",
+              },
+              {
+                icon: UserX,
+                title: "Unqualified leads",
+                desc: "Many prospects are not a good fit, leading to low conversion rates.",
+              },
+              {
+                icon: Plane,
+                title: "High travel costs and lost productivity",
+                desc: "Onsite visits and events are expensive and time-consuming.",
+              },
+              {
+                icon: EyeOff,
+                title: "Lack of visibility and follow-up",
+                desc: "Important follow-ups are missed and activities are hard to track.",
+              },
+            ].map((p) => (
+              <div
+                key={p.title}
+                className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 hover:shadow-md transition-all duration-300"
+              >
+                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <p.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-bold text-[15px] text-primary-deep mb-2 leading-snug">{p.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm font-semibold text-primary-deep mb-3 uppercase tracking-wider">The result?</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {["Lower productivity", "Higher costs", "Fewer closed deals"].map((r) => (
+                <span
+                  key={r}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 border border-rose-500/30 text-sm font-semibold text-rose-600 dark:text-rose-400"
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  {r}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* The gap */}
+          <div className="max-w-2xl mx-auto text-center mt-24 mb-12">
+            <h3 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep tracking-tight">
+              A clear gap in the B2B sales process
+            </h3>
+            <p className="mt-4 text-muted-foreground text-lg">
+              Most sales teams use multiple disconnected tools and manual processes to find leads,
+              reach out, track activities and stay updated on the market. That creates gaps,
+              inefficiencies and missed opportunities.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="hidden md:grid grid-cols-2 gap-4 px-4 mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <span>Traditional approach · multiple tools, manual work</span>
+              <span>The gap</span>
+            </div>
+            <div className="space-y-3">
+              {[
+                { tool: "Manual market research", gap: "Hard to find the right accounts" },
+                { tool: "Multiple data sources", gap: "Data is incomplete or outdated" },
+                { tool: "Manual email outreach", gap: "Generic messages and low response rates" },
+                { tool: "Separate WhatsApp tool", gap: "Disjointed communication" },
+                { tool: "Manual follow-ups", gap: "Important follow-ups are missed" },
+                { tool: "Spreadsheets for tracking", gap: "No single view of activities" },
+                { tool: "No real-time market insights", gap: "Limited visibility on competitors and trends" },
+                { tool: "Time-consuming admin", gap: "Manual task updates take time" },
+              ].map((g) => (
+                <div
+                  key={g.tool}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 bg-card rounded-xl border border-border/60 p-4"
+                >
+                  <p className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                    <X className="h-4 w-4 text-muted-foreground shrink-0" />
+                    {g.tool}
+                  </p>
+                  <p className="text-sm text-primary-deep flex items-center gap-2 md:border-l md:border-border/60 md:pl-4">
+                    <AlertCircle className="h-4 w-4 text-hot shrink-0" />
+                    {g.gap}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* EngageIQ fills the gap */}
+          <div className="max-w-2xl mx-auto text-center mt-24 mb-12">
+            <h3 className="text-3xl lg:text-4xl font-display font-bold text-primary-deep tracking-tight">
+              EngageIQ.lk fills the gap
+            </h3>
+            <p className="mt-4 text-muted-foreground text-lg">
+              A complete AI-powered platform that helps you find the right accounts, engage
+              intelligently, track everything and close more opportunities — without the need
+              for onsite visits. Work from anywhere. Build a global pipeline.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+            {[
+              {
+                icon: BrainCircuit,
+                title: "AI Account Targeting & Prioritization",
+              },
+              {
+                icon: Mail,
+                title: "Email Automation & Sequences",
+              },
+              {
+                icon: MessageCircle,
+                title: "WhatsApp Communication",
+              },
+              {
+                icon: Globe,
+                title: "Customer-Specific Landing Pages",
+              },
+              {
+                icon: TrendingUp,
+                title: "AI Market & Competitor Intelligence",
+              },
+              {
+                icon: BarChart3,
+                title: "Activity Audit & Sales Dashboard",
+              },
+              {
+                icon: Mic,
+                title: "Voice / Chat Task Updates",
+              },
+              {
+                icon: Layers,
+                title: "All in One Platform",
+              },
+            ].map((c) => (
+              <div
+                key={c.title}
+                className="flex items-center gap-4 bg-card rounded-xl border border-border/60 p-4 hover:shadow-md transition-all duration-300"
+              >
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-gradient-primary flex items-center justify-center">
+                  <c.icon className="h-5 w-5 text-white" />
+                </div>
+                <h4 className="font-display font-semibold text-sm text-primary-deep leading-snug">{c.title}</h4>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section id="how-it-works" className="py-24 bg-gradient-soft">
         <div className="container mx-auto px-6">
