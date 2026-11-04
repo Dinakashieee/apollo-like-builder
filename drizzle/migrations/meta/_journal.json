@@ -127,6 +127,13 @@
       "when": 1793788734691,
       "tag": "0017_career_applications",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793795287896,
+      "tag": "0018_career_application_least_privilege",
+      "breakpoints": true
     }
   ]
 }
