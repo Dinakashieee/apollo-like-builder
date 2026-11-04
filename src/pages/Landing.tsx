@@ -18,6 +18,14 @@ import {
   TrendingUp,
   Workflow,
   X,
+  MessageCircle,
+  Globe,
+  Mic,
+  Layers,
+  EyeOff,
+  UserX,
+  Plane,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -328,6 +336,7 @@ export default function Landing() {
         <div className="container mx-auto h-16 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-foreground/80">
+            <a href="#about" className="hover:text-primary transition-colors">About</a>
             <a href="#features" className="hover:text-primary transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-primary transition-colors">How it works</a>
             <a href="#preview" className="hover:text-primary transition-colors">Product</a>
