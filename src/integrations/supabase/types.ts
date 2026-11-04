@@ -117,6 +117,110 @@ export type Database = {
           },
         ]
       }
+      ad_campaign_leads: {
+        Row: {
+          assigned_to: string | null
+          campaign_id: string
+          company: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          message: string | null
+          phone: string | null
+          raw: Json
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          campaign_id: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          phone?: string | null
+          raw?: Json
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          campaign_id?: string
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          phone?: string | null
+          raw?: Json
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaign_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_campaign_leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_campaigns: {
+        Row: {
+          auto_created: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          intake_token: string
+          name: string
+          platform: string
+          workspace_id: string
+        }
+        Insert: {
+          auto_created?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          intake_token?: string
+          name: string
+          platform?: string
+          workspace_id: string
+        }
+        Update: {
+          auto_created?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          intake_token?: string
+          name?: string
+          platform?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       career_applications: {
         Row: {
           consent: boolean
@@ -2299,6 +2403,32 @@ export type Database = {
           },
         ]
       }
+      workspace_lead_intake: {
+        Row: {
+          created_at: string
+          token: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          token?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          token?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_lead_intake_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_members: {
         Row: {
           created_at: string
@@ -2360,6 +2490,35 @@ export type Database = {
           },
         ]
       }
+      workspace_team_roles: {
+        Row: {
+          role: Database["public"]["Enums"]["team_role"]
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          role?: Database["public"]["Enums"]["team_role"]
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          role?: Database["public"]["Enums"]["team_role"]
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_team_roles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           created_at: string
@@ -2406,8 +2565,13 @@ export type Database = {
         }
         Returns: Json
       }
+      campaign_intake_token: { Args: { _campaign_id: string }; Returns: string }
       can_customize_landing: {
         Args: { _workspace_id: string }
+        Returns: boolean
+      }
+      can_manage_campaign_leads: {
+        Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
       consume_signalhire_credit: {
@@ -2573,6 +2737,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      team_role_of: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: Database["public"]["Enums"]["team_role"]
+      }
       track_landing_view: {
         Args: {
           _cta_clicked?: boolean
@@ -2608,6 +2776,7 @@ export type Database = {
       opportunity_level: "high" | "medium" | "low"
       reply_temperature: "hot" | "warm" | "cold" | "neutral"
       step_status: "pending" | "sent" | "skipped"
+      team_role: "admin" | "marketing" | "sales"
       ticket_status: "open" | "in_progress" | "resolved"
       waitlist_status: "waiting" | "invited" | "converted" | "rejected"
     }
@@ -2745,6 +2914,7 @@ export const Constants = {
       opportunity_level: ["high", "medium", "low"],
       reply_temperature: ["hot", "warm", "cold", "neutral"],
       step_status: ["pending", "sent", "skipped"],
+      team_role: ["admin", "marketing", "sales"],
       ticket_status: ["open", "in_progress", "resolved"],
       waitlist_status: ["waiting", "invited", "converted", "rejected"],
     },
