@@ -1107,17 +1107,28 @@ export default function Landing() {
         </div>
       </footer>
       <ChatWidget mode="support" />
-      <Dialog open={welcomeOpen} onOpenChange={setWelcomeOpen}>
-        <DialogContent className="w-[min(720px,calc(100vw_-_32px),calc(100dvh_-_32px))] max-w-none gap-0 overflow-hidden rounded-lg border-0 p-0 [&>button]:right-2 [&>button]:top-2 [&>button]:bg-background [&>button]:p-2 [&>button]:text-foreground [&>button]:opacity-100">
-          <DialogTitle className="sr-only">Welcome to EngageIQ.lk</DialogTitle>
-          <DialogDescription className="sr-only">Discover B2B opportunities with EngageIQ.lk. Sign up for free access.</DialogDescription>
-          <Button asChild variant="ghost" className="h-auto w-full rounded-none p-0">
-            <Link to={user ? "/app" : "/auth"} aria-label={user ? "Open EngageIQ.lk" : "Sign up for free access"} onClick={() => setWelcomeOpen(false)}>
-              <img src={welcomePoster.url} alt="EngageIQ.lk — find the right accounts, engage via email and WhatsApp, and track opportunities. Sign up for free access." className="block aspect-square w-full object-contain" />
-            </Link>
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {welcomeOpen && (
+        <aside
+          role="dialog"
+          aria-label="Welcome to EngageIQ.lk"
+          className="fixed bottom-4 right-4 z-50 w-56 overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg sm:w-64"
+        >
+          <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
+            <span className="text-xs font-semibold tracking-wide text-foreground/90">Welcome 👋</span>
+            <button
+              type="button"
+              aria-label="Close welcome"
+              onClick={() => setWelcomeOpen(false)}
+              className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <Link to={user ? "/app" : "/auth"} aria-label={user ? "Open EngageIQ.lk" : "Sign up for free access"} onClick={() => setWelcomeOpen(false)}>
+            <img src={welcomePoster.url} alt="EngageIQ.lk — find the right accounts, engage via email and WhatsApp, and track opportunities." className="block w-full object-contain" />
+          </Link>
+        </aside>
+      )}
       <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel={waitlistPlan} />
     </div>
   );
