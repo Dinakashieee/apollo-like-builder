@@ -1107,26 +1107,12 @@ export default function Landing() {
       </footer>
       <ChatWidget mode="support" />
       {welcomeOpen && (
-        <aside
-          role="dialog"
-          aria-label="Welcome to EngageIQ.lk"
-          className="fixed bottom-4 right-4 z-50 w-56 overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg sm:w-64"
-        >
-          <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
-            <span className="text-xs font-semibold tracking-wide text-foreground/90">Welcome 👋</span>
-            <button
-              type="button"
-              aria-label="Close welcome"
-              onClick={() => setWelcomeOpen(false)}
-              className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <Link to={user ? "/app" : "/auth"} aria-label={user ? "Open EngageIQ.lk" : "Sign up for free access"} onClick={() => setWelcomeOpen(false)}>
-            <img src={welcomePoster.url} alt="EngageIQ.lk — find the right accounts, engage via email and WhatsApp, and track opportunities." className="block w-full object-contain" />
-          </Link>
-        </aside>
+        <WelcomeSideCard
+          open={welcomeOpen}
+          onClose={() => setWelcomeOpen(false)}
+          href={user ? "/app" : "/auth"}
+          linkLabel={user ? "Open EngageIQ.lk" : "Sign up for free access"}
+        />
       )}
       <JoinWaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} planLabel={waitlistPlan} />
     </div>
