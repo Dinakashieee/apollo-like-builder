@@ -26,6 +26,7 @@ import { ConnectInboxBanner } from "./ConnectInboxBanner";
 import { DemoDataBanner } from "./DemoDataBanner";
 import { SendPacePopup } from "./SendPacePopup";
 import { EmailSendingBreakBanner } from "./EmailSendingBreakBanner";
+import { WelcomeSideCard } from "./WelcomeSideCard";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
@@ -35,6 +36,22 @@ export function AppLayout() {
     null
   );
   const [companyExists, setCompanyExists] = useState<boolean | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(() => {
+    try {
+      return !sessionStorage.getItem("engageiq-welcome-dismissed");
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissWelcome = () => {
+    setWelcomeOpen(false);
+    try {
+      sessionStorage.setItem("engageiq-welcome-dismissed", "1");
+    } catch {
+      /* ignore storage failures */
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -129,6 +146,7 @@ export function AppLayout() {
         </div>
         <ChatWidget mode="assistant" />
         <SendPacePopup />
+        <WelcomeSideCard open={welcomeOpen} onClose={dismissWelcome} />
       </div>
     </SidebarProvider>
   );
