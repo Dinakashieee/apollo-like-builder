@@ -10,21 +10,36 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import poster from "@/assets/engageiq_internship.asset.json";
 import { applicationSchema, internship } from "@/lib/careers";
+import { CareerCvUpload } from "@/components/CareerCvUpload";
+import { CV_BUCKET, cvContentType, validateCv } from "@/lib/careerCv";
 
 export default function Careers() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [cv, setCv] = useState<File | null>(null);
+  const [uploadedCv, setUploadedCv] = useState<{ file: File; path: string } | null>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
     const form = new FormData(event.currentTarget);
     const parsed = applicationSchema.safeParse({ ...Object.fromEntries(form.entries()), consent: form.get("consent") === "on" });
     if (!parsed.success) { setError("Please complete all required fields, use a valid email and HTTPS profile link, and write at least 20 characters about yourself."); return; }
+    if (cv) { const problem = validateCv(cv); if (problem) { setError(problem); return; } }
     setBusy(true); setError("");
     try {
       const { full_name, email, phone, location, profile_url, introduction } = parsed.data;
-      const result = await supabase.from("career_applications").insert({ full_name: full_name ?? "", email: email ?? "", phone: phone ?? "", location: location ?? "", profile_url, introduction: introduction ?? "", consent: true });
+      let cvPath: string | null = null;
+      if (cv) {
+        if (uploadedCv?.file === cv) cvPath = uploadedCv.path;
+        else {
+          cvPath = `${crypto.randomUUID()}.${cv.name.split(".").pop()?.toLowerCase()}`;
+          const upload = await supabase.storage.from(CV_BUCKET).upload(cvPath, cv, { contentType: cvContentType(cv.name), upsert: false });
+          if (upload.error) throw upload.error;
+          setUploadedCv({ file: cv, path: cvPath });
+        }
+      }
+      const result = await supabase.from("career_applications").insert({ full_name: full_name ?? "", email: email ?? "", phone: phone ?? "", location: location ?? "", profile_url, introduction: introduction ?? "", consent: true, cv_path: cvPath, cv_name: cv ? cv.name.slice(0,255) : null });
       if (result.error) throw result.error;
       setSent(true);
     } catch { setError("Your application could not be saved. Please try again; your details are still here."); }
@@ -50,6 +65,7 @@ export default function Careers() {
           {sent ? <div role="status" className="py-10 space-y-3"><CheckCircle2 className="w-10 h-10 text-primary" /><h3 className="text-xl font-semibold">Application received</h3><p className="text-muted-foreground">Thank you for applying to EngageIQ.lk. Your application has been saved for our team to review.</p><Button variant="outline" asChild><Link to="/">Back to home</Link></Button></div> : <form onSubmit={submit} className="mt-6 space-y-5">
             {[{name:"full_name", label:"Full name", type:"text", max:120}, {name:"email",label:"Email address",type:"email",max:254}, {name:"phone",label:"Phone number",type:"tel",max:30}, {name:"location",label:"City / location in Sri Lanka",type:"text",max:120}, {name:"profile_url",label:"LinkedIn profile or CV link (optional)",type:"url",max:1000}].map(f => <div key={f.name} className="space-y-2"><Label htmlFor={f.name}>{f.label}</Label><Input id={f.name} name={f.name} type={f.type} maxLength={f.max} required={f.name !== "profile_url"} placeholder={f.name === "profile_url" ? "https://" : undefined} /></div>)}
             <div className="space-y-2"><Label htmlFor="introduction">Tell us about yourself and why you’re interested</Label><Textarea id="introduction" name="introduction" minLength={20} maxLength={4000} required rows={5} /></div>
+            <CareerCvUpload file={cv} onChange={setCv} disabled={busy} />
             <label className="flex gap-3 text-sm text-muted-foreground items-start"><input name="consent" type="checkbox" required className="mt-1" /><span>I agree that EngageIQ.lk may use my application details for recruitment. <Link to="/privacy" className="text-primary underline">Privacy notice</Link></span></label>
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy} className="w-full">{busy ? <Loader2 className="mr-2 w-4 h-4 animate-spin" /> : <Send className="mr-2 w-4 h-4" />}{busy ? "Submitting…" : "Submit application"}</Button>
