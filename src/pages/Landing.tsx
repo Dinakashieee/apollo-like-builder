@@ -336,7 +336,8 @@ export default function Landing() {
       <header className="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-xl">
         <div className="container mx-auto h-16 flex items-center justify-between">
           <Logo />
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-foreground/80">
+          <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-foreground/80">
+            <Link to="/careers" className="hover:text-primary transition-colors font-semibold">Careers</Link>
             <a href="#about" className="hover:text-primary transition-colors">About</a>
             <a href="#features" className="hover:text-primary transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-primary transition-colors">How it works</a>
@@ -344,7 +345,6 @@ export default function Landing() {
             <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
             <a href="#customers" className="hover:text-primary transition-colors">Customers</a>
             <a href="#why-us" className="hover:text-primary transition-colors">Why us</a>
-            <Link to="/demo" className="hover:text-primary transition-colors animate-pulse text-hot font-semibold">Book a demo</Link>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2">
             <Link to="/demo" className="hidden sm:inline-flex animate-pulse text-hot font-semibold">
