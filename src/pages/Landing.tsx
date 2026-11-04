@@ -38,7 +38,6 @@ import { ChatWidget } from "@/components/ChatWidget";
 import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
 import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import welcomePoster from "@/assets/engageiq-welcome.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
