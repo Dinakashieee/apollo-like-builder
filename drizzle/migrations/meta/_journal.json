@@ -120,6 +120,13 @@
       "when": 1793726553424,
       "tag": "0016_scheduled_sender_eligible_batch",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793788734691,
+      "tag": "0017_career_applications",
+      "breakpoints": true
     }
   ]
 }
