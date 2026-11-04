@@ -117,6 +117,45 @@ export type Database = {
           },
         ]
       }
+      career_applications: {
+        Row: {
+          consent: boolean
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          introduction: string
+          location: string
+          phone: string
+          profile_url: string | null
+          role: string
+        }
+        Insert: {
+          consent: boolean
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          introduction: string
+          location: string
+          phone: string
+          profile_url?: string | null
+          role?: string
+        }
+        Update: {
+          consent?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          introduction?: string
+          location?: string
+          phone?: string
+          profile_url?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
       company_divisions: {
         Row: {
           buying_stage: number
