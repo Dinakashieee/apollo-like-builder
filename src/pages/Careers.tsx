@@ -23,7 +23,8 @@ export default function Careers() {
     if (!parsed.success) { setError("Please complete all required fields, use a valid email and HTTPS profile link, and write at least 20 characters about yourself."); return; }
     setBusy(true); setError("");
     try {
-      const result = await supabase.from("career_applications").insert(parsed.data);
+      const { full_name, email, phone, location, profile_url, introduction } = parsed.data;
+      const result = await supabase.from("career_applications").insert({ full_name: full_name ?? "", email: email ?? "", phone: phone ?? "", location: location ?? "", profile_url, introduction: introduction ?? "", consent: true });
       if (result.error) throw result.error;
       setSent(true);
     } catch { setError("Your application could not be saved. Please try again; your details are still here."); }
