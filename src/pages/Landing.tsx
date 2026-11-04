@@ -69,7 +69,7 @@ const features = [
     desc: "See why buyers ghost your emails and WhatsApp messages, plus personal daily, weekly and monthly summaries.",
   },
   {
-    icon: Database,
+    icon: Globe,
     title: "Customer Landing Pages",
     desc: "Branded pages per lead or campaign with themes, colour matching from the company website and AI images.",
   },
