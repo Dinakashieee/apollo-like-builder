@@ -39,6 +39,7 @@ import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
 import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
 import welcomePoster from "@/assets/engageiq-welcome.asset.json";
+import { WelcomeSideCard } from "@/components/WelcomeSideCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";

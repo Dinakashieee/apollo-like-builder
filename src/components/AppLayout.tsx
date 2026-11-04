@@ -26,6 +26,7 @@ import { ConnectInboxBanner } from "./ConnectInboxBanner";
 import { DemoDataBanner } from "./DemoDataBanner";
 import { SendPacePopup } from "./SendPacePopup";
 import { EmailSendingBreakBanner } from "./EmailSendingBreakBanner";
+import { WelcomeSideCard } from "./WelcomeSideCard";
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
