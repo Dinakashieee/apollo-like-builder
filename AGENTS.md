@@ -22,3 +22,4 @@
 - Company imports and CSV exports use shared company data helpers; CSV exports neutralize formula injection.
 - AI brand-color matching reads the company site (Firecrawl scrape, direct fetch fallback) in an authenticated edge function and only returns validated 6-digit hex palettes; client only supplies workspace and URL.
 - Ghost Analysis scores sent emails and WhatsApp messages in the browser with deterministic rules against the five Hunter 2026 ghosting reasons, per workspace and per account; it uses no AI credits and changes no data.
+- Campaign leads use workspace team roles (owner=admin; admin/marketing manage, sales read-only on assigned rows) enforced by RLS; public intake is token-authorised via the campaign-lead-intake edge function, and campaign intake tokens are column-hidden and read only through a manager-gated RPC.

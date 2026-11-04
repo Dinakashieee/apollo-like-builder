@@ -29,6 +29,7 @@ import Settings from "./pages/Settings";
 import Company from "./pages/Company";
 import Help from "./pages/Help";
 import GhostAnalysis from "./pages/GhostAnalysis";
+import CampaignLeads from "./pages/CampaignLeads";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import Reminders from "./pages/Reminders";
@@ -78,6 +79,7 @@ const App = () => (
                   <Route path="pages" element={<LandingPages />} />
                   <Route path="email-health" element={<EmailHealth />} />
                   <Route path="ghost-analysis" element={<GhostAnalysis />} />
+                  <Route path="campaign-leads" element={<CampaignLeads />} />
                   
                   <Route path="intelligence" element={<Intelligence />} />
                   <Route path="targets" element={<Targets />} />
