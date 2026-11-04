@@ -1108,7 +1108,7 @@ export default function Landing() {
       </footer>
       <ChatWidget mode="support" />
       <Dialog open={welcomeOpen} onOpenChange={setWelcomeOpen}>
-        <DialogContent className="w-[min(720px,calc(100vw-32px),calc(100dvh-32px))] max-w-none gap-0 overflow-hidden rounded-lg border-0 p-0 [&>button]:right-2 [&>button]:top-2 [&>button]:bg-background [&>button]:p-2 [&>button]:text-foreground [&>button]:opacity-100">
+        <DialogContent className="w-[min(720px,calc(100vw_-_32px),calc(100dvh_-_32px))] max-w-none gap-0 overflow-hidden rounded-lg border-0 p-0 [&>button]:right-2 [&>button]:top-2 [&>button]:bg-background [&>button]:p-2 [&>button]:text-foreground [&>button]:opacity-100">
           <DialogTitle className="sr-only">Welcome to EngageIQ.lk</DialogTitle>
           <DialogDescription className="sr-only">Discover B2B opportunities with EngageIQ.lk. Sign up for free access.</DialogDescription>
           <Button asChild variant="ghost" className="h-auto w-full rounded-none p-0">
