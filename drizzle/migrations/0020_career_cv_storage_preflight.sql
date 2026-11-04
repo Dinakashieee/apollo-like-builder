@@ -1,0 +1,3 @@
+ALTER POLICY "Public applicants upload CVs" ON storage.objects WITH CHECK (bucket_id = 'career-cvs' AND name ~ '^[0-9a-f-]{36}\.(pdf|doc|docx)$');
+ALTER POLICY "Career CV validated uploads boundary" ON storage.objects WITH CHECK (bucket_id <> 'career-cvs' OR name ~ '^[0-9a-f-]{36}\.(pdf|doc|docx)$');
+COMMENT ON POLICY "Public applicants upload CVs" ON storage.objects IS 'Storage preflight inserts have no metadata; bucket enforces size, application attachment trigger validates finalized size and MIME before accepting a CV.';
