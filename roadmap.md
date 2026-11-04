@@ -1,6 +1,6 @@
 # Careers
 - [x] Add internship page, web applications and private admin review; submission saved and test row removed, anonymous read/update/delete denied, admin review verified, three tests pass, build OK. Hosted poster verified; localhost screenshot uses intercepted hosted image because Vite does not serve the asset infrastructure.
-- [ ] Publish with user-approved existing security risks.
+- [x] Publishing requested with user-approved existing security risks; deployment scheduled for www.engageiqlk.com, completion not yet verified.
 
 # Monitoring: scheduled email starvation
 - [x] Exclude paused users before batch selection and back off transient failures; deployed dispatcher, 12 tests pass, build OK. Exact selection SQL tested against 25 paused rows plus one active row (active selected, paused excluded), Resume and retry eligibility checked, synthetic data removed. Direct RPC invocation is denied to the diagnostic role as intended; actual delivery/cron authorization remains unverified. Existing AI allowances preserved; quota finding resolved as contrary to the saved policy.
