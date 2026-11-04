@@ -46,7 +46,7 @@ const features = [
   {
     icon: TrendingUp,
     title: "AI Deal Intelligence",
-    desc: "Score every account on intent, fit, and timing — automatically enriched from 60+ data sources.",
+    desc: "Score every account on Fit, Intent, Signal and Stage, backed by dated public evidence and company signals.",
   },
   {
     icon: Mail,
@@ -56,22 +56,22 @@ const features = [
   {
     icon: Workflow,
     title: "Multi-Step Automation",
-    desc: "Build sequences that adapt to replies, opens, and signals — without lifting a finger.",
+    desc: "Schedule multi-step follow-ups with custom day gaps, a healthy 50-emails-a-day limit and pause/resume breaks.",
   },
   {
     icon: Target,
     title: "Lead Management",
-    desc: "Unified inbox for hot, warm, and cold leads with smart filters and team assignments.",
+    desc: "Hot, warm and cold leads with lead lists, campaign leads from ads, and Admin/Marketing/Sales roles.",
   },
   {
     icon: BarChart3,
-    title: "Pipeline Analytics",
-    desc: "Real-time conversion across every funnel stage. See what's moving — and what's stuck.",
+    title: "Ghost Analysis & Dashboards",
+    desc: "See why buyers ghost your emails and WhatsApp messages, plus personal daily, weekly and monthly summaries.",
   },
   {
     icon: Database,
-    title: "Bring Your Own Database",
-    desc: "Connect your own Postgres or Supabase. Your leads, your data, your control — zero lock-in.",
+    title: "Customer Landing Pages",
+    desc: "Branded pages per lead or campaign with themes, colour matching from the company website and AI images.",
   },
 ];
 
@@ -103,7 +103,7 @@ const comparisons = [
       { engage: "Triggers outreach only when intent is detected", other: "Sequences run regardless of buyer signal" },
       { engage: "Context-aware messages from your own data", other: "Generic templates with {first_name} merges" },
       { engage: "Reply-quality optimized, not volume optimized", other: "Optimized for send volume and seat count" },
-      { engage: "Own your contact data in your database", other: "Data tied to Apollo's contact credits" },
+      { engage: "Own your contact data — export anytime", other: "Data tied to Apollo's contact credits" },
     ],
     verdict:
       "Stop spraying. EngageIQ.lk tells you when an account is actually worth a touch — and drafts the message that fits the moment.",
@@ -180,7 +180,6 @@ const tiers: Tier[] = [
       "Email Health monitor",
       "1 Landing Page",
       "1 user",
-      "Bring Your Own Database (BYOD) supported",
       "Community support",
     ],
   },
@@ -413,7 +412,7 @@ export default function Landing() {
             style={{ animationDelay: "180ms" }}
           >
             <Database className="h-4 w-4" />
-            <span>Bring Your Own Database — your data never leaves your control</span>
+            <span>Your workspace data stays private to your team — export anytime as CSV</span>
           </div>
 
           <div
@@ -647,7 +646,7 @@ export default function Landing() {
               },
               {
                 icon: TrendingUp,
-                title: "AI Market & Competitor Intelligence",
+                title: "Targets, Competitors & Company Signals",
               },
               {
                 icon: BarChart3,
@@ -655,7 +654,7 @@ export default function Landing() {
               },
               {
                 icon: Mic,
-                title: "Voice / Chat Task Updates",
+                title: "One-Message Daily Updates",
               },
               {
                 icon: Layers,
@@ -701,7 +700,7 @@ export default function Landing() {
                 step: "02",
                 icon: Database,
                 title: "Import or claim leads",
-                desc: "Import your own lead database — sourced via data-enrichment browser add-ons and scraping tools, or pull from the SignalHire shared pool using your own API key. All data stays in your BYOD database.",
+                desc: "Import leads from CSV, add them manually, or search and claim contacts through SignalHire with your own API key. Organise them into lead lists.",
               },
               {
                 step: "03",
@@ -719,19 +718,19 @@ export default function Landing() {
                 step: "05",
                 icon: Shield,
                 title: "Email health check",
-                desc: "Check your email deliverability free of charge. Monitor domain reputation, warm-up status, and SPF/DKIM/DMARC health so you never land in spam.",
+                desc: "Check SPF, DKIM and DMARC for your domain free, track your 50-emails-a-day healthy limit, and run Ghost Analysis on what you send.",
               },
               {
                 step: "06",
                 icon: BarChart3,
-                title: "Market intelligence",
-                desc: "See current market trends and shifting demand in your target sectors. Stay ahead of the curve with data that updates in real time.",
+                title: "Company signals & targets",
+                desc: "EngageIQ.lk researches each company after you save it and lists matching target accounts and competitors, with evidence and dates.",
               },
               {
                 step: "07",
                 icon: Target,
-                title: "Competitor deep intelligence",
-                desc: "We surface your competitors, the best deals to focus on, systems in use, and the highest-value accounts to chase — all refreshed automatically every 24 hours with zero input from you.",
+                title: "Daily updates & dashboards",
+                desc: "Type one message about your day — EngageIQ.lk saves the summary, creates your next tasks and shows team and personal progress.",
                 highlight: true,
               },
             ].map((s) => (
@@ -1043,7 +1042,7 @@ export default function Landing() {
 
           <p className="text-center text-xs text-muted-foreground mt-10 max-w-2xl mx-auto">
             Free plan is fully free — no card needed. Paid plans bill immediately and you can cancel anytime from billing.
-            All plans support Bring Your Own Database. Local taxes added at checkout where required by law.
+            Local taxes added at checkout where required by law.
           </p>
         </div>
       </section>
