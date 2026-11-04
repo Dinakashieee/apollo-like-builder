@@ -23,6 +23,7 @@ import {
   Mic,
   Layers,
   EyeOff,
+  Clock,
   UserX,
   Plane,
   AlertCircle,
