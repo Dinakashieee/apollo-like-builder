@@ -903,6 +903,7 @@ export default function Landing() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <Logo />
             <div className="flex items-center gap-5 text-xs text-muted-foreground">
+              <Link to="/careers" className="hover:text-foreground">Careers</Link>
               <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
               <Link to="/terms" className="hover:text-foreground">Terms</Link>
               <Link to="/refund" className="hover:text-foreground">Refund</Link>

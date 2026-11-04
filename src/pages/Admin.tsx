@@ -9,6 +9,7 @@ import { ShieldAlert, Loader2, Mail, Inbox, Users, RefreshCw } from "lucide-reac
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { CareerApplications } from "@/components/CareerApplications";
 
 type Waitlist = {
   id: string;
@@ -137,7 +138,10 @@ export default function Admin() {
           <TabsTrigger value="tickets">
             <Inbox className="h-4 w-4 mr-2" /> Support tickets ({tickets.length})
           </TabsTrigger>
+          <TabsTrigger value="careers">Careers</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="careers" className="mt-4"><CareerApplications /></TabsContent>
 
         <TabsContent value="waitlist" className="space-y-3 mt-4">
           {loading ? (
