@@ -1,6 +1,6 @@
 # Monitoring: sender settings and presence
-- [ ] Fix restricted-column sender reads and saves; verify signed-in Settings and Automation save/reload.
-- [ ] Clean up presence subscriptions on remount/workspace changes; test lifecycle and live reconnection.
+- [x] Sender reads and upsert returns explicitly select permitted fields; signed-in Settings and Automation custom sender save/reload and built-in mode verified; blank/default sender values restored, no emails sent.
+- [x] Presence cleanup belongs to the effect and depends on stable user/workspace IDs; four regression tests pass, live two-tab presence reconnects after navigation/reload with one channel per tab and deduplicated user count; workspace changes tested with mocks, not multiple live workspaces.
 
 # Careers
 - [ ] Add optional drag-and-drop PDF/Word CV uploads, private admin downloads, and verify submission/privacy.

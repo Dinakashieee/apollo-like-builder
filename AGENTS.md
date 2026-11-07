@@ -1,4 +1,5 @@
 # Architecture
+- Sender settings browser reads and write returns select only permitted non-secret columns; presence subscriptions are owned and removed by the effect using stable user/workspace IDs to avoid reuse of subscribed channels.
 - The homepage sales-engine showcase uses local illustrative workflow states, never fabricated live metrics or autonomous-agent claims, to accurately demonstrate existing product features.
 - Careers applications allow validated insert-only public submissions; CVs use an insert-only private Storage bucket with validated application attachments and platform-admin-only downloads, keeping recruitment documents inaccessible to other applicants.
 - Lead lists use workspace-scoped list/member records with database-validated lead membership; list outreach opens one recipient draft at a time in external mail clients and never uses built-in app-email infrastructure, because campaigns are not app emails.
