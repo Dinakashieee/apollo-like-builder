@@ -1,3 +1,7 @@
+# Monitoring: sender settings and presence
+- [x] Sender reads and upsert returns explicitly select permitted fields; signed-in Settings and Automation custom sender save/reload and built-in mode verified; blank/default sender values restored, no emails sent.
+- [x] Presence cleanup belongs to the effect and depends on stable user/workspace IDs; four regression tests pass, live two-tab presence reconnects after navigation/reload with one channel per tab and deduplicated user count; workspace changes tested with mocks, not multiple live workspaces.
+
 # Careers
 - [ ] Add optional drag-and-drop PDF/Word CV uploads, private admin downloads, and verify submission/privacy.
 - [x] Add internship page, web applications and private admin review; submission saved and test row removed, anonymous read/update/delete denied, admin review verified, three tests pass, build OK. Hosted poster verified; localhost screenshot uses intercepted hosted image because Vite does not serve the asset infrastructure.

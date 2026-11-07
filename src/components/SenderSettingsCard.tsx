@@ -51,6 +51,7 @@ interface OAuthApp {
 }
 
 const emailSchema = z.string().trim().email().max(160);
+const SENDER_COLUMNS = "id, mode, from_name, from_email, reply_to, verified";
 
 const PERSONAL_DOMAINS = new Set([
   "gmail.com", "googlemail.com", "yahoo.com", "outlook.com", "hotmail.com",
@@ -117,11 +118,15 @@ export function SenderSettingsCard() {
     (async () => {
       setLoading(true);
       const [s, a, o] = await Promise.all([
-        supabase.from("email_sender_settings").select("*").eq("workspace_id", current.id).maybeSingle(),
+        supabase.from("email_sender_settings").select(SENDER_COLUMNS).eq("workspace_id", current.id).maybeSingle(),
         supabase.from("email_accounts").select("id, provider, email_address, display_name, status").eq("workspace_id", current.id),
         supabase.from("user_oauth_apps").select("id, provider, client_id, label").eq("workspace_id", current.id),
       ]);
       if (cancelled) return;
+      if (s.error) {
+        toast({ title: "Could not load sender settings", description: s.error.message, variant: "destructive" });
+      }
+      setSettings({ mode: "builtin", from_name: "", from_email: "", reply_to: "", verified: false });
       if (s.data) {
         setSettings({
           id: s.data.id,
@@ -149,7 +154,7 @@ export function SenderSettingsCard() {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [current]);
+  }, [current?.id]);
 
   const persist = async (patch: Partial<SenderSettings>) => {
     if (!current) return null;
@@ -166,7 +171,7 @@ export function SenderSettingsCard() {
     const { data, error } = await supabase
       .from("email_sender_settings")
       .upsert(payload, { onConflict: "workspace_id" })
-      .select().maybeSingle();
+      .select(SENDER_COLUMNS).maybeSingle();
     if (error) {
       toast({ title: "Could not save", description: error.message, variant: "destructive" });
       return null;
