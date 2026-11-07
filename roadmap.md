@@ -1,3 +1,7 @@
+# Monitoring: sender settings and presence
+- [ ] Fix restricted-column sender reads and saves; verify signed-in Settings and Automation save/reload.
+- [ ] Clean up presence subscriptions on remount/workspace changes; test lifecycle and live reconnection.
+
 # Careers
 - [ ] Add optional drag-and-drop PDF/Word CV uploads, private admin downloads, and verify submission/privacy.
 - [x] Add internship page, web applications and private admin review; submission saved and test row removed, anonymous read/update/delete denied, admin review verified, three tests pass, build OK. Hosted poster verified; localhost screenshot uses intercepted hosted image because Vite does not serve the asset infrastructure.
