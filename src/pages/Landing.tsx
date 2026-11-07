@@ -39,6 +39,7 @@ import { LiveDashboardPreview } from "@/components/LiveDashboardPreview";
 import { AdvancedDashboardsPreview } from "@/components/AdvancedDashboardsPreview";
 import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
 import { WelcomeSideCard } from "@/components/WelcomeSideCard";
+import { SalesEngineShowcase } from "@/components/SalesEngineShowcase";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -503,6 +504,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <SalesEngineShowcase signedIn={Boolean(user)} />
 
       {/* About the product */}
       <section id="about" className="py-24">
