@@ -142,7 +142,7 @@ export default function PublicLandingPage({ byHost = false }: Props) {
     ? "min-h-screen"
     : "min-h-screen bg-background";
   const wrapperStyle: React.CSSProperties = page.template === "bold"
-    ? { background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)` }
+    ? { background: `linear-gradient(135deg, ${accent} 0%, hsl(var(--primary-deep)) 100%)` }
     : {};
 
   if (page.template === "split" && !hasBlocks) {
