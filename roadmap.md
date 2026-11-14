@@ -1,6 +1,7 @@
 # Brand colour consistency
-- [ ] Align global brand tokens and newer homepage, dashboard, company, and landing-page elements to Ocean & Teal (#0c2340, #1a4a6e, #2d8a9e, #5cbdb9), preserving warning and success states.
-- [ ] Check the homepage and signed-in dashboard at desktop and phone widths; confirm no off-brand decorative colours remain in the updated sections.
+- [x] Align global brand tokens and newer homepage, dashboard, company, and landing-page elements to Ocean & Teal (#0c2340, #1a4a6e, #2d8a9e, #5cbdb9), preserving warning and success states.
+- [x] Recolour the homepage artwork; verify homepage, previews and Sales Engine at desktop and the user's current screen size with no overflow or browser errors; build OK.
+- [ ] Signed-in visual check — blocked: the backend is temporarily inaccessible, so a preview session could not be created after two attempts; updated app panels pass the build and colour scan.
 
 # Monitoring: sender settings and presence
 - [x] Sender reads and upsert returns explicitly select permitted fields; signed-in Settings and Automation custom sender save/reload and built-in mode verified; blank/default sender values restored, no emails sent.
