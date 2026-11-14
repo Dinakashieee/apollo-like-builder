@@ -31,8 +31,8 @@ const SEED_EVENTS: Omit<EmailEvent, "id" | "time">[] = [
 
 const STATUS_STYLES: Record<EmailEvent["status"], { label: string; cls: string; Icon: typeof Mail }> = {
   sending:   { label: "Sending",   cls: "bg-primary/10 text-primary",          Icon: Mail },
-  delivered: { label: "Delivered", cls: "bg-blue-500/10 text-blue-600",        Icon: MailCheck },
-  opened:    { label: "Opened",    cls: "bg-amber-500/10 text-amber-600",      Icon: MailOpen },
+  delivered: { label: "Delivered", cls: "bg-primary/10 text-primary",          Icon: MailCheck },
+  opened:    { label: "Opened",    cls: "bg-warning/10 text-warning",          Icon: MailOpen },
   replied:   { label: "Replied",   cls: "bg-success/15 text-success",          Icon: Reply },
 };
 
@@ -108,10 +108,10 @@ export function LiveDashboardPreview() {
   // --- Channel funnel -----------------------------------------------------
   const funnel = [
     { label: "Sent",      value: sent,     pct: 100, color: "bg-primary" },
-    { label: "Delivered", value: Math.round(sent * 0.97), pct: 97, color: "bg-blue-500" },
-    { label: "Opened",    value: opens,    pct: Math.round((opens / sent) * 100), color: "bg-amber-500" },
+    { label: "Delivered", value: Math.round(sent * 0.97), pct: 97, color: "bg-primary-mid" },
+    { label: "Opened",    value: opens,    pct: Math.round((opens / sent) * 100), color: "bg-warning" },
     { label: "Replied",   value: replies,  pct: Math.round((replies / sent) * 100), color: "bg-success" },
-    { label: "Meetings",  value: 38,       pct: 3, color: "bg-violet-500" },
+    { label: "Meetings",  value: 38,       pct: 3, color: "bg-primary-deep" },
   ];
 
   return (
@@ -145,9 +145,9 @@ export function LiveDashboardPreview() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
           {[
             { l: "Emails sent",     v: sent.toLocaleString(),      d: "+18% vs last wk", icon: Mail,        spark: [4,6,5,7,8,10,9,12], color: "text-primary",  bar: "from-primary/70 to-primary" },
-            { l: "Open rate",       v: `${Math.round((opens / sent) * 100)}%`, d: "+6pt",          icon: TrendingUp,  spark: [3,4,4,5,6,6,7,8],  color: "text-amber-600", bar: "from-amber-300 to-amber-500" },
-            { l: "Reply rate",      v: `${((replies / sent) * 100).toFixed(1)}%`, d: "+2.4pt",     icon: Reply,       spark: [2,3,3,4,4,5,5,6],  color: "text-success",  bar: "from-emerald-300 to-emerald-500" },
-            { l: "Pipeline added",  v: `$${pipeline}k`,            d: "+22%",            icon: DollarSign,  spark: [5,7,6,8,9,10,12,14], color: "text-violet-600", bar: "from-violet-300 to-violet-500" },
+            { l: "Open rate",       v: `${Math.round((opens / sent) * 100)}%`, d: "+6pt",          icon: TrendingUp,  spark: [3,4,4,5,6,6,7,8],  color: "text-warning", bar: "from-warning/50 to-warning" },
+            { l: "Reply rate",      v: `${((replies / sent) * 100).toFixed(1)}%`, d: "+2.4pt",     icon: Reply,       spark: [2,3,3,4,4,5,5,6],  color: "text-success",  bar: "from-success/50 to-success" },
+            { l: "Pipeline added",  v: `$${pipeline}k`,            d: "+22%",            icon: DollarSign,  spark: [5,7,6,8,9,10,12,14], color: "text-primary-mid", bar: "from-primary-mid/50 to-primary-mid" },
           ].map((k, kIdx) => {
             const Icon = k.icon;
             // Rotate sparkline based on tick so each KPI looks like a live stream
@@ -309,12 +309,12 @@ export function LiveDashboardPreview() {
             </div>
             <ul className="space-y-2.5">
               {[
-                { co: "Northwind Co.",  sig: "Hiring 4 RevOps roles · 12 site visits today",   score: 94, color: "from-emerald-400 to-teal-500" },
-                { co: "Acme Robotics",  sig: "Series B · $40M · CTO opened deck 3×",            score: 88, color: "from-violet-400 to-purple-500" },
-                { co: "Bluebird Labs",  sig: "Switched off Salesforce · evaluating tools",      score: 81, color: "from-amber-400 to-orange-500" },
+                { co: "Northwind Co.",  sig: "Hiring 4 RevOps roles · 12 site visits today",   score: 94, color: "from-primary to-primary-mid" },
+                { co: "Acme Robotics",  sig: "Series B · $40M · CTO opened deck 3×",            score: 88, color: "from-primary-deep to-primary" },
+                { co: "Bluebird Labs",  sig: "Switched off Salesforce · evaluating tools",      score: 81, color: "from-primary-mid to-primary-deep" },
               ].map((o) => (
                 <li key={o.co} className="flex items-center gap-2.5">
-                  <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${o.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+                  <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${o.color} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                     {o.co.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">

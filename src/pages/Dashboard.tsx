@@ -299,7 +299,7 @@ function AIDealIntelTab({ workspaceId }: { workspaceId?: string }) {
             const urgent = (d.score ?? 0) >= 80;
             return (
               <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-                <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-white`}>
+                <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                   {(d.title ?? "??").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -395,7 +395,7 @@ function NewTargetsTab({ workspaceId }: { workspaceId?: string }) {
         <div className="space-y-2">
           {leads.map((t, i) => (
             <div key={t.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-white`}>
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                 {(t.company_name ?? t.contact_name ?? "??").slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

@@ -718,7 +718,7 @@ export default function Companies() {
                             )}
                             <span
                               className={cn(
-                                "h-8 w-8 rounded-full text-white text-[11px] font-semibold flex items-center justify-center shrink-0",
+                                "h-8 w-8 rounded-full text-primary-foreground text-[11px] font-semibold flex items-center justify-center shrink-0",
                                 avatarColor(a.company_name)
                               )}
                             >

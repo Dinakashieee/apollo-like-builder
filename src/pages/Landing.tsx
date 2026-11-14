@@ -145,11 +145,11 @@ const comparisons = [
 ];
 
 const trustedAvatars = [
-  { initials: "AR", from: "from-rose-400", to: "to-pink-500" },
-  { initials: "JM", from: "from-amber-400", to: "to-orange-500" },
-  { initials: "PT", from: "from-emerald-400", to: "to-teal-500" },
-  { initials: "SK", from: "from-sky-400", to: "to-indigo-500" },
-  { initials: "LV", from: "from-violet-400", to: "to-purple-500" },
+  { initials: "AR", from: "from-primary", to: "to-primary-mid" },
+  { initials: "JM", from: "from-primary-deep", to: "to-primary" },
+  { initials: "PT", from: "from-primary-mid", to: "to-primary-deep" },
+  { initials: "SK", from: "from-primary", to: "to-primary-deep" },
+  { initials: "LV", from: "from-primary-mid", to: "to-primary" },
 ];
 
 const ANNUAL_DISCOUNT = 0.2; // 20% off annual
@@ -411,7 +411,7 @@ export default function Landing() {
 
           {/* BYOD highlight */}
           <div
-            className="mt-7 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-sm font-semibold text-emerald-700 dark:text-emerald-400 animate-fade-up"
+            className="mt-7 inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-accent border border-primary/20 text-sm font-semibold text-primary animate-fade-up"
             style={{ animationDelay: "180ms" }}
           >
             <Database className="h-4 w-4" />
@@ -483,7 +483,7 @@ export default function Landing() {
               {trustedAvatars.map((a) => (
                 <div
                   key={a.initials}
-                  className={`h-10 w-10 rounded-full bg-gradient-to-br ${a.from} ${a.to} border-2 border-background flex items-center justify-center text-xs font-bold text-white shadow-sm`}
+                  className={`h-10 w-10 rounded-full bg-gradient-to-br ${a.from} ${a.to} border-2 border-background flex items-center justify-center text-xs font-bold text-primary-foreground shadow-sm`}
                 >
                   {a.initials}
                 </div>
@@ -886,7 +886,7 @@ export default function Landing() {
             focus on each week. I stopped guessing — and started closing."
           </blockquote>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-semibold">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary-mid flex items-center justify-center text-primary-foreground font-semibold">
               AR
             </div>
             <div className="text-left">
