@@ -743,7 +743,7 @@ export default function Landing() {
                 key={s.step}
                 className={`relative flex flex-col items-center text-center group rounded-2xl p-4 transition-all ${s.highlight ? 'bg-primary/5 ring-2 ring-primary/40 shadow-glow' : 'hover:bg-card/50'}`}
               >
-                <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${s.highlight ? 'bg-gradient-to-r from-hot to-rose-500 shadow-glow' : 'bg-gradient-primary shadow-glow'}`}>
+                <div className={`relative z-10 h-11 w-11 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${s.highlight ? 'bg-gradient-to-r from-hot to-warning shadow-glow' : 'bg-gradient-primary shadow-glow'}`}>
                   <s.icon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">Step {s.step}</span>

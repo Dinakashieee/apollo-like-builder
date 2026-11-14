@@ -131,10 +131,10 @@ function LivePulse() {
 function LandingPagesPanel() {
   const views = useTicker(1284, 1, 1600);
   const pages = [
-    { name: "northwind.engageiq.com/welcome", co: "Northwind Co.",   views: 142, ctr: 38, color: "from-emerald-400 to-teal-500", live: 3 },
-    { name: "acme.engageiq.com/intro",        co: "Acme Robotics",   views: 98,  ctr: 31, color: "from-violet-400 to-purple-500", live: 2 },
-    { name: "bluebird.engageiq.com/demo",     co: "Bluebird Labs",   views: 76,  ctr: 27, color: "from-amber-400 to-orange-500", live: 1 },
-    { name: "lumen.engageiq.com/pricing",     co: "Lumen Health",    views: 54,  ctr: 22, color: "from-pink-400 to-rose-500",    live: 0 },
+    { name: "northwind.engageiq.com/welcome", co: "Northwind Co.",   views: 142, ctr: 38, color: "from-primary to-primary-mid", live: 3 },
+    { name: "acme.engageiq.com/intro",        co: "Acme Robotics",   views: 98,  ctr: 31, color: "from-primary-deep to-primary", live: 2 },
+    { name: "bluebird.engageiq.com/demo",     co: "Bluebird Labs",   views: 76,  ctr: 27, color: "from-primary-mid to-primary-deep", live: 1 },
+    { name: "lumen.engageiq.com/pricing",     co: "Lumen Health",    views: 54,  ctr: 22, color: "from-primary to-primary-deep",    live: 0 },
   ];
   return (
     <div className="space-y-4">
@@ -167,7 +167,7 @@ function LandingPagesPanel() {
         <div className="space-y-2.5">
           {pages.map((p) => (
             <div key={p.name} className="flex items-center gap-3">
-              <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${p.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+              <div className={`h-8 w-8 shrink-0 rounded-md bg-gradient-to-br ${p.color} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                 {p.co.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -234,7 +234,7 @@ function WhatsAppPanel() {
           </div>
           {threads.map((th, i) => (
             <div key={th.who} className={`p-2 rounded-lg flex items-center gap-2 cursor-pointer ${i === 0 ? "bg-primary/5 border border-primary/20" : "hover:bg-muted/40"}`}>
-              <div className="relative h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-white">
+              <div className="relative h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                 {th.who.split(" ").map(n => n[0]).join("")}
                 {th.online && <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />}
               </div>
@@ -246,7 +246,7 @@ function WhatsAppPanel() {
                 <p className="text-[10px] text-muted-foreground truncate">{th.last}</p>
               </div>
               {th.unread > 0 && (
-                <span className="h-4 min-w-4 px-1 rounded-full bg-success text-white text-[9px] font-bold flex items-center justify-center">{th.unread}</span>
+                <span className="h-4 min-w-4 px-1 rounded-full bg-success text-success-foreground text-[9px] font-bold flex items-center justify-center">{th.unread}</span>
               )}
             </div>
           ))}
@@ -254,7 +254,7 @@ function WhatsAppPanel() {
 
         <div className="lg:col-span-3 bg-card border border-border/60 rounded-xl p-4 flex flex-col">
           <div className="flex items-center gap-2 pb-3 border-b border-border/60 mb-3">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-white">SC</div>
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-[10px] font-bold text-primary-foreground">SC</div>
             <div>
               <p className="text-[11px] font-bold text-primary-deep">Sarah Chen · Northwind Co.</p>
               <p className="text-[9px] text-success flex items-center gap-1"><LivePulse />typing…</p>
@@ -280,7 +280,7 @@ function Bubble({ side, children, ai }: { side: "me" | "them"; children: React.R
         me
           ? ai
             ? "bg-primary/10 text-primary-deep border border-dashed border-primary/40"
-            : "bg-success text-white"
+            : "bg-success text-success-foreground"
           : "bg-muted text-primary-deep"
       }`}>
         {ai && <span className="flex items-center gap-1 text-[9px] font-bold text-primary mb-0.5"><Sparkles className="h-2.5 w-2.5" /> AI suggestion</span>}
@@ -294,10 +294,10 @@ function Bubble({ side, children, ai }: { side: "me" | "them"; children: React.R
 
 function AIDealIntelPanel() {
   const deals = [
-    { co: "Northwind Co.",  stage: "Demo booked",   score: 94, delta: "+8", next: "Send pricing PDF before Thu call", urgent: true,  color: "from-emerald-400 to-teal-500" },
-    { co: "Acme Robotics",  stage: "Evaluating",    score: 88, delta: "+6", next: "Loop in CFO — Series B just closed", urgent: true, color: "from-violet-400 to-purple-500" },
-    { co: "Bluebird Labs",  stage: "Champion",      score: 81, delta: "+3", next: "Reply within 4h — pricing question",  urgent: false, color: "from-amber-400 to-orange-500" },
-    { co: "Lumen Health",   stage: "Nurture",       score: 64, delta: "−2", next: "Hold — wait for Q1 budget signal",   urgent: false, color: "from-pink-400 to-rose-500" },
+    { co: "Northwind Co.",  stage: "Demo booked",   score: 94, delta: "+8", next: "Send pricing PDF before Thu call", urgent: true,  color: "from-primary to-primary-mid" },
+    { co: "Acme Robotics",  stage: "Evaluating",    score: 88, delta: "+6", next: "Loop in CFO — Series B just closed", urgent: true, color: "from-primary-deep to-primary" },
+    { co: "Bluebird Labs",  stage: "Champion",      score: 81, delta: "+3", next: "Reply within 4h — pricing question",  urgent: false, color: "from-primary-mid to-primary-deep" },
+    { co: "Lumen Health",   stage: "Nurture",       score: 64, delta: "−2", next: "Hold — wait for Q1 budget signal",   urgent: false, color: "from-primary to-primary-deep" },
   ];
   return (
     <div className="space-y-4">
@@ -332,7 +332,7 @@ function AIDealIntelPanel() {
         <div className="space-y-2.5">
           {deals.map((d) => (
             <div key={d.co} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${d.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${d.color} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                 {d.co.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -361,11 +361,11 @@ function AIDealIntelPanel() {
 
 function CompetitorsPanel() {
   const comps = [
-    { name: "Outreach.io",   share: 38, trend: "+4",  color: "bg-rose-500",    accounts: ["Acme Robotics", "Lumen Health"] },
-    { name: "Apollo.io",     share: 27, trend: "+2",  color: "bg-violet-500",  accounts: ["Bluebird Labs"] },
-    { name: "Salesloft",     share: 18, trend: "−1",  color: "bg-amber-500",   accounts: ["Northwind Co."] },
-    { name: "Clay",          share: 11, trend: "+6",  color: "bg-emerald-500", accounts: ["Vertex AI Co."] },
-    { name: "HubSpot Seq.",  share: 6,  trend: "−3",  color: "bg-sky-500",     accounts: [] },
+    { name: "Outreach.io",   share: 38, trend: "+4",  color: "bg-primary-deep", accounts: ["Acme Robotics", "Lumen Health"] },
+    { name: "Apollo.io",     share: 27, trend: "+2",  color: "bg-primary-mid",  accounts: ["Bluebird Labs"] },
+    { name: "Salesloft",     share: 18, trend: "−1",  color: "bg-primary",      accounts: ["Northwind Co."] },
+    { name: "Clay",          share: 11, trend: "+6",  color: "bg-primary-glow", accounts: ["Vertex AI Co."] },
+    { name: "HubSpot Seq.",  share: 6,  trend: "−3",  color: "bg-muted-foreground", accounts: [] },
   ];
   return (
     <div className="space-y-4">
@@ -424,11 +424,11 @@ function CompetitorsPanel() {
 function NewTargetsPanel() {
   const matched = useTicker(238, 1, 1500);
   const targets = [
-    { co: "Vertex AI Co.",     why: "Hiring 4 AEs + RevOps lead",          fit: 96, color: "from-emerald-400 to-teal-500" },
-    { co: "Helios Robotics",   why: "Series B closed last week",           fit: 92, color: "from-violet-400 to-purple-500" },
-    { co: "Tidewater Health",  why: "Switched off legacy CRM (signal)",    fit: 89, color: "from-amber-400 to-orange-500" },
-    { co: "Nimbus Logistics",  why: "Mentioned 'lead quality' on G2 review", fit: 84, color: "from-pink-400 to-rose-500" },
-    { co: "Quartz Analytics",  why: "Opened pricing page 3× this week",    fit: 81, color: "from-sky-400 to-blue-500" },
+    { co: "Vertex AI Co.",     why: "Hiring 4 AEs + RevOps lead",          fit: 96, color: "from-primary to-primary-mid" },
+    { co: "Helios Robotics",   why: "Series B closed last week",           fit: 92, color: "from-primary-deep to-primary" },
+    { co: "Tidewater Health",  why: "Switched off legacy CRM (signal)",    fit: 89, color: "from-primary-mid to-primary-deep" },
+    { co: "Nimbus Logistics",  why: "Mentioned 'lead quality' on G2 review", fit: 84, color: "from-primary to-primary-deep" },
+    { co: "Quartz Analytics",  why: "Opened pricing page 3× this week",    fit: 81, color: "from-primary-deep to-primary-mid" },
   ];
   return (
     <div className="space-y-4">
@@ -463,7 +463,7 @@ function NewTargetsPanel() {
         <div className="space-y-2">
           {targets.map((t) => (
             <div key={t.co} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${t.color} flex items-center justify-center text-[10px] font-bold text-white`}>
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${t.color} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                 {t.co.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
