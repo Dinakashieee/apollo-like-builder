@@ -100,8 +100,8 @@
 @layer base {
   :root {
     /* Surfaces */
-    --background: 215 50% 97%;          /* paper #f5f8fc */
-    --foreground: 217 60% 14%;          /* deep navy text */
+    --background: 180 33% 97%;          /* Ocean & Teal paper #f5fafa */
+    --foreground: 213 68% 15%;          /* deep navy #0c2340 */
 
     --card: 0 0% 100%;
     --card-foreground: 217 60% 14%;

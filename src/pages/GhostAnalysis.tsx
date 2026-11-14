@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { analyzeGhosting, GHOST_FACTORS, type AccountGhostReport, type GhostLead, type GhostMessage } from "@/lib/ghostAnalysis";
 
-const riskTone = (n: number) => (n >= 60 ? "text-destructive" : n >= 35 ? "text-amber-600" : "text-primary");
+const riskTone = (n: number) => (n >= 60 ? "text-destructive" : n >= 35 ? "text-warning" : "text-primary");
 const riskLabel = (n: number) => (n >= 60 ? "High risk" : n >= 35 ? "Medium risk" : "Healthy");
 
 function GhostRadar({ report }: { report: AccountGhostReport }) {

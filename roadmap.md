@@ -1,3 +1,7 @@
+# Brand colour consistency
+- [ ] Align global brand tokens and newer homepage, dashboard, company, and landing-page elements to Ocean & Teal (#0c2340, #1a4a6e, #2d8a9e, #5cbdb9), preserving warning and success states.
+- [ ] Check the homepage and signed-in dashboard at desktop and phone widths; confirm no off-brand decorative colours remain in the updated sections.
+
 # Monitoring: sender settings and presence
 - [x] Sender reads and upsert returns explicitly select permitted fields; signed-in Settings and Automation custom sender save/reload and built-in mode verified; blank/default sender values restored, no emails sent.
 - [x] Presence cleanup belongs to the effect and depends on stable user/workspace IDs; four regression tests pass, live two-tab presence reconnects after navigation/reload with one channel per tab and deduplicated user count; workspace changes tested with mocks, not multiple live workspaces.

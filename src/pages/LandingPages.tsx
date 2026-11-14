@@ -530,12 +530,12 @@ function EditorPanel({ page, leads, sequences, onSaved, onClose }: { page: Page;
 
 function LivePreview({ page }: { page: Page }) {
   if (isLandingTheme(page.template)) return <ThemedLandingPage page={page} preview />;
-  const accent = page.accent_color || "#6366f1";
+  const accent = page.accent_color || "hsl(var(--primary))";
   const vars = { name: page.prospect_name, company: page.prospect_company };
   const onDark = page.template === "bold";
 
   const wrapperStyle: React.CSSProperties = onDark
-    ? { background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)`, color: "#fff" }
+    ? { background: `linear-gradient(135deg, ${accent} 0%, hsl(var(--primary-deep)) 100%)`, color: "hsl(var(--primary-foreground))" }
     : { background: "hsl(var(--background))" };
 
   const hasBlocks = page.blocks?.length > 0;
