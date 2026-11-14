@@ -276,7 +276,7 @@ export default function Leads() {
                               </Badge>
                             )}
                             {isSignalHireLead(lead) && (
-                              <Badge className="bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/30 hover:bg-violet-500/10 text-[10px] h-5">
+                              <Badge className="bg-accent text-accent-foreground border border-primary/20 hover:bg-accent text-[10px] h-5">
                                 SignalHire lead
                               </Badge>
                             )}

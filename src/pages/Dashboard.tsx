@@ -276,7 +276,7 @@ function AIDealIntelTab({ workspaceId }: { workspaceId?: string }) {
     );
   }
 
-  const colors = ["from-emerald-400 to-teal-500", "from-violet-400 to-purple-500", "from-amber-400 to-orange-500", "from-pink-400 to-rose-500", "from-sky-400 to-blue-500"];
+  const colors = ["from-primary to-primary-glow", "from-primary-deep to-primary", "from-primary-mid to-primary-glow", "from-primary to-primary-mid", "from-primary-deep to-primary-glow"];
 
   return (
     <div className="space-y-4">
@@ -299,7 +299,7 @@ function AIDealIntelTab({ workspaceId }: { workspaceId?: string }) {
             const urgent = (d.score ?? 0) >= 80;
             return (
               <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-                <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-white`}>
+                <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                   {(d.title ?? "??").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -374,7 +374,7 @@ function NewTargetsTab({ workspaceId }: { workspaceId?: string }) {
 
   const withSignal = leads.filter((l) => (l.score ?? 0) >= 70).length;
   const avg = leads.length ? Math.round(leads.reduce((a, b) => a + (b.score ?? 0), 0) / leads.length) : 0;
-  const colors = ["from-emerald-400 to-teal-500", "from-violet-400 to-purple-500", "from-amber-400 to-orange-500", "from-pink-400 to-rose-500", "from-sky-400 to-blue-500"];
+  const colors = ["from-primary to-primary-glow", "from-primary-deep to-primary", "from-primary-mid to-primary-glow", "from-primary to-primary-mid", "from-primary-deep to-primary-glow"];
 
   return (
     <div className="space-y-4">
@@ -395,7 +395,7 @@ function NewTargetsTab({ workspaceId }: { workspaceId?: string }) {
         <div className="space-y-2">
           {leads.map((t, i) => (
             <div key={t.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30">
-              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-white`}>
+              <div className={`h-9 w-9 shrink-0 rounded-md bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-[10px] font-bold text-primary-foreground`}>
                 {(t.company_name ?? t.contact_name ?? "??").slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

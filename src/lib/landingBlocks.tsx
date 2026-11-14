@@ -36,8 +36,8 @@ export function interpolate(s: string | undefined | null, vars: { name?: string 
 export function ctaStyle(style: BlockStyle, accent: string, onDark = false): React.CSSProperties {
   if (style === "primary") return { background: accent, color: "#fff", border: `1px solid ${accent}` };
   if (style === "secondary") return onDark
-    ? { background: "#fff", color: "#0f172a", border: "1px solid #fff" }
-    : { background: "#0f172a", color: "#fff", border: "1px solid #0f172a" };
+    ? { background: "hsl(var(--card))", color: "hsl(var(--primary-deep))", border: "1px solid hsl(var(--card))" }
+    : { background: "hsl(var(--primary-deep))", color: "hsl(var(--primary-foreground))", border: "1px solid hsl(var(--primary-deep))" };
   return { background: "transparent", color: onDark ? "#fff" : accent, border: `1px solid ${onDark ? "#fff" : accent}` };
 }
 

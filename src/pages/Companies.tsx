@@ -108,20 +108,18 @@ const KIND_LABELS: Record<DivisionKind, string> = {
 };
 
 const KIND_STYLES: Record<DivisionKind, string> = {
-  division: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  product: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  service: "bg-amber-50 text-amber-700 border-amber-200",
+  division: "bg-primary/10 text-primary border-primary/20",
+  product: "bg-accent text-accent-foreground border-primary/20",
+  service: "bg-secondary text-secondary-foreground border-border",
 };
 
 const AVATAR_COLORS = [
-  "bg-emerald-500",
-  "bg-sky-500",
-  "bg-violet-500",
-  "bg-amber-500",
-  "bg-rose-500",
-  "bg-teal-500",
-  "bg-indigo-500",
-  "bg-orange-500",
+  "bg-primary",
+  "bg-primary-mid",
+  "bg-primary-deep",
+  "bg-primary/80",
+  "bg-primary-mid/90",
+  "bg-primary-deep/90",
 ];
 
 function avatarColor(name: string) {
@@ -720,7 +718,7 @@ export default function Companies() {
                             )}
                             <span
                               className={cn(
-                                "h-8 w-8 rounded-full text-white text-[11px] font-semibold flex items-center justify-center shrink-0",
+                                "h-8 w-8 rounded-full text-primary-foreground text-[11px] font-semibold flex items-center justify-center shrink-0",
                                 avatarColor(a.company_name)
                               )}
                             >

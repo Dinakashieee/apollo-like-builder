@@ -123,7 +123,7 @@ export default function PublicLandingPage({ byHost = false }: Props) {
 
   if (isLandingTheme(page.template)) return <ThemedLandingPage page={page} onCta={onCta} />;
 
-  const accent = page.accent_color || "#6366f1";
+  const accent = page.accent_color || "hsl(var(--primary))";
   const vars = { name: page.prospect_name, company: page.prospect_company };
   const onDark = page.template === "bold";
 
@@ -142,7 +142,7 @@ export default function PublicLandingPage({ byHost = false }: Props) {
     ? "min-h-screen"
     : "min-h-screen bg-background";
   const wrapperStyle: React.CSSProperties = page.template === "bold"
-    ? { background: `linear-gradient(135deg, ${accent} 0%, #0f172a 100%)` }
+    ? { background: `linear-gradient(135deg, ${accent} 0%, hsl(var(--primary-deep)) 100%)` }
     : {};
 
   if (page.template === "split" && !hasBlocks) {
