@@ -42,7 +42,7 @@ import { WelcomeSideCard } from "@/components/WelcomeSideCard";
 import { SalesEngineShowcase } from "@/components/SalesEngineShowcase";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg-ocean.jpg";
+import heroBg from "@/assets/hero-bg-royal.jpg";
 
 const features = [
   {
